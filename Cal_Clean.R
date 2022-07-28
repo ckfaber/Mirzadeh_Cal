@@ -25,6 +25,7 @@
 
 ## Load required packages ------------------------------------------------------
 
+library(plyr)
 library(tidyverse)
 library(magrittr)
 library(lubridate)
@@ -32,7 +33,7 @@ library(here)
 
 ## Directory hard-coding ------------------------------------------------------ 
 
-load_dir  <- "C:/Users/cfabe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Data_Raw/Calorimetry/" 
+#load_dir  <- "C:/Users/cfabe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Data_Raw/Calorimetry/" 
 ext       <- ".csv"
 cohort    <- "mon001"
 rundate   <- "2021-10-18"  
@@ -49,9 +50,9 @@ cols2excl <- c('Age','Diet','Cage','Stilltime_M',
 filename  <- paste(rundate,cohort,sep = "_")
 code      <- paste(rundate,cohort,"DECODED",sep = "_")
 
-df_code   <- read_csv(here(paste(code,".csv",sep = "")))
+df_code   <- read_csv(here::here(paste(code,".csv",sep = "")))
 
-df        <- read_csv(here(paste(filename,".csv",sep = ""))) %>%
+df        <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   merge(df_code) %>%                                    #unblind by merging with decoding df 
   as_tibble() %>%                                       #convert to tibble
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
