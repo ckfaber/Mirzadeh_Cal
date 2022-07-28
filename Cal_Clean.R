@@ -5,43 +5,37 @@
 
 # kasper.chelsea@gmail.com
 
-## Reqs ------------------------------------------------------------------
-
-#       - .exp data files processed with MI v2.46 in 1-minute bins - all should be processed with the SAME MACRO
-#       - TimeSeries sheet as a .csv 
-#       - Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
+# REQS:
+# - .exp data files processed with MI v2.46 in 1-minute bins - all should be processed with the SAME MACRO
+# - TimeSeries sheet as a .csv 
+# - Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
 
 # Known bugs: 
-
-#     - EnviroLightlux_M sometimes has 0s and 1s, sometimes has 1s and 3s, sometimes 3s and 7s
-#           - therefore photoperiod assignment is done based on ZT/clock time NOT from sensor
-#           - will need to be updated for DD or other light schedule experiments
+# - EnviroLightlux_M sometimes has 0s and 1s, sometimes has 1s and 3s, sometimes 3s and 7s
+# - therefore photoperiod assignment is done based on ZT/clock time NOT from sensor
+# - will need to be updated for DD or other light schedule experiments
 
 # Next steps: 
 
-#       - improve hardcoding of file names/directories: back-slashes (/) are needed instead of (\)
+# - improve hardcoding of file names/directories: back-slashes (/) are needed instead of (\)
 #         like Windows provides when copy/pasting 
-#       - Convert this to function to call from another pre-processing script
-#       - read in appropriately named .csvs from directory without having to hard-code the file
-#       - improve experimental log for metadata read-in and association with cal data
+# - Convert this to function to call from another pre-processing script
+# - read in appropriately named .csvs from directory without having to hard-code the file
+# - improve experimental log for metadata read-in and association with cal data
 
 ## Load required packages ------------------------------------------------------
 
-library(plyr)
 library(tidyverse)
 library(magrittr)
 library(lubridate)
-library(glue)
 library(here)
 
 ## Directory hard-coding ------------------------------------------------------ 
 
-
-
 load_dir  <- "C:/Users/cfabe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Data_Raw/Calorimetry/" 
 ext       <- ".csv"
 cohort    <- "mon001"
-rundate   <- "2021_10_18"  
+rundate   <- "2021-10-18"  
 
 ## Animals to remove -----------------------------------------------------------
 
@@ -52,15 +46,16 @@ cols2excl <- c('Age','Diet','Cage','Stilltime_M',
 
 ## Load data ------------------------------------------------------------------
 
-filename  <- glue(cohort,rundate,.sep = "_")
-code      <- glue("DECODED",cohort,rundate,.sep = "_")
+filename  <- paste(rundate,cohort,sep = "_")
+code      <- paste(rundate,cohort,"DECODED",sep = "_")
 
-df_code   <- read_csv(glue(load_dir,code,ext))
-df        <- read_csv(glue(load_dir,filename,ext)) %>%
-                merge(df_code) %>%                                    #unblind by merging with decoding df 
-                as_tibble() %>%                                       #convert to tibble
-                mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
-                rename(Cage = Animal)
+df_code   <- read_csv(here(paste(code,".csv",sep = "")))
+
+df        <- read_csv(here(paste(filename,".csv",sep = ""))) %>%
+  merge(df_code) %>%                                    #unblind by merging with decoding df 
+  as_tibble() %>%                                       #convert to tibble
+  mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
+  rename(Cage = Animal)
 
 # try with inner_join instead: 
 # df        <- read_csv(glue(load_dir,filename,ext)) %>%
