@@ -5,8 +5,6 @@
 
 # kasper.chelsea@gmail.com
 
-## README ---------------------------------------------------------------------
-
 # REQS:
 
 # - 'filename_Clean.Rda' file from Cal_Clean.R script
@@ -26,17 +24,18 @@
 # 7) summary tables without having to hard-code each individual parameter...gt breaks when you try to do multiple
 # 8) write function to generate multiple plots and group into figure
 
-## Where be your data? ---------------------------------------------------------
-
-setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
-cohort <- "mon001"
-rundate <- "2021_10_18"
-
 ## Load packages -------------------------------------------------------------
 
 library(tidyverse)
 library(patchwork)
 library(glue)
+library(here)
+
+## Where be your data? ---------------------------------------------------------
+
+setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
+cohort <- "mon001"
+rundate <- "2021_10_18"
 
 ## Load data -----------------------------------------------------------------
 
