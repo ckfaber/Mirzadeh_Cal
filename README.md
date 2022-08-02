@@ -8,5 +8,5 @@ Requirements:
 
 **Chelsea Faber**<br>
 Mirzadeh Laboratory at Barrow Neurological Institute<br>
-kasper.chelsea@gmail.com<br>
+kasper DOT chelsea AT gmail DOT com<br>
 02-Aug-2022
