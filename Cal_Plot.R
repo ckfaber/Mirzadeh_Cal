@@ -40,19 +40,17 @@ rundate <- "2021-10-18"
 
 load(here::here(paste(cohort,rundate,"Clean.Rda",sep = "_")))
 #exp_date <- format(ymd(rundate),'%b %d, %Y')
-pp_data <- df.hourly %>%
-  distinct(Time,Photoperiod)
 
 ## (Optional) Smoothing via moving mean ---------------------------------------
 
-cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
+cols2smooth <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
 
 smooth_win <- 3 # in hours
 
 df.hourly %<>%
   group_by(Animal) %>% 
   mutate(across(
-    all_of(cols2avg) , ~ zoo::rollmean(., smooth_win, fill = NA), .names = "smooth{smooth_win}_{.col}" )) %>%
+    all_of(cols2smooth) , ~ zoo::rollmean(., smooth_win, fill = NA), .names = "smooth{smooth_win}_{.col}" )) %>%
   ungroup()
 
 ## Compute summary statistics -----------------------------------------------
@@ -114,6 +112,10 @@ EE.hourly.summary <- df.hourly %>%
             sem = sd / sqrt(n)) 
 
 ## Timeseries plots -----------------------------------------------------------
+
+# Extract time-series as small df for plotting
+pp_data <- df.hourly %>%
+  distinct(Time,Photoperiod)
 
 # Temporary fix to avoid copy/pasting tons of code blocks: hard-code variable of
 # interest here
