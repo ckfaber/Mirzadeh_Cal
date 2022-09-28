@@ -33,13 +33,12 @@ library(here)
 
 ## Where be your data? ---------------------------------------------------------
 
-setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
 cohort <- "mon001"
-rundate <- "2021_10_18"
+rundate <- "2021-10-18"
 
 ## Load data -----------------------------------------------------------------
 
-load(glue(cohort,rundate,"Clean.Rda",.sep = "_"))
+load(here::here(paste(cohort,rundate,"Clean.Rda",sep = "_")))
 #exp_date <- format(ymd(rundate),'%b %d, %Y')
 pp_data <- df.hourly %>%
   distinct(Time,Photoperiod)
