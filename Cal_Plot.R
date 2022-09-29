@@ -62,17 +62,17 @@ df.hourly %<>%
 vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
 # Create function to generate hourly summaries for plotting with geom_line()
-groupvar <- 'Treatment'
-plotvar <- 'EBalance'
+group <- 'Treatment'
+var <- 'EBalance'
 
-groupmeans <- function(groupvar,plotvar) {
+summarize_groups <- function(group,var) {
   
   df.hourly %>%
-    group_by({{ groupvar }},Time) %>%
-    summarize("{{plotvar}}_value" := mean({{ plotvar }}),
-              "{{plotvar}}_sd" := sd({{ plotvar }}),
-              "{{plotvar}}_n" := n(),
-              "{{plotvar}}_sem" := sd({{plotvar}}) / sqrt(n()))
+    group_by({{ group }},Time) %>%
+    summarize("{{var}}_value" := mean({{ var }}),
+              "{{var}}_sd" := sd({{ var }}),
+              "{{var}}_n" := n(),
+              "{{var}}_sem" := sd({{var}}) / sqrt(n()))
 }
 
 ## The old way -----------------------------------------------------------------
