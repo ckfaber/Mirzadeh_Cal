@@ -50,20 +50,14 @@ cols2excl <- c('Age','Diet','Cage','Stilltime_M',
 filename  <- paste(rundate,cohort,sep = "_")
 code      <- paste(rundate,cohort,"DECODED",sep = "_")
 
-df_code   <- read_csv(here::here(paste(code,".csv",sep = "")))
+# Load csv with run metadata
+df_code   <- read_csv(here::here(paste(code,".csv",sep = ""))) 
 
+# Load cal.csv and merge metadata
 df        <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
-  merge(df_code) %>%                                    #unblind by merging with decoding df 
-  as_tibble() %>%                                       #convert to tibble
+  left_join(df_code, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
   rename(Cage = Animal)
-
-# try with inner_join instead: 
-# df        <- read_csv(glue(load_dir,filename,ext)) %>%
-#   inner_join(df_code, by = #ID HERE#) %>%                                    #unblind by merging with decoding df 
-#   as_tibble() %>%                                       #convert to tibble
-#   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
-#   rename(Cage = Animal)
 
 ## Tidy data -------------------------------------------------------------------
 
