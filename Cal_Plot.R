@@ -55,25 +55,28 @@ df.hourly %<>%
 
 ## Compute summary statistics -----------------------------------------------
 
-# TO DO: wrap into a function/loop to implement all at once
-# - look into using tidyr::nest() to do this. See vignette("nest").
-# Hard-code desired variables for time-series plots
+# Create vector with variables names you want to plot
+#vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
-vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
+# Specify which group to compare
+group <- 'Treatment'
+
+# TEMP until for-loop is worked out: specify variable to plot one at a time
+var <- 'RER'
 
 # Create function to generate hourly summaries for plotting with geom_line()
-group <- 'Treatment'
-var <- 'EBalance'
-
 summarize_groups <- function(group,var) {
   
   df.hourly %>%
     group_by({{ group }},Time) %>%
-    summarize("{{var}}_value" := mean({{ var }}),
-              "{{var}}_sd" := sd({{ var }}),
-              "{{var}}_n" := n(),
-              "{{var}}_sem" := sd({{var}}) / sqrt(n()))
+    summarize(value = mean({{ var }}),
+              sd = sd({{ var }}),
+              n = n(),
+              sem = sd({{var}}) / sqrt(n()))
 }
+
+# - look into using tidyr::nest() to do this. See vignette("nest").
+
 
 ## The old way -----------------------------------------------------------------
 
@@ -137,11 +140,13 @@ pp_data <- df.hourly %>%
 
 # Temporary fix to avoid copy/pasting tons of code blocks: hard-code variable of
 # interest here
-df <- EB.hourly.summary
+df <- df.hourly
 xlab <- "Time (Hours)"
 ylab <- "kcal"
 
 EBplot <- ggplot(data = df) + 
+  
+  # Shaded light/dark boxes
   geom_tile(data = pp_data,
             mapping = aes(fill = Photoperiod,y=0),
             alpha = 0.2,
@@ -149,14 +154,20 @@ EBplot <- ggplot(data = df) +
             show.legend = NA) + ## tiles will go all the way up and down
   aes(x = Time, y = value) +
   geom_line(aes(color = Treatment)) +
+  
+  # Set color scheme
   scale_color_manual(values = c("turquoise4", "darkorange3")) +   ## colors for the group
+  
+  # Smooth SEM ribbon 
   geom_ribbon(aes(
     ymin = value-sem, 
     ymax = value+sem,
     fill = Treatment),
     linetype = 0,
     alpha = 0.3)+
-  scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   ## colors for the group
+  
+  # Set color scheme for filled areas: light/dark boxes and SEM ribbon
+  scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   
   labs(x = xlab, y = ylab)+ 
   scale_x_continuous(expand = expansion(0, 0)) +   ## no padding on the x-axis
   theme_classic() + 
