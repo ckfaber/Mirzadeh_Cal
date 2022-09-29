@@ -56,7 +56,7 @@ df.hourly %<>%
 ## Compute summary statistics -----------------------------------------------
 
 # Create vector with variables names you want to plot
-#vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
+vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
 # Specify which group to compare
 group <- 'Treatment'
@@ -68,12 +68,16 @@ var <- 'RER'
 summarize_groups <- function(group,var) {
   
   df.hourly %>%
-    group_by({{ group }},Time) %>%
-    summarize(value = mean({{ var }}),
-              sd = sd({{ var }}),
+    group_by( get(group) ,Time) %>%
+    summarize(value = mean( get(var) ),
+              sd = sd( get(var) ),
               n = n(),
-              sem = sd({{var}}) / sqrt(n()))
+              sem = sd(get(var)) / sqrt(n())) %>%
+    rename( {{group}} := "get(group)")
 }
+
+# Test out your new function
+RER.summary <- summarize_groups(group,var)
 
 # - look into using tidyr::nest() to do this. See vignette("nest").
 
