@@ -69,10 +69,10 @@ groupmeans <- function(groupvar,plotvar) {
   
   df.hourly %>%
     group_by({{ groupvar }},Time) %>%
-    summarize(value = mean({{ plotvar }}),
-              sd = sd({{ plotvar }}),
-              n = n(),
-              sem = sd / sqrt(n))
+    summarize("{{plotvar}}_value" := mean({{ plotvar }}),
+              "{{plotvar}}_sd" := sd({{ plotvar }}),
+              "{{plotvar}}_n" := n(),
+              "{{plotvar}}_sem" := sd({{plotvar}}) / sqrt(n()))
 }
 
 ## The old way -----------------------------------------------------------------
