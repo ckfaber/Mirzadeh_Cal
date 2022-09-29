@@ -1,3 +1,19 @@
+## Script for Generating Summary Tables of Pre-processed Calorimetry Data
+
+# Written by Chelsea Faber
+# Mirzadeh Lab, Barrow Neurological Institute
+
+# kasper.chelsea@gmail.com
+
+# REQS:
+
+# - 'filename_Clean.Rda' file from Cal_Clean.R script
+
+## Load packages -------------------------------------------------------------
+
+library(tidyverse)
+library(here)
+
 ## Summary parameters ----------------------------------------------------------
 
 # Remind yourself of the variable names

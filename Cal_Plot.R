@@ -1,4 +1,4 @@
-## Script for Generating Plots and Summary Tables of Pre-processed Calorimetry Data
+## Script for Generating Plots of Pre-processed Calorimetry Data
 
 # Written by Chelsea Faber
 # Mirzadeh Lab, Barrow Neurological Institute
@@ -21,14 +21,12 @@
 # 5) stats!!! 
 # 6) cumulative sum of FI within each photoperiod per animal <- partially there,
 # but issues detailed below
-# 7) summary tables without having to hard-code each individual parameter...gt breaks when you try to do multiple
-# 8) write function to generate multiple plots and group into figure
+# 7) write function to generate multiple plots and group into figure
 
 ## Load packages -------------------------------------------------------------
 
 library(tidyverse)
 library(patchwork)
-library(glue)
 library(here)
 
 ## Where be your data? ---------------------------------------------------------
