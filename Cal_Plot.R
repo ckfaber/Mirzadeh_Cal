@@ -67,7 +67,8 @@ summarize_groups <- function(group,var) {
     summarize(value = mean( get(var) ),
               sd = sd( get(var) ),
               n = n(),
-              sem = sd(get(var)) / sqrt(n())) %>%
+              sem = sd(get(var)) / sqrt(n()),
+              .groups = "drop") %>%
     rename( {{group}} := "get(group)")
 }
 
