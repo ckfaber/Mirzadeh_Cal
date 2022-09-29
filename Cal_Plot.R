@@ -57,7 +57,7 @@ df.hourly %<>%
 
 # Specify grouping & variables for time-series plotting
 group <- 'Treatment'
-vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
+vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
 ## Create function to generate hourly summaries for plotting with geom_line()---
 summarize_groups <- function(group,var) {
@@ -82,60 +82,6 @@ for (i in 1:length(vars2plot)) {
 
 }
 
-## The old way -----------------------------------------------------------------
-
-EB.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(EBalance),
-            sd = sd(EBalance),
-            n = n(),
-            sem = sd / sqrt(n))
-
-# loop through vars2plot
-
-#skeleton loop here, build on this
-for (i in 1:length(vars2plot)) {
-  print(vars2plot[i])
-}
-
-# Manually for each variable - variables are hard-coded, 
-# make sure to modify to "smooth3_{var}" if smoothing desired.
-
-EB.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(EBalance),
-            sd = sd(EBalance),
-            n = n(),
-            sem = sd / sqrt(n))
-
-VO2.smooth <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(smooth3_VO2),
-            sd = sd(smooth3_VO2),
-            n = n(),
-            sem = sd / sqrt(n))
-
-FI.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(FoodIntake),
-            sd = sd(FoodIntake),
-            n = n(),
-            sem = sd / sqrt(n))
-
-CumulativeFI.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(Cumulative_FI),
-            sd = sd(Cumulative_FI),
-            n = n(),
-            sem = sd / sqrt(n))
-
-EE.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(EE),
-            sd = sd(EE),
-            n = n(),
-            sem = sd / sqrt(n)) 
-
 ## Timeseries plots -----------------------------------------------------------
 
 # Extract time-series as small df for plotting
@@ -144,7 +90,7 @@ pp_data <- df.hourly %>%
 
 # Temporary fix to avoid copy/pasting tons of code blocks: hard-code variable of
 # interest here
-df <- df.hourly
+df <- grp.summaries[[1]]
 xlab <- "Time (Hours)"
 ylab <- "kcal"
 
