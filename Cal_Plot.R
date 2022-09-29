@@ -55,16 +55,11 @@ df.hourly %<>%
 
 ## Compute summary statistics -----------------------------------------------
 
-# Create vector with variables names you want to plot
+# Specify grouping & variables for time-series plotting
+group <- 'Treatment'
 vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
-# Specify which group to compare
-group <- 'Treatment'
-
-# TEMP until for-loop is worked out: specify variable to plot one at a time
-var <- 'RER'
-
-# Create function to generate hourly summaries for plotting with geom_line()
+## Create function to generate hourly summaries for plotting with geom_line()---
 summarize_groups <- function(group,var) {
   
   df.hourly %>%
@@ -76,11 +71,15 @@ summarize_groups <- function(group,var) {
     rename( {{group}} := "get(group)")
 }
 
-# Test out your new function
-RER.summary <- summarize_groups(group,var)
+# Loop through hard-coded variables of vars2plot
+grp.summaries <- vector(mode = "list", length = length(vars2plot)) # initialize empty list
+for (i in 1:length(vars2plot)) {
+  
+  var <- vars2plot[i]
+  names(grp.summaries)[i] <- var
+  grp.summaries[[i]] <- summarize_groups(group,var)
 
-# - look into using tidyr::nest() to do this. See vignette("nest").
-
+}
 
 ## The old way -----------------------------------------------------------------
 
