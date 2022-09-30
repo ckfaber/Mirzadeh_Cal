@@ -43,7 +43,7 @@ rundate   <- "2021-10-18"
 remove_animals <- 274 
 cols2excl <- c('Age','Diet','Cage','Stilltime_M',
                'Sleeptime_M','XBreak_R','YBreak_R',
-               'month','day','Mass_g','AllMeters_M')
+               'Mass_g','AllMeters_M')
 
 ## Load data ------------------------------------------------------------------
 
@@ -57,7 +57,10 @@ df_code   <- read_csv(here::here(paste(code,".csv",sep = "")))
 df        <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   left_join(df_code, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
-  dplyr::rename(Cage = Animal)
+  dplyr::rename(Cage = Animal)%>%
+  select(!(starts_with("Enviro") 
+           | starts_with("Ped") 
+           | all_of(cols2excl)))
 
 ## Tidy data -------------------------------------------------------------------
 
@@ -112,10 +115,7 @@ df %<>%
   mutate(FoodIn.kcal = FoodIn.g * 4.2, .before = FoodIn.g) %>%
   mutate(EE.kcal.bin = EE * int, .before = EE) %>%
   mutate(EBalance = FoodIn.kcal - EE.kcal.bin, .before = VO2) %>%
-  ungroup() %>%
-  select(!(starts_with("Enviro") 
-           | starts_with("Ped") 
-           | all_of(cols2excl)))
+  ungroup() 
 
 # Remove any rows/columns with only NAs
 df <- df[rowSums(is.na(df)) != ncol(df), ]
