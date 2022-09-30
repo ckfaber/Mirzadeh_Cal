@@ -57,7 +57,7 @@ df_code   <- read_csv(here::here(paste(code,".csv",sep = "")))
 df        <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   left_join(df_code, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
-  rename(Cage = Animal)
+  dplyr::rename(Cage = Animal)
 
 ## Tidy data -------------------------------------------------------------------
 
