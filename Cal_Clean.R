@@ -177,7 +177,7 @@ pp.averaged.daily <- df %>%
 
 ## Export to (optional) .csv, .Rda--------------------------------------------
 
-setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
+#setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
 #write.csv(df, glue(cohort,"Clean.csv",.sep="_"),row.names = FALSE)
-savename <- glue(cohort,rundate,"Clean.Rda",.sep = "_")
+savename <- paste(cohort,rundate,"Clean.Rda",sep = "_")
 save(df, df.hourly, pp.averaged.total, pp.averaged.daily, file = savename)
