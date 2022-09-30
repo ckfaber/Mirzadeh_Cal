@@ -119,6 +119,7 @@ df %<>%
   mutate(FoodIn.kcal = FoodIn.g * 4.2, .before = FoodIn.g) %>%
   mutate(EE.kcal.bin = EE * int, .before = EE) %>%
   mutate(EBalance = FoodIn.kcal - EE.kcal.bin, .before = VO2) %>%
+  mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>%
   ungroup() 
 
 # Remove any rows/columns with only NAs
@@ -127,30 +128,30 @@ df <- df[, colSums(is.na(df)) != nrow(df)]
 View(df)
 
 ## Bin to hourly ---------------------------------------------------
-cols2sum <- c('FoodIn.g','WaterIn.g','EBalance')
+cols2sum <- c('FoodIn.g','WaterIn.g','EBalance','AllMeters')
 cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
 cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal')
 cols2keep <- c('DateTime','Time','minute')
 
 df.hourly <- df %>%
   group_by(Animal,exp_day,hour) %>%
-  select(!EE.kcal.bin) %>%
+  select(!EE.kcal.bin) %>% # don't need the 1-3" bin anymore
   mutate(
     across(all_of(cols2keep),median)) %>% 
   mutate(across(
-    all_of(cols2avg), mean)) %>%
+    all_of(cols2avg), mean)) %>% # rates get averaged
   mutate(across(
-    all_of(cols2sum),sum)) %>%
+    all_of(cols2sum),sum)) %>% # intake, distances get summed
   mutate(across(
-    all_of(cols4cum),max)) %>%
+    all_of(cols4cum),max)) %>% # cumulative values just keep the maximum (total for the hour)
   ungroup() %>%
-  distinct() %>%
-  select(!c(hour,minute)) %>%
+  distinct() %>% # squashes down to one observation per hour
+  select(!c(hour,minute)) %>% 
   mutate(Animal = as.factor(Animal)) %>%
   group_by(Animal) %>%
   slice(2:(n()-1)) %>% # trim incomplete hours at start and end
   mutate(Time = as.numeric(
-    difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>%
+    difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
   ungroup()
 
 ## Overall photoperiod means ------------------------------------------------
