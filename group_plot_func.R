@@ -29,7 +29,7 @@ group_plot <- function(data,group,title,ylab) {
     labs(x = "Time (hours)", y = ylab)+ 
     scale_x_continuous(expand = expansion(0, 0)) +   ## no padding on the x-axis
     theme_classic() + 
-    ggtitle(temptitle)
+    ggtitle(title)
   
 }
 

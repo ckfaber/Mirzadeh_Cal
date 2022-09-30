@@ -36,6 +36,10 @@ library(here)
 cohort <- "mon001"
 rundate <- "2021-10-18"
 
+# Specify grouping & variables for time-series plotting
+group     <- 'Treatment'
+vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
+
 ## Load data -----------------------------------------------------------------
 
 load(here::here(paste(cohort,rundate,"Clean.Rda",sep = "_")))
@@ -56,10 +60,6 @@ df.hourly %<>%
 ## Compute summary statistics -----------------------------------------------
 
 # TO DO: automate units for variable plotting - maybe as external sheet, use join methods?
-
-# Specify grouping & variables for time-series plotting
-group     <- 'Treatment'
-vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
 ## Create function to generate hourly summaries for plotting with geom_line()---
 group_summarize <- function(group,var) {
@@ -86,49 +86,67 @@ for (i in 1:length(vars2plot)) {
 
 ## Timeseries plots -----------------------------------------------------------
 
-# TO DO: Loop through grp.summaries to generate time-series plots with automatic
-# plot annotation & axis labeling
-
 # Extract time-series as small df for plotting
 pp_data <- df.hourly %>%
   distinct(Time,Photoperiod)
 
-# Temporary fix to avoid copy/pasting tons of code blocks: hard-code variable of
-# interest here
-df <- grp.summaries[[1]]
-xlab <- "Time (Hours)"
-ylab <- "UNITS"
+group_plot <- function(data,group,title,ylab) {
+  
+  plot <- ggplot(data) + 
+    
+    # Shaded light/dark boxes
+    geom_tile(data = pp_data,
+              mapping = aes(fill = Photoperiod,y=0),
+              alpha = 0.2,
+              height = Inf,
+              show.legend = NA) + ## tiles will go all the way up and down
+    aes(x = Time, y = value) +
+    geom_line(aes(color = get(group))) + 
+    
+    # Set color scheme
+    scale_color_manual(group,values = c("turquoise4", "darkorange3")) +   ## colors for the group
+    
+    # Smooth SEM ribbon 
+    geom_ribbon(aes(
+      ymin = value-sem, 
+      ymax = value+sem,
+      fill = get(group)),
+      linetype = 0,
+      alpha = 0.3)+
+    
+    # Set color scheme for filled areas: light/dark boxes and SEM ribbon
+    scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   
+    labs(x = "Time (hours)", y = ylab)+ 
+    scale_x_continuous(expand = expansion(0, 0)) +   ## no padding on the x-axis
+    theme_classic() + 
+    ggtitle(title)
+  
+}
 
-EBplot <- ggplot(data = df) + 
-  
-  # Shaded light/dark boxes
-  geom_tile(data = pp_data,
-            mapping = aes(fill = Photoperiod,y=0),
-            alpha = 0.2,
-            height = Inf,
-            show.legend = NA) + ## tiles will go all the way up and down
-  aes(x = Time, y = value) +
-  geom_line(aes(color = Treatment)) +
-  
-  # Set color scheme
-  scale_color_manual(values = c("turquoise4", "darkorange3")) +   ## colors for the group
-  
-  # Smooth SEM ribbon 
-  geom_ribbon(aes(
-    ymin = value-sem, 
-    ymax = value+sem,
-    fill = Treatment),
-    linetype = 0,
-    alpha = 0.3)+
-  
-  # Set color scheme for filled areas: light/dark boxes and SEM ribbon
-  scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   
-  labs(x = xlab, y = ylab)+ 
-  scale_x_continuous(expand = expansion(0, 0)) +   ## no padding on the x-axis
-  theme_classic() + 
-  ggtitle("Energy Balance")
+## Loop through ggplot generation ----------------------------------------------
 
-# use geom_segment to create vertical line to mark important events
+group <- 'Treatment'
+ts.plots <- vector(mode = "list",length = length(vars2plot))
+
+for (i in 1:length(vars2plot)) {
+  
+  data <- grp.summaries[[i]]
+  title <- names(grp.summaries)[i]
+  names(ts.plots)[i] <- title
+  ylab <- "UNITS"
+  ts.plots[[i]] <- group_plot(data,group,title,ylab)
+  ts.plots[[i]]
+  
+}
+
+# The above will automatically print the figures to the Plots window, but you
+# can generate individually by name using the following syntax:
+ts.plots$EBalance
+
+# TO DO: 
+# - improve plot annotation/axis labeling
+# - improve plot scaling
+# - use geom_segment to create vertical line to mark important events
 
 ## Box Plots (D/L/total) -----------------------------------------------------
 
