@@ -43,7 +43,7 @@ rundate   <- "2021-10-18"
 remove_animals <- 274 
 cols2excl <- c('Age','Diet','Cage','Stilltime_M',
                'Sleeptime_M','XBreak_R','YBreak_R',
-               'month','day','Mass_g','AllMeters_R')
+               'month','day','Mass_g','AllMeters_M')
 
 ## Load data ------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ df %<>%
          RER = RER_M, 
          FoodIn.cum = FoodInA_M, 
          WaterIn.cum = WaterInA_M, 
-         AllMeters.cum = AllMeters_M,
+         AllMeters = AllMeters_R,
          BodyMass = BodyMass_M,
          VH2O = VH2O_M)
 
