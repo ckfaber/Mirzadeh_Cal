@@ -31,119 +31,124 @@ library(here)
 
 ## Where be your data? ---------------------------------------------------------
 
-setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
 cohort <- "mon001"
-rundate <- "2021_10_18"
+rundate <- "2021-10-18"
+
+# Specify grouping & variables for time-series plotting
+group     <- 'Treatment'
+vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
 ## Load data -----------------------------------------------------------------
 
-load(glue(cohort,rundate,"Clean.Rda",.sep = "_"))
+load(here::here(paste(cohort,rundate,"Clean.Rda",sep = "_")))
 #exp_date <- format(ymd(rundate),'%b %d, %Y')
-pp_data <- df.hourly %>%
-  distinct(Time,Photoperiod)
 
 ## (Optional) Smoothing via moving mean ---------------------------------------
 
-cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
+cols2smooth <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
 
 smooth_win <- 3 # in hours
 
 df.hourly %<>%
   group_by(Animal) %>% 
   mutate(across(
-    all_of(cols2avg) , ~ zoo::rollmean(., smooth_win, fill = NA), .names = "smooth{smooth_win}_{.col}" )) %>%
+    all_of(cols2smooth) , ~ zoo::rollmean(., smooth_win, fill = NA), .names = "smooth{smooth_win}_{.col}" )) %>%
   ungroup()
 
 ## Compute summary statistics -----------------------------------------------
 
-# TO DO: wrap into a function/loop to implement all at once
-# - look into using tidyr::nest() to do this. See vignette("nest").
-# Hard-code desired variables for time-series plots
+# TO DO: automate units for variable plotting - maybe as external sheet, use join methods?
 
-vars2plot <- c('EE','EBalance','RER','AllMeters','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
-
-# function
-
-
-
-
-# loop through vars2plot
-
-#skeleton loop here, build on this
-for (i in 1:length(vars2plot)) {
-  print(vars2plot[i])
+## Create function to generate hourly summaries for plotting with geom_line()---
+group_summarize <- function(group,var) {
+  
+  df.hourly %>%
+    group_by( get(group) ,Time) %>%
+    summarize(value = mean( get(var) ),
+              sd = sd( get(var) ),
+              n = n(),
+              sem = sd(get(var)) / sqrt(n()),
+              .groups = "drop") %>%
+    rename( {{group}} := "get(group)")
 }
 
-# Manually for each variable - variables are hard-coded, 
-# make sure to modify to "smooth3_{var}" if smoothing desired.
+# Loop through hard-coded variables of vars2plot
+grp.summaries <- vector(mode = "list", length = length(vars2plot)) # initialize empty list
+for (i in 1:length(vars2plot)) {
+  
+  var <- vars2plot[i]
+  names(grp.summaries)[i] <- var
+  grp.summaries[[i]] <- group_summarize(group,var)
 
-EB.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(EBalance),
-            sd = sd(EBalance),
-            n = n(),
-            sem = sd / sqrt(n))
-
-VO2.smooth <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(smooth3_VO2),
-            sd = sd(smooth3_VO2),
-            n = n(),
-            sem = sd / sqrt(n))
-
-FI.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(FoodIntake),
-            sd = sd(FoodIntake),
-            n = n(),
-            sem = sd / sqrt(n))
-
-CumulativeFI.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(Cumulative_FI),
-            sd = sd(Cumulative_FI),
-            n = n(),
-            sem = sd / sqrt(n))
-
-EE.hourly.summary <- df.hourly %>%
-  group_by(Treatment,Time) %>%
-  summarize(value = mean(EE),
-            sd = sd(EE),
-            n = n(),
-            sem = sd / sqrt(n)) 
+}
 
 ## Timeseries plots -----------------------------------------------------------
 
-# Temporary fix to avoid copy/pasting tons of code blocks: hard-code variable of
-# interest here
-df <- EB.hourly.summary
-xlab <- "Time (Hours)"
-ylab <- "kcal"
+# Extract time-series as small df for plotting
+pp_data <- df.hourly %>%
+  distinct(Time,Photoperiod)
 
-EBplot <- ggplot(data = df) + 
-  geom_tile(data = pp_data,
-            mapping = aes(fill = Photoperiod,y=0),
-            alpha = 0.2,
-            height = Inf,
-            show.legend = NA) + ## tiles will go all the way up and down
-  aes(x = Time, y = value) +
-  geom_line(aes(color = Treatment)) +
-  scale_color_manual(values = c("turquoise4", "darkorange3")) +   ## colors for the group
-  geom_ribbon(aes(
-    ymin = value-sem, 
-    ymax = value+sem,
-    fill = Treatment),
-    linetype = 0,
-    alpha = 0.3)+
-  scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   ## colors for the group
-  labs(x = xlab, y = ylab)+ 
-  scale_x_continuous(expand = expansion(0, 0)) +   ## no padding on the x-axis
-  theme_classic() + 
-  ggtitle("Energy Balance")
+group_plot <- function(data,group,title,ylab) {
+  
+  plot <- ggplot(data) + 
+    
+    # Shaded light/dark boxes
+    geom_tile(data = pp_data,
+              mapping = aes(fill = Photoperiod,y=0),
+              alpha = 0.2,
+              height = Inf,
+              show.legend = NA) + ## tiles will go all the way up and down
+    aes(x = Time, y = value) +
+    geom_line(aes(color = get(group))) + 
+    
+    # Set color scheme
+    scale_color_manual(group,values = c("turquoise4", "darkorange3")) +   ## colors for the group
+    
+    # Smooth SEM ribbon 
+    geom_ribbon(aes(
+      ymin = value-sem, 
+      ymax = value+sem,
+      fill = get(group)),
+      linetype = 0,
+      alpha = 0.3)+
+    
+    # Set color scheme for filled areas: light/dark boxes and SEM ribbon
+    scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   
+    labs(x = "Time (hours)", y = ylab)+ 
+    scale_x_continuous(expand = expansion(0, 0)) +   ## no padding on the x-axis
+    theme_classic() + 
+    ggtitle(title)
+  
+}
 
-# use geom_segment to create vertical line to mark important events
+## Loop through ggplot generation ----------------------------------------------
+
+group <- 'Treatment'
+ts.plots <- vector(mode = "list",length = length(vars2plot))
+
+for (i in 1:length(vars2plot)) {
+  
+  data <- grp.summaries[[i]]
+  title <- names(grp.summaries)[i]
+  names(ts.plots)[i] <- title
+  ylab <- "UNITS"
+  ts.plots[[i]] <- group_plot(data,group,title,ylab)
+  ts.plots[[i]]
+  
+}
+
+# The above will automatically print the figures to the Plots window, but you
+# can generate individually by name using the following syntax:
+ts.plots$EBalance
+
+# TO DO: 
+# - improve plot annotation/axis labeling
+# - improve plot scaling
+# - use geom_segment to create vertical line to mark important events
 
 ## Box Plots (D/L/total) -----------------------------------------------------
+
+# TO DO: Automate for all plots
 
 ylab <- "Energy Expenditure (kcal/hr)"
 
