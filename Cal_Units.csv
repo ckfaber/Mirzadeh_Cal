@@ -1,0 +1,31 @@
+Sable_Var,Renamed_Var,Unit,Min_Normal_Range,Max_Normal_Range,Description
+AllMeters_M,,m,,,"Cumulative sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _M denotes mean during 30s sampling"
+AllMeters_R,,m,,,"Sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _R denotes range from last cage sample to current cage sample - in other words, the total distance the mouse traveled since the cage was last selected."
+Animal,Cage,NA,,,Cage number
+BodyMass_M,BodyMass,g,,,Mean body mass of animal
+FoodInA_M,FoodIn.cum,g,,,Mass of food consumed by animal during the cycle
+kcal_hr_M,EE,kcal/hr,0.300,0.600,Mean energy expenditure in kcal/hr. Calculated using the Weir equation
+PedMeters_M,,m,,,"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
+PedMeters_R,,,,,"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
+PedSpeed_Mnz,,m/s,,,Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean
+RER_M,RER,NA,0.700,1.000,"Mean respiratory exchange ratio, VCO2/VO2, unitless"
+VCO2_M,VCO2,ml/min,0.800,2.500,Rate of carbon dioxide emission
+VH2O_M,VH2O,g/hr,,,Rate of water vapor loss
+VO2_M,VO2,ml/min,1.000,3.000,Rate of oxygen consumption
+WaterInA_M,WaterIn.cum,g,,,Mass of water consumed by animal during the cycle
+Xbreak_R,XBreak,count,,,Number of x-axis beam breaks
+Ybreak_R,YBreak,count,,,Number of y-axis beam breaks
+EnviroTemp_M,,,,,
+EnviroRH_M,,,,,
+EnviroBP_M,,,94.000,104.000,
+EnviroLightlux_M,,,,,
+EnviroOccupancy_M,,,,,"VO2 = VO2_M, "
+EnviroSound_M,,,,,"         Animal = ID_Code, "
+Stilltime_M,,,,,"         VCO2 = VCO2_M, "
+Sleeptime_M,,,,,"         EE = kcal_hr_M, "
+,,,,,"         RER = RER_M, "
+,,,,,"         FoodIn.cum = FoodInA_M, "
+,,,,,"         WaterIn.cum = WaterInA_M, "
+,,,,,"         AllMeters.cum = AllMeters_M,"
+,,,,,"         BodyMass = BodyMass_M,"
+,,,,,         VH2O = VH2O_M)
