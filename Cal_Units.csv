@@ -23,4 +23,9 @@ EnviroOccupancy_M,NA,,
 EnviroSound_M,NA,,
 Stilltime_M,NA,,
 Sleeptime_M,NA,,
-NA,EBalance,kcal,
+,EE.kcal.bin,kcal,"Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"
+,AllMeters.cum,m,Calculated from AllMeters using cumsum()
+,FoodIn.g,g,Calculated from FoodIn.cum using diff()
+,WaterIn.g,g,Calculated from WaterIn.cum using diff()
+,FoodIn.kcal,kcal,Calculated from FoodIn.g*4.2
+,EBalance,kcal,Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
