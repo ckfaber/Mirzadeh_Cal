@@ -87,7 +87,7 @@ df %<>%
   mutate(ZT = mapvalues(hour, from = (0:23), to = c(18:23,0:17)),.before = Sex) %>%     
   mutate(Photoperiod = as.factor(mapvalues(ZT, from = c(0:23), to = c(rep(1,12),rep(0,12)))),.before = ZT) %>%
   mutate(exp_day = mapvalues(day, from = unique(day), to = 1:length(unique(day))),.after = DateTime) %>%
-  rename(VO2 = VO2_M, 
+  dplyr::rename(VO2 = VO2_M, 
          Animal = ID_Code, 
          VCO2 = VCO2_M, 
          EE = kcal_hr_M, 
