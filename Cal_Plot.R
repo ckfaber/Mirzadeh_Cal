@@ -55,12 +55,14 @@ df.hourly %<>%
 
 ## Compute summary statistics -----------------------------------------------
 
+# TO DO: automate units for variable plotting - maybe as external sheet, use join methods?
+
 # Specify grouping & variables for time-series plotting
-group <- 'Treatment'
+group     <- 'Treatment'
 vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
 
 ## Create function to generate hourly summaries for plotting with geom_line()---
-summarize_groups <- function(group,var) {
+group_summarize <- function(group,var) {
   
   df.hourly %>%
     group_by( get(group) ,Time) %>%
@@ -78,11 +80,14 @@ for (i in 1:length(vars2plot)) {
   
   var <- vars2plot[i]
   names(grp.summaries)[i] <- var
-  grp.summaries[[i]] <- summarize_groups(group,var)
+  grp.summaries[[i]] <- group_summarize(group,var)
 
 }
 
 ## Timeseries plots -----------------------------------------------------------
+
+# TO DO: Loop through grp.summaries to generate time-series plots with automatic
+# plot annotation & axis labeling
 
 # Extract time-series as small df for plotting
 pp_data <- df.hourly %>%
@@ -92,7 +97,7 @@ pp_data <- df.hourly %>%
 # interest here
 df <- grp.summaries[[1]]
 xlab <- "Time (Hours)"
-ylab <- "kcal"
+ylab <- "UNITS"
 
 EBplot <- ggplot(data = df) + 
   
@@ -126,6 +131,8 @@ EBplot <- ggplot(data = df) +
 # use geom_segment to create vertical line to mark important events
 
 ## Box Plots (D/L/total) -----------------------------------------------------
+
+# TO DO: Automate for all plots
 
 ylab <- "Energy Expenditure (kcal/hr)"
 
