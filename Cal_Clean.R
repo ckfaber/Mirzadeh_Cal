@@ -25,11 +25,11 @@
 
 ## Load required packages ------------------------------------------------------
 
-library(plyr)
 library(tidyverse)
 library(magrittr)
 library(lubridate)
 library(here)
+library(plyr, include.only = 'mapvalues')
 
 ## Directory hard-coding ------------------------------------------------------ 
 
@@ -57,7 +57,7 @@ df_code   <- read_csv(here::here(paste(code,".csv",sep = "")))
 df        <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   left_join(df_code, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
-  dplyr::rename(Cage = Animal)%>%
+  rename(Cage = Animal)%>%
   select(!(starts_with("Enviro") 
            | starts_with("Ped") 
            | all_of(cols2excl)))
@@ -82,12 +82,16 @@ df <- df[order(df$DateTime),] %>%
 
 ## Transform data  ------------------------------------------------------------
 
+# TO DO: 
+# - update code to use dplyr::recode instead of plyr::mapvalues, as plyr no
+# longer supported
+
 # Compute experimental day and ZT time, rename some variables
 df %<>%
-  mutate(ZT = mapvalues(hour, from = (0:23), to = c(18:23,0:17)),.before = Sex) %>%     
-  mutate(Photoperiod = as.factor(mapvalues(ZT, from = c(0:23), to = c(rep(1,12),rep(0,12)))),.before = ZT) %>%
-  mutate(exp_day = mapvalues(day, from = unique(day), to = 1:length(unique(day))),.after = DateTime) %>%
-  dplyr::rename(VO2 = VO2_M, 
+  mutate(ZT = plyr::mapvalues(hour, from = (0:23), to = c(18:23,0:17)),.before = Sex) %>%     
+  mutate(Photoperiod = as.factor(plyr::mapvalues(ZT, from = c(0:23), to = c(rep(1,12),rep(0,12)))),.before = ZT) %>%
+  mutate(exp_day = plyr::mapvalues(day, from = unique(day), to = 1:length(unique(day))),.after = DateTime) %>%
+  rename(VO2 = VO2_M, 
          Animal = ID_Code, 
          VCO2 = VCO2_M, 
          EE = kcal_hr_M, 
