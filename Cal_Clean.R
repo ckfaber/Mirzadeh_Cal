@@ -146,7 +146,7 @@ df.hourly <- df %>%
     all_of(cols4cum),max)) %>% # cumulative values just keep the maximum (total for the hour)
   ungroup() %>%
   distinct() %>% # squashes down to one observation per hour
-  select(!c(hour,minute)) %>% 
+  select(!c(hour,minute,month,day)) %>% 
   mutate(Animal = as.factor(Animal)) %>%
   group_by(Animal) %>%
   slice(2:(n()-1)) %>% # trim incomplete hours at start and end
