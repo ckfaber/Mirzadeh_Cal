@@ -188,6 +188,9 @@ for (i in 1:length(vars2plot)) {
 
 ## Assemble figures -----------------------------------------------------------
 
+# TO DO: 
+# - move to separate script
+
 # busy, but example of what patchwork can do: 
 Figure1 <- EE / locomotion
 
@@ -212,6 +215,9 @@ pp_EE / pp_VO2
 
 
 ## Save your pretty plots! ----------------------------------------------------
+
+# TO DO: 
+# - export box.plots & ts.plots
 
 # Modify to save vector graphics (for better scaling at high-res)
 
