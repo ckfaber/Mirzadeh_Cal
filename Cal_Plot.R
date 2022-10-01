@@ -85,7 +85,7 @@ for (i in 1:length(vars2plot)) {
 pp_data <- df.hourly %>%
   distinct(Time,Photoperiod)
 
-group_plot <- function(data,group,title,ylab) {
+group_tsplot <- function(data,group,title,ylab) {
   
   plot <- ggplot(data) + 
     
@@ -150,27 +150,41 @@ ts.plots$RER
 
 # TO DO: Automate for all plots
 
-ylab <- "Energy Expenditure (kcal/hr)"
+group_boxplot <- function(group,var,title,ylab) {
+  
+  ggplot(pp.averaged.total,
+         aes(x = Photoperiod,
+             y = get(var))) +
+    geom_boxplot(aes(fill = stage(get(group), after_scale = alpha(fill, 0.5)))) +
+    scale_color_manual(group,
+      values = c("turquoise4", "darkorange3"),
+      aesthetics = c("color", "fill")
+    ) +
+    labs(x = NULL, y = ylab) +
+    scale_x_discrete(labels = c("Dark", "Light")) +
+    theme_classic() + 
+    ggtitle(title)
+  
+}
 
-pp.EE <- ggplot(pp.averaged.total,
-                aes(x = Photoperiod,
-                    y = mean.EE)) + 
-  geom_boxplot(aes(fill = stage(Treatment,after_scale = alpha(fill,0.5)))) +
-  scale_color_manual(values = c("turquoise4","darkorange3"),aesthetics = c("color","fill")) +
-  labs(x = NULL, y = ylab) +
-  scale_x_discrete(labels = c("Dark","Light")) +
-  theme_classic()
+## Loop through all plots ------------------------------------------------------
 
+box.plots <- vector(mode = "list",length = length(vars2plot))
 
-pp.EE.daily <- ggplot(pp.averaged.daily,
-                      aes(x = Photoperiod,
-                          y = mean.EE)) + 
-  geom_boxplot(aes(fill = stage(Treatment,after_scale = alpha(fill,0.5)))) +
-  scale_color_manual(values = c("turquoise4","darkorange3"),aesthetics = c("color","fill")) +
-  labs(x = NULL, y = ylab) +
-  scale_x_discrete(labels = c("Dark","Light")) +
-  theme_classic() +
-  facet_grid(cols = vars(exp_day))
+for (i in 1:length(vars2plot)) {
+  
+  var <- vars2plot[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
+  box.plots[[i]] <- group_boxplot(group,var,title,ylab)
+  names(box.plots)[i] <- var
+  #ts.plots[[i]]
+  
+}
 
 ## Assemble figures -----------------------------------------------------------
 
