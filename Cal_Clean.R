@@ -156,24 +156,19 @@ df.hourly <- df %>%
 
 ## Overall photoperiod means ------------------------------------------------
 
-se <- function(x, na.rm=FALSE) {
-  if (na.rm) x <- na.omit(x)
-  sqrt(var(x)/length(x))
-}
-
 pp.averaged.total <- df %>%
   group_by(Photoperiod,Treatment,Animal) %>%
   summarize(
-    across(all_of(cols2sum),sum,.names = "tot.{.col}"),
-    across(all_of(cols2avg),mean,.names = "mean.{.col}"),
-    across(all_of(cols4cum),max,.names = "tot.{.col}")) 
+    across(all_of(cols2sum),sum),
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max)) 
 
 pp.averaged.daily <- df %>%
   group_by(exp_day,Photoperiod,Treatment,Animal) %>%
   summarize(
-    across(all_of(cols2sum),sum,.names = "tot.{.col}"),
-    across(all_of(cols2avg),mean,.names = "mean.{.col}"),
-    across(all_of(cols4cum),max,.names = "tot.{.col}"))  
+    across(all_of(cols2sum),sum),
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max))  
 
 ## Export to (optional) .csv, .Rda--------------------------------------------
 
