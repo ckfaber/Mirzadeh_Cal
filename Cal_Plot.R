@@ -41,7 +41,7 @@ vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum',
 ## Load data -----------------------------------------------------------------
 
 load(here::here(paste(cohort,rundate,"Clean.Rda",sep = "_")))
-#exp_date <- format(ymd(rundate),'%b %d, %Y')
+unitkeys <- read_csv(here::here("Cal_Units.csv"))
 
 ## (Optional) Smoothing via moving mean ---------------------------------------
 
@@ -55,11 +55,8 @@ df.hourly %<>%
     all_of(cols2smooth) , ~ zoo::rollmean(., smooth_win, fill = NA), .names = "smooth{smooth_win}_{.col}" )) %>%
   ungroup()
 
-## Compute summary statistics -----------------------------------------------
+## Create function to generate hourly summaries --------------------------------
 
-# TO DO: automate units for variable plotting - maybe as external sheet, use join methods?
-
-## Create function to generate hourly summaries for plotting with geom_line()---
 group_summarize <- function(group,var) {
   
   df.hourly %>%
@@ -129,20 +126,23 @@ ts.plots <- vector(mode = "list",length = length(vars2plot))
 for (i in 1:length(vars2plot)) {
   
   data <- grp.summaries[[i]]
-  title <- names(grp.summaries)[i]
-  names(ts.plots)[i] <- title
-  ylab <- "UNITS"
+  var <- names(grp.summaries)[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
   ts.plots[[i]] <- group_plot(data,group,title,ylab)
-  ts.plots[[i]]
+  names(ts.plots)[i] <- var
+  #ts.plots[[i]]
   
 }
 
-# The above will automatically print the figures to the Plots window, but you
-# can generate individually by name using the following syntax:
-ts.plots$EBalance
+# Visualize plots with the following syntax: 
+ts.plots$RER
 
 # TO DO: 
-# - improve plot annotation/axis labeling
 # - improve plot scaling
 # - use geom_segment to create vertical line to mark important events
 

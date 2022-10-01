@@ -1,31 +1,31 @@
-Sable_Var,Renamed_Var,Unit,Description
-AllMeters_M,NA,m,"Cumulative sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _M denotes mean during 30s sampling"
-AllMeters_R,AllMeters,m,"Sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _R denotes range from last cage sample to current cage sample - in other words, the total distance the mouse traveled since the cage was last selected."
-Animal,Cage,NA,Cage number
-BodyMass_M,BodyMass,g,Mean body mass of animal
-FoodInA_M,FoodIn.cum,g,Mass of food consumed by animal during the cycle
-kcal_hr_M,EE,kcal/hr,Mean energy expenditure in kcal/hr. Calculated using the Weir equation
-PedMeters_M,NA,m,"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
-PedMeters_R,PedMeters,m,"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
-PedSpeed_Mnz,PedSpeed,m/s,Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean
-RER_M,RER,NA,"Mean respiratory exchange ratio, VCO2/VO2, unitless"
-VCO2_M,VCO2,ml/min,Rate of carbon dioxide emission
-VH2O_M,VH2O,g/hr,Rate of water vapor loss
-VO2_M,VO2,ml/min,Rate of oxygen consumption
-WaterInA_M,WaterIn.cum,g,Mass of water consumed by animal during the cycle
-Xbreak_R,XBreak,count,Number of x-axis beam breaks
-Ybreak_R,YBreak,count,Number of y-axis beam breaks
-EnviroTemp_M,NA,,
-EnviroRH_M,NA,,
-EnviroBP_M,NA,kPa,
-EnviroLightlux_M,NA,,
-EnviroOccupancy_M,NA,,
-EnviroSound_M,NA,,
-Stilltime_M,NA,,
-Sleeptime_M,NA,,
-,EE.kcal.bin,kcal,"Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"
-,AllMeters.cum,m,Calculated from AllMeters using cumsum()
-,FoodIn.g,g,Calculated from FoodIn.cum using diff()
-,WaterIn.g,g,Calculated from WaterIn.cum using diff()
-,FoodIn.kcal,kcal,Calculated from FoodIn.g*4.2
-,EBalance,kcal,Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
+Sable_Var,Renamed_Var,Title,Unit,Description
+AllMeters_M,NA,NA,(m),"Cumulative sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _M denotes mean during 30s sampling"
+AllMeters_R,AllMeters,Activity,(m),"Sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _R denotes range from last cage sample to current cage sample - in other words, the total distance the mouse traveled since the cage was last selected."
+Animal,Cage,NA,NA,Cage number
+BodyMass_M,BodyMass,Body Mass,(g),Mean body mass of animal
+FoodInA_M,FoodIn.cum,Cumulative Food Intake,(g),Mass of food consumed by animal during the cycle
+kcal_hr_M,EE,Energy Expenditure,(kcal/hr),Mean energy expenditure in kcal/hr. Calculated using the Weir equation
+PedMeters_M,NA,NA,(m),"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
+PedMeters_R,PedMeters,Directed Activity,(m),"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
+PedSpeed_Mnz,PedSpeed,Directed Speed,(m/s),Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean
+RER_M,RER,RER,NA,"Mean respiratory exchange ratio, VCO2/VO2, unitless"
+VCO2_M,VCO2,vCO2 Emission,(mL/min),Rate of carbon dioxide emission
+VH2O_M,VH2O,vH2O Loss,(g/hr),Rate of water vapor loss
+VO2_M,VO2,vO2 Consumption,(mL/min),Rate of oxygen consumption
+WaterInA_M,WaterIn.cum,Cumulative Water Intake,(g),Mass of water consumed by animal during the cycle
+Xbreak_R,XBreak,Beam Breaks (x),(count),Number of x-axis beam breaks
+Ybreak_R,YBreak,Beam Breaks (y),(count),Number of y-axis beam breaks
+EnviroTemp_M,NA,,,
+EnviroRH_M,NA,,,
+EnviroBP_M,NA,,kPa,
+EnviroLightlux_M,NA,,,
+EnviroOccupancy_M,NA,,,
+EnviroSound_M,NA,,,
+Stilltime_M,NA,,,
+Sleeptime_M,NA,,,
+,EE.kcal.bin,NA,(kcal),"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"
+,AllMeters.cum,Cumulative Activity,(m),Calculated from AllMeters using cumsum()
+,FoodIn.g,Food Intake,(g),Calculated from FoodIn.cum using diff()
+,WaterIn.g,Water Intake,(g),Calculated from WaterIn.cum using diff()
+,FoodIn.kcal,Food Intake,(kcal),Calculated from FoodIn.g*4.2
+,EBalance,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
