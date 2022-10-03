@@ -28,6 +28,7 @@
 library(tidyverse)
 library(patchwork)
 library(here)
+library(plyr, include.only = 'mapvalues')
 
 ## Where be your data? ---------------------------------------------------------
 
@@ -133,7 +134,7 @@ for (i in 1:length(vars2plot)) {
   
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
-  ts.plots[[i]] <- group_plot(data,group,title,ylab)
+  ts.plots[[i]] <- group_tsplot(data,group,title,ylab)
   names(ts.plots)[i] <- var
   #ts.plots[[i]]
   
