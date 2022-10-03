@@ -156,23 +156,45 @@ df.hourly <- df %>%
 
 ## Overall photoperiod means ------------------------------------------------
 
-pp.averaged.total <- df %>%
-  group_by(Photoperiod,Treatment,Animal) %>%
+total.avg.daily <- df %>%
+  group_by(exp_day,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) 
+    across(all_of(cols4cum),max)) %>%
+  mutate(Photoperiod = "Total") %>%
+  ungroup()
 
-pp.averaged.daily <- df %>%
-  group_by(exp_day,Photoperiod,Treatment,Animal) %>%
+pp.avg.daily <- df %>%
+  group_by(exp_day,Photoperiod,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max))  
+    across(all_of(cols4cum),max)) %>%
+  ungroup() %>%
+  bind_rows(.,total.avg.daily)
+
+total.avg <- df %>%
+  group_by(Animal) %>%
+  summarize(
+    across(all_of(cols2sum),sum),
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max)) %>%
+  mutate(Photoperiod = "Total") %>%
+  ungroup()
+
+pp.avg.total <- df %>%
+  group_by(Photoperiod,Animal) %>%
+  summarize(
+    across(all_of(cols2sum),sum),
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max)) %>%
+  ungroup() %>%
+  bind_rows(.,total.avg)
 
 ## Export to (optional) .csv, .Rda--------------------------------------------
 
 #setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
 #write.csv(df, glue(cohort,"Clean.csv",.sep="_"),row.names = FALSE)
 savename <- paste(cohort,rundate,"Clean.Rda",sep = "_")
-save(df, df.hourly, pp.averaged.total, pp.averaged.daily, file = savename)
+save(df, df.hourly, pp.avg.total, pp.avg.daily,file = savename)
