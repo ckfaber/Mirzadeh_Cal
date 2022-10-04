@@ -25,11 +25,11 @@
 
 ## Load required packages ------------------------------------------------------
 
+library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(magrittr)
 library(lubridate)
 library(here)
-library(plyr, include.only = 'mapvalues')
 
 ## Directory hard-coding ------------------------------------------------------ 
 
@@ -157,7 +157,7 @@ df.hourly <- df %>%
 ## Overall photoperiod means ------------------------------------------------
 
 total.avg.daily <- df %>%
-  group_by(exp_day,Treatment,Animal) %>%
+  group_by(exp_day,Group,Treatment,Sex,Animal) %>% 
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
@@ -166,7 +166,7 @@ total.avg.daily <- df %>%
   ungroup()
 
 pp.avg.daily <- df %>%
-  group_by(exp_day,Photoperiod,Treatment,Animal) %>%
+  group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
@@ -175,7 +175,7 @@ pp.avg.daily <- df %>%
   bind_rows(.,total.avg.daily)
 
 total.avg <- df %>%
-  group_by(Treatment,Animal) %>%
+  group_by(Group,Treatment,Sex,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
@@ -184,7 +184,7 @@ total.avg <- df %>%
   ungroup()
 
 pp.avg.total <- df %>%
-  group_by(Photoperiod,Treatment,Animal) %>%
+  group_by(Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
