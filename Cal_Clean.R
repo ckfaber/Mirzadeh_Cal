@@ -157,7 +157,7 @@ df.hourly <- df %>%
 ## Overall photoperiod means ------------------------------------------------
 
 total.avg.daily <- df %>%
-  group_by(exp_day,Animal) %>%
+  group_by(exp_day,Treatment,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
@@ -166,7 +166,7 @@ total.avg.daily <- df %>%
   ungroup()
 
 pp.avg.daily <- df %>%
-  group_by(exp_day,Photoperiod,Animal) %>%
+  group_by(exp_day,Photoperiod,Treatment,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
@@ -175,7 +175,7 @@ pp.avg.daily <- df %>%
   bind_rows(.,total.avg.daily)
 
 total.avg <- df %>%
-  group_by(Animal) %>%
+  group_by(Treatment,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
@@ -184,7 +184,7 @@ total.avg <- df %>%
   ungroup()
 
 pp.avg.total <- df %>%
-  group_by(Photoperiod,Animal) %>%
+  group_by(Photoperiod,Treatment,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
