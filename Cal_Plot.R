@@ -25,10 +25,10 @@
 
 ## Load packages -------------------------------------------------------------
 
+library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(patchwork)
 library(here)
-library(plyr, include.only = 'mapvalues')
 
 ## Where be your data? ---------------------------------------------------------
 
@@ -37,7 +37,7 @@ rundate <- "2021-10-18"
 
 # Specify grouping & variables for time-series plotting
 group     <- 'Treatment'
-vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal','WaterIn.g')
+vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal')
 
 ## Load data -----------------------------------------------------------------
 
@@ -121,7 +121,6 @@ group_tsplot <- function(data,group,title,ylab) {
 
 ## Loop through ggplot generation ----------------------------------------------
 
-group <- 'Treatment'
 ts.plots <- vector(mode = "list",length = length(vars2plot))
 
 for (i in 1:length(vars2plot)) {
@@ -149,11 +148,9 @@ ts.plots$RER
 
 ## Box Plots (D/L/total) -----------------------------------------------------
 
-# TO DO: Automate for all plots
-
-group_boxplot <- function(group,var,title,ylab) {
+group_boxplot <- function(data,group,var,title,ylab) {
   
-  ggplot(pp.averaged.total,
+  ggplot(data,
          aes(x = Photoperiod,
              y = get(var))) +
     geom_boxplot(aes(fill = stage(get(group), after_scale = alpha(fill, 0.5)))) +
@@ -162,13 +159,20 @@ group_boxplot <- function(group,var,title,ylab) {
       aesthetics = c("color", "fill")
     ) +
     labs(x = NULL, y = ylab) +
-    scale_x_discrete(labels = c("Dark", "Light")) +
+    scale_x_discrete(labels = c("Dark", "Light", "Total")) +
     theme_classic() + 
     ggtitle(title)
   
 }
 
 ## Loop through all plots ------------------------------------------------------
+
+# BUG HERE: 
+# For some reason, all of the plots in box.plots list end up as the last
+# variable named in the loop. If you remove the call to save the ggplot to
+# box.plots, and instead just print to the Plot window, they look correct. I
+# cannot for the life of me figure out what is causing this problem, especially
+# because the same code worked for the ts.plots above.
 
 box.plots <- vector(mode = "list",length = length(vars2plot))
 
@@ -181,9 +185,10 @@ for (i in 1:length(vars2plot)) {
   
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
-  box.plots[[i]] <- group_boxplot(group,var,title,ylab)
+  print(group_boxplot(data = pp.avg.total,group = group,var = var,title = title,ylab = ylab))
+  
+  #box.plots[[i]] <- plot
   names(box.plots)[i] <- var
-  #ts.plots[[i]]
   
 }
 
