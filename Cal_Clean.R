@@ -156,12 +156,7 @@ df.hourly <- df %>%
 
 ## Overall photoperiod and daily means -----------------------------------------
 
-#maxdiff <- function(vec) {
-  
-  max(vec) - min(vec)
-  
-}
-
+# Compute average for each day
 total.avg.daily <- df %>%
   group_by(exp_day,Group,Treatment,Sex,Animal) %>% 
   summarize(
@@ -170,6 +165,7 @@ total.avg.daily <- df %>%
   mutate(Photoperiod = "Total") %>%
   ungroup()
 
+# Compute average within each photoperiod, append to total.avg.daily
 pp.avg.daily <- df %>%
   group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
@@ -179,6 +175,7 @@ pp.avg.daily <- df %>%
   bind_rows(.,total.avg.daily) 
 rm(total.avg.daily)
 
+# Compute average across variables for entire experiment
 total.avg <- df %>%
   group_by(Group,Treatment,Sex,Animal) %>%
   summarize(
@@ -187,16 +184,7 @@ total.avg <- df %>%
   mutate(Photoperiod = "Total") %>%
   ungroup()
 
-# pp.avg.total <- df %>%
-#   group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
-#   summarize(
-#     across(all_of(cols2sum),sum),
-#     across(all_of(cols2avg),mean),
-#     across(all_of(cols4cum),max)) %>%
-#   ungroup() %>%
-#   bind_rows(.,total.avg)
-
-# Test fix - this will compute the overall average daily value for every requested variable across the whole experiment
+# Compute the overall average daily value for every requested variable across the whole experiment
 pp.avg.total <- pp.avg.daily %>%
   group_by(Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
