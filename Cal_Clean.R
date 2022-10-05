@@ -34,27 +34,26 @@ library(here)
 ## Directory hard-coding ------------------------------------------------------ 
 
 #load_dir  <- "C:/Users/cfabe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Data_Raw/Calorimetry/" 
-ext       <- ".csv"
-cohort    <- "mon001"
-rundate   <- "2021-10-18"  
-
-## Animals to remove -----------------------------------------------------------
-
-remove_animals <- 274 
-cols2excl <- c('Age','Diet','Cage','Stilltime_M',
+ext             <- ".csv"
+cohort          <- "mon001"
+rundate         <- "2021-10-18"  
+diet.kcal       <- 4.2
+remove_animals  <- 274 
+trim.short.days <- TRUE
+cols2excl       <- c('Age','Diet','Cage','Stilltime_M',
                'Sleeptime_M','XBreak_R','YBreak_R',
                'Mass_g','AllMeters_M')
 
 ## Load data ------------------------------------------------------------------
 
-filename  <- paste(rundate,cohort,sep = "_")
-code      <- paste(rundate,cohort,"DECODED",sep = "_")
+filename        <- paste(rundate,cohort,sep = "_")
+code            <- paste(rundate,cohort,"DECODED",sep = "_")
 
 # Load csv with run metadata
-df_code   <- read_csv(here::here(paste(code,".csv",sep = ""))) 
+df_code         <- read_csv(here::here(paste(code,".csv",sep = ""))) 
 
 # Load cal.csv and merge metadata
-df        <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
+df              <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   left_join(df_code, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
   rename(Cage = Animal)%>%
@@ -107,25 +106,35 @@ start_time <- df$DateTime[1]
 df %<>%
   mutate(Time = as.numeric(difftime(DateTime,start_time),units = "hours"),.after = DateTime)
 
-# Compute binned measures, energy balance, deselect some extraneous columns
-# TO DO: compute EE columns as kcal/bin
-
+# Compute time interval (in hours) for estimating binned energy expenditure
 int <- df$Time[2] - df$Time[1]
 
+# Compute new columns
 df %<>%
   group_by(Animal) %>%
-  mutate(FoodIn.g = c(diff(FoodIn.cum),0),.before = FoodIn.cum) %>%
-  mutate(WaterIn.g = c(diff(WaterIn.cum),0),.before = WaterIn.cum) %>%
-  mutate(FoodIn.kcal = FoodIn.g * 4.2, .before = FoodIn.g) %>%
-  mutate(EE.kcal.bin = EE * int, .before = EE) %>%
-  mutate(EBalance = FoodIn.kcal - EE.kcal.bin, .before = VO2) %>%
-  mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>%
+  mutate(FoodIn.g = c(diff(FoodIn.cum),0),.before = FoodIn.cum) %>% # convert cumulative to binned food intake
+  mutate(WaterIn.g = c(diff(WaterIn.cum),0),.before = WaterIn.cum) %>% # convert cumulative to binned water intake
+  mutate(FoodIn.kcal = FoodIn.g * diet.kcal, .before = FoodIn.g) %>% # convert g to kcal
+  mutate(EE.kcal.bin = EE * int, .before = EE) %>% # EE is kcal/hr, multiply by int (x hours between samples) to get kcal/bin
+  mutate(EBalance = FoodIn.kcal - EE.kcal.bin, .before = VO2) %>% # compute energy balance per bin
+  mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>% # compute cumulative distance traveled
   ungroup() 
 
 # Remove any rows/columns with only NAs
 df <- df[rowSums(is.na(df)) != ncol(df), ]
 df <- df[, colSums(is.na(df)) != nrow(df)]
 View(df)
+
+# Remove days with <24h
+if (trim.short.days) {
+  
+  trim.df <- df %>%
+  group_by(exp_day) %>%
+  mutate(n = n()) %>% 
+  ungroup() %>%
+  filter(!(n < max(n)))  
+   
+}
 
 ## Bin to hourly ---------------------------------------------------
 cols2sum <- c('FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','AllMeters')
@@ -155,6 +164,8 @@ df.hourly <- df %>%
   ungroup()
 
 ## Overall photoperiod and daily means -----------------------------------------
+
+
 
 # Compute average for each day
 total.avg.daily <- df %>%
