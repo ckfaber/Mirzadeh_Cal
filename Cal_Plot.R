@@ -14,14 +14,9 @@
 
 # To do 
 
-# 1) total daily average together with dark/light box plots 
 # 2) overlay individual values as geom_point? for small ns 
 # 3) annotate number within each group on top of each box/bar plot 
-# 4) SEM bars on bar plots 
 # 5) stats!!! 
-# 6) cumulative sum of FI within each photoperiod per animal <- partially there,
-# but issues detailed below
-# 7) write function to generate multiple plots and group into figure
 
 ## Load packages -------------------------------------------------------------
 
@@ -57,8 +52,9 @@ df.hourly %<>%
     all_of(cols2smooth) , ~ zoo::rollmean(., smooth_win, fill = NA), .names = "smooth{smooth_win}_{.col}" )) %>%
   ungroup()
 
-## Create function to generate hourly summaries --------------------------------
+## Timeseries plots------------------------------------------------------------
 
+# Create function to generate hourly summaries by variable
 group_summarize <- function(group,var) {
   
   df.hourly %>%
@@ -81,12 +77,11 @@ for (i in 1:length(tsvars)) {
 
 }
 
-## Timeseries plots -----------------------------------------------------------
-
 # Extract time-series as small df for plotting
 pp_data <- df.hourly %>%
   distinct(Time,Photoperiod)
 
+# Create function to generate time-series plots
 group_tsplot <- function(data,group,title,ylab) {
   
   plot <- ggplot(data) + 
@@ -120,8 +115,7 @@ group_tsplot <- function(data,group,title,ylab) {
   
 }
 
-## Loop through ggplot generation ----------------------------------------------
-
+# Loop through ggplot generation 
 ts.plots <- vector(mode = "list",length = length(tsvars))
 
 for (i in 1:length(tsvars)) {
@@ -147,8 +141,9 @@ ts.plots$RER
 # - improve plot scaling
 # - use geom_segment to create vertical line to mark important events
 
-## Box Plots (D/L/total) -----------------------------------------------------
+## Box Plots (D/L/total for daily and overall experiment) ----------------------
 
+# Create function to generate boxplots
 group_boxplot <- function(data,group,var,title,ylab) {
   
   ggplot(data,
@@ -166,10 +161,8 @@ group_boxplot <- function(data,group,var,title,ylab) {
   
 }
 
-## Loop through all plots ------------------------------------------------------
-
+# Loop through all variables for overall experiment plots
 box.plots <- vector(mode = "list",length = length(boxplotvars))
-
 for (i in 1:length(boxplotvars)) {
   
   var <- boxplotvars[i]
@@ -188,8 +181,8 @@ for (i in 1:length(boxplotvars)) {
   
 }
 
+# Loop through all the variables for daily plots
 daily.box.plots <- vector(mode = "list",length = length(boxplotvars))
-
 for (i in 1:length(boxplotvars)) {
   
   var <- boxplotvars[i]
