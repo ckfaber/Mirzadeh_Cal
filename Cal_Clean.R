@@ -128,9 +128,9 @@ df <- df[, colSums(is.na(df)) != nrow(df)]
 View(df)
 
 ## Bin to hourly ---------------------------------------------------
-cols2sum <- c('FoodIn.g','WaterIn.g','EBalance','AllMeters')
+cols2sum <- c('FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','AllMeters')
 cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
-cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal')
+cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum')
 cols2keep <- c('DateTime','Time','minute')
 
 df.hourly <- df %>%
@@ -154,14 +154,19 @@ df.hourly <- df %>%
     difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
   ungroup()
 
-## Overall photoperiod means ------------------------------------------------
+## Overall photoperiod and daily means -----------------------------------------
+
+#maxdiff <- function(vec) {
+  
+  max(vec) - min(vec)
+  
+}
 
 total.avg.daily <- df %>%
   group_by(exp_day,Group,Treatment,Sex,Animal) %>% 
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) %>%
+    across(all_of(cols2avg),mean)) %>%
   mutate(Photoperiod = "Total") %>%
   ungroup()
 
@@ -169,28 +174,35 @@ pp.avg.daily <- df %>%
   group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) %>%
+    across(all_of(cols2avg),mean)) %>%
   ungroup() %>%
-  bind_rows(.,total.avg.daily)
+  bind_rows(.,total.avg.daily) 
+rm(total.avg.daily)
 
 total.avg <- df %>%
   group_by(Group,Treatment,Sex,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) %>%
+    across(all_of(cols2avg),mean)) %>%
   mutate(Photoperiod = "Total") %>%
   ungroup()
 
-pp.avg.total <- df %>%
+# pp.avg.total <- df %>%
+#   group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
+#   summarize(
+#     across(all_of(cols2sum),sum),
+#     across(all_of(cols2avg),mean),
+#     across(all_of(cols4cum),max)) %>%
+#   ungroup() %>%
+#   bind_rows(.,total.avg)
+
+# Test fix - this will compute the overall average daily value for every requested variable across the whole experiment
+pp.avg.total <- pp.avg.daily %>%
   group_by(Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
-    across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) %>%
-  ungroup() %>%
-  bind_rows(.,total.avg)
+    across(all_of(c(cols2sum,cols2avg)),mean)) %>% 
+  ungroup()
+rm(total.avg)
 
 ## Export to (optional) .csv, .Rda--------------------------------------------
 
