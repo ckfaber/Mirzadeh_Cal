@@ -37,7 +37,8 @@ rundate <- "2021-10-18"
 
 # Specify grouping & variables for time-series plotting
 group     <- 'Treatment'
-vars2plot <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal')
+tsvars <- c('EE','EBalance','RER','AllMeters.cum','FoodIn.cum','WaterIn.cum','FoodIn.kcal')
+boxplotvars <- c('EE','EBalance','RER','AllMeters','WaterIn.g','FoodIn.kcal')
 
 ## Load data -----------------------------------------------------------------
 
@@ -70,11 +71,11 @@ group_summarize <- function(group,var) {
     rename( {{group}} := "get(group)")
 }
 
-# Loop through hard-coded variables of vars2plot
-grp.summaries <- vector(mode = "list", length = length(vars2plot)) # initialize empty list
-for (i in 1:length(vars2plot)) {
+# Loop through hard-coded variables of tsvars
+grp.summaries <- vector(mode = "list", length = length(tsvars)) # initialize empty list
+for (i in 1:length(tsvars)) {
   
-  var <- vars2plot[i]
+  var <- tsvars[i]
   names(grp.summaries)[i] <- var
   grp.summaries[[i]] <- group_summarize(group,var)
 
@@ -121,9 +122,9 @@ group_tsplot <- function(data,group,title,ylab) {
 
 ## Loop through ggplot generation ----------------------------------------------
 
-ts.plots <- vector(mode = "list",length = length(vars2plot))
+ts.plots <- vector(mode = "list",length = length(tsvars))
 
-for (i in 1:length(vars2plot)) {
+for (i in 1:length(tsvars)) {
   
   data <- grp.summaries[[i]]
   var <- names(grp.summaries)[i]
@@ -135,7 +136,7 @@ for (i in 1:length(vars2plot)) {
   
   ts.plots[[i]] <- group_tsplot(data,group,title,ylab)
   names(ts.plots)[i] <- var
-  #ts.plots[[i]]
+  print(ts.plots[[i]])
   
 }
 
@@ -167,28 +168,44 @@ group_boxplot <- function(data,group,var,title,ylab) {
 
 ## Loop through all plots ------------------------------------------------------
 
-# BUG HERE: 
-# For some reason, all of the plots in box.plots list end up as the last
-# variable named in the loop. If you remove the call to save the ggplot to
-# box.plots, and instead just print to the Plot window, they look correct. I
-# cannot for the life of me figure out what is causing this problem, especially
-# because the same code worked for the ts.plots above.
+box.plots <- vector(mode = "list",length = length(boxplotvars))
 
-box.plots <- vector(mode = "list",length = length(vars2plot))
-
-for (i in 1:length(vars2plot)) {
+for (i in 1:length(boxplotvars)) {
   
-  var <- vars2plot[i]
+  var <- boxplotvars[i]
   
   title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
   unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
   
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
-  print(group_boxplot(data = pp.avg.total,group = group,var = var,title = title,ylab = ylab))
-  
-  #box.plots[[i]] <- plot
   names(box.plots)[i] <- var
+  plot <- group_boxplot(data = pp.avg.total,group = group,var = var,title = title,ylab = ylab)
+  print(plot)
+  
+  box.plots[[i]] <- plot
+  
+  
+}
+
+daily.box.plots <- vector(mode = "list",length = length(boxplotvars))
+
+for (i in 1:length(boxplotvars)) {
+  
+  var <- boxplotvars[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
+  names(daily.box.plots)[i] <- var
+  plot <- group_boxplot(data = pp.avg.daily,group = group,var = var,title = title,ylab = ylab) + 
+    facet_grid(cols = vars(exp_day))
+  print(plot)
+  
+  daily.box.plots[[i]] <- plot
+  
   
 }
 
