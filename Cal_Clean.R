@@ -40,7 +40,7 @@ rundate         <- "2021-10-18"
 diet.kcal       <- 4.2
 remove_animals  <- 274 
 trim.short.days <- TRUE
-cols2excl       <- c('Age','Diet','Cage','Stilltime_M',
+cols2excl       <- c('Age','Cage','Stilltime_M',
                'Sleeptime_M','XBreak_R','YBreak_R',
                'Mass_g','AllMeters_M')
 
