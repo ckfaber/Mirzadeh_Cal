@@ -33,3 +33,4 @@ Sleeptime_M,NA,,,
 ,EB.norm,Normalized Energy Balance,(kcal/g),Energy balance normalized to body mass (g). Calculated as EBalance/BodyMass
 ,EE.cum,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure
 ,EB.cum,Cumulative Energy Balance,(kcal),Cumulative energy balance
+,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)

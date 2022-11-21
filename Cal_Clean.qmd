@@ -1,56 +1,76 @@
-## Script for Tidying Sable Calorimetry Data ----------------------------------------
+---
+title: "Cal_Clean: A Script for Tidying Sable Indirect Calorimetry Data"
+author: "Chelsea Faber"
+format: 
+   html:
+     df-print: paged
+editor: visual
+---
 
-# Written by Chelsea Faber
-# Mirzadeh Lab, Barrow Neurological Institute
+###### Inputs:
 
-# kasper.chelsea@gmail.com
+-   Cohort and rundate of calorimetry run
+-   List of animal ID numbers to be excluded (NA if none)
 
-# REQS:
-# - .exp data files processed with MI v2.46 in 1-minute bins - all should be processed with the SAME MACRO
-# - TimeSeries sheet as a .csv 
-# - Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
+###### Outputs:
 
-# Known bugs: 
-# - EnviroLightlux_M sometimes has 0s and 1s, sometimes has 1s and 3s, sometimes 3s and 7s
-# - therefore photoperiod assignment is done based on ZT/clock time NOT from sensor
-# - will need to be updated for DD or other light schedule experiments
+-   .Rda file containing cleaned dataframe at original sampling rate (typically, 1-3 minutes), 1h-binned dataframe, and photoperiod-binned dataframes for further plotting and statistical analyses.
 
-# Next steps: 
+###### Requirements:
 
-# - improve hardcoding of file names/directories: back-slashes (/) are needed instead of (\)
-#         like Windows provides when copy/pasting 
-# - Convert this to function to call from another pre-processing script
-# - read in appropriately named .csvs from directory without having to hard-code the file
-# - improve experimental log for metadata read-in and association with cal data
+-   .exp data files processed with MI v2.46 in 1-minute bins
+-   TimeSeries sheet as a .csv saved in your default working directory (run `library(here)` to find out where this is!)
+-   Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
 
-## Load required packages ------------------------------------------------------
+###### Known bugs:
 
+-   EnviroLightlux_M is inconsistent in numbering (sometimes has 0s and 1s, or 1s and 3s, or 3s and 7s), therefore photoperiod assignment is done based on ZT/clock time and NOT from sensor. This will need to be updated for DD or other light schedule experiments
+
+## Load required packages
+
+```{r}
+#| label: load-packages
+#| warning: false
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(magrittr)
 library(lubridate)
 library(here)
+```
 
-## Directory hard-coding ------------------------------------------------------ 
+## Define inputs to script for analysis
 
-#load_dir  <- "C:/Users/cfabe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Data_Raw/Calorimetry/" 
-ext             <- ".csv"
+If everything is working properly, these variables are the only ones a user should have to change to clean a given file's calorimetry data. Eventually, this entire script will be converted to a function, such that the user would type these in-line when calling that function (e.g., `Cal_Clean(cohort = 'mon001',rundate = '2021-10-18',remove_animals = 274,trim.short.days = FALSE)`).
+
+```{r}
+# Run-specific user-defined parameters
 cohort          <- "mon001"
 rundate         <- "2021-10-18"  
-diet.kcal       <- 4.2
 remove_animals  <- 274 
+
+# Default parameters
 trim.short.days <- FALSE
+diet.kcal       <- 4.2
 cols2excl       <- c('Age','Cage','Stilltime_M',
                'Sleeptime_M','XBreak_R','YBreak_R',
                'Mass_g','AllMeters_M')
+ext             <- ".csv"
+```
 
-## Load data ------------------------------------------------------------------
+## Load data
 
+To load your data, please ensure that it is located in the repository that the `here()` function points to. Otherwise, you will get an error.
+
+A workaround, if you do not wish to load your data using the here() package, is to type the entire file path in the call to `read_csv()`.
+
+```{r}
+#| warning: false
 filename        <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"DECODED",sep = "_")
 
 # Load csv with run metadata
 df_code         <- read_csv(here::here(paste(code,".csv",sep = ""))) 
+df_code
 
 # Load cal.csv and merge metadata
 df              <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
@@ -60,8 +80,15 @@ df              <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   select(!(starts_with("Enviro") 
            | starts_with("Ped") 
            | all_of(cols2excl)))
+head(df)
+```
 
-## Tidy data -------------------------------------------------------------------
+## Tidy data
+
+Here, we remove any animals that we had previously specified, and perform some general data cleaning - most importantly, extraction of time of day information from the DateTime column.
+
+```{r}
+#| warning: false
 
 # Remove dead/sick animals
 df %<>%
@@ -79,11 +106,14 @@ df %<>%
 df <- df[order(df$DateTime),] %>%
   arrange(ID_Code)
 
-## Transform data  ------------------------------------------------------------
+head(df)
+```
 
-# TO DO: 
-# - update code to use dplyr::recode instead of plyr::mapvalues, as plyr no
-# longer supported
+## Transform data
+
+Here, we compute a handful of new variables from existing ones, including Zeitgeber time, Photoperiod, and experimental day from DateTime, etc.
+
+```{r}
 
 # Compute experimental day and ZT time, rename some variables
 df %<>%
@@ -100,12 +130,22 @@ df %<>%
          AllMeters = AllMeters_R,
          BodyMass = BodyMass_M,
          VH2O = VH2O_M)
+```
 
+For plotting purposes, here we create a new column containing the time from which the recording started, in hours.
+
+```{r}
 # Compute hours from recording start for plots
 start_time <- df$DateTime[1]
 df %<>%
   mutate(Time = as.numeric(difftime(DateTime,start_time),units = "hours"),.after = DateTime)
 
+head(df$Time)
+```
+
+Next, we will compute some more parameters of interest, including binned food and water intake (from the original cumulative values), food intake in kcal (from grams), binned and cumulative energy expenditure (from the instantaneous estimate of hourly rate), cumulative distance traveled, and energy balance. The binned energy expenditure is questionable currently - please let me know if you find any issues.
+
+```{r}
 # Compute time interval (in hours) for estimating binned energy expenditure
 int <- df$Time[2] - df$Time[1]
 
@@ -122,24 +162,39 @@ df %<>%
   mutate(EB.cum = cumsum(EBalance), .after = EBalance) %>%
   mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>% # compute cumulative distance traveled
   ungroup() 
+```
 
+Next, we remove rows/columns with missing values (NAs) across entire row/column.
+
+```{r}
 # Remove any rows/columns with only NAs
 df <- df[rowSums(is.na(df)) != ncol(df), ]
 df <- df[, colSums(is.na(df)) != nrow(df)]
-View(df)
+```
+
+Here we can optionally remove data points that are not part of a full day's recording. I only recommend this if your first and last days of recording are not important to your analysis.
+
+By default, this will not run. If you want to trim the incomplete days, run `trim.short.days <- TRUE` (default is `FALSE`).
+
+```{r}
 
 # Remove days with <24h
 if (trim.short.days) {
-  
   trim.df <- df %>%
   group_by(exp_day) %>%
   mutate(n = n()) %>% 
   ungroup() %>%
   filter(!(n < max(n)))  
-   
 }
+```
 
-## Bin to hourly ---------------------------------------------------
+## Bin to hourly
+
+Here, we compute hourly bins for each variable. Depending on variable, this is done by either summing all values within the hour (`cols2sum`: binned, non-cumulative measures), taking the mean of all values within the hour (`cols2avg`: rates), taking the maximum value within the hour (`cols4cum`: binned, cumulative measures), and taking the median value for assigning the new bin time (`cols2keep`: dates and times only).
+
+```{r}
+#| warning: false
+
 cols2sum <- c('FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','AllMeters')
 cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
 cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum','EE.cum','EB.cum','FoodIn.cum.kcal')
@@ -149,7 +204,7 @@ df.hourly <- df %>%
   group_by(Animal,exp_day,hour) %>%
   select(!EE.kcal.bin) %>% # don't need the 1-3" bin anymore
   mutate(
-    across(all_of(cols2keep),median)) %>% 
+    across(all_of(cols2keep),median)) %>% # assign middle of time bin to new bin
   mutate(across(
     all_of(cols2avg), mean)) %>% # rates get averaged
   mutate(across(
@@ -165,11 +220,18 @@ df.hourly <- df %>%
   mutate(Time = as.numeric(
     difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
   ungroup()
+```
 
-## Overall photoperiod and daily means -----------------------------------------
+## Photoperiod and daily means
 
+Next, we compute the cumulative totals or averages of all variables for each experimental day.
 
+***Note that the experimental day is derived from the calendar day.***
 
+If incomplete days were not trimmed above, then the daily and photoperiod averages will be affected by the start and end of recording where \<24-hours are included. Working on a fix for this, where each day starts from the start of the recording (day 1 = first 24 hours, and so on).
+
+```{r}
+#| warning: false
 # Compute average for each day
 total.avg.daily <- df %>%
   group_by(exp_day,Group,Treatment,Sex,Animal) %>% 
@@ -179,6 +241,14 @@ total.avg.daily <- df %>%
   mutate(Photoperiod = "Total") %>%
   ungroup()
 
+total.avg.daily
+
+```
+
+Next, we compute cumulative totals or averages of all variables within each photoperiod per day. This is merged with the `total.avg.daily` data so that plots containing dark, light, and total can be obtained from the same data frame.
+
+```{r}
+#| warning: false
 # Compute average within each photoperiod, append to total.avg.daily
 pp.avg.daily <- df %>%
   group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
@@ -188,7 +258,13 @@ pp.avg.daily <- df %>%
   ungroup() %>%
   bind_rows(.,total.avg.daily) 
 rm(total.avg.daily)
+pp.avg.daily
+```
 
+Finally, we compute cumulative totals and averages across the entire experiment, for each day...
+
+```{r}
+#| warning: false
 # Compute average across variables for entire experiment
 total.avg <- df %>%
   group_by(Group,Treatment,Sex,Animal) %>%
@@ -197,7 +273,12 @@ total.avg <- df %>%
     across(all_of(cols2avg),mean)) %>%
   mutate(Photoperiod = "Total") %>%
   ungroup()
+```
 
+... and within each photoperiod.
+
+```{r}
+#| warning: false
 # Compute the overall average daily value for every requested variable across the whole experiment
 pp.avg.total <- pp.avg.daily %>%
   group_by(Photoperiod,Group,Treatment,Sex,Animal) %>%
@@ -205,10 +286,5 @@ pp.avg.total <- pp.avg.daily %>%
     across(all_of(c(cols2sum,cols2avg)),mean)) %>% 
   ungroup()
 rm(total.avg)
-
-## Export to (optional) .csv, .Rda--------------------------------------------
-
-#setwd("C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/CLF/Projects/mon/Outputs")
-#write.csv(df, glue(cohort,"Clean.csv",.sep="_"),row.names = FALSE)
-savename <- paste(cohort,rundate,"Clean.Rda",sep = "_")
-save(df, df.hourly, pp.avg.total, pp.avg.daily,file = savename)
+pp.avg.total
+```
