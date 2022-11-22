@@ -18,7 +18,7 @@ editor: visual
 
 ###### Requirements:
 
--   .exp data files processed with MI v2.46 in 1-minute bins
+-   TimeSeries sheet from Macro-processed .exp data files (MI < v2.46) in 1 or 3-minute bins
 -   TimeSeries sheet as a .csv saved in your default working directory (run `library(here)` to find out where this is!)
 -   Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
 
@@ -177,7 +177,6 @@ Here we can optionally remove data points that are not part of a full day's reco
 By default, this will not run. If you want to trim the incomplete days, run `trim.short.days <- TRUE` (default is `FALSE`).
 
 ```{r}
-
 # Remove days with <24h
 if (trim.short.days) {
   trim.df <- df %>%

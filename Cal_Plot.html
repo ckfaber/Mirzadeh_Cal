@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chelsea Faber">
+
+<title>Cal_Plot: A Script for Plotting Tidied Sable Indirect Calorimetry Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="Cal_Plot_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Cal_Plot_files/libs/quarto-html/quarto.js"></script>
+<script src="Cal_Plot_files/libs/quarto-html/popper.min.js"></script>
+<script src="Cal_Plot_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Cal_Plot_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Cal_Plot_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Cal_Plot_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Cal_Plot_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Cal_Plot_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Cal_Plot_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+<link href="Cal_Plot_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="Cal_Plot_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Cal_Plot: A Script for Plotting Tidied Sable Indirect Calorimetry Data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Chelsea Faber </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="inputs" class="level6">
+<h6 class="anchored" data-anchor-id="inputs">Inputs:</h6>
+<ul>
+<li>Cohort and rundate for macro-processed, Cal_Clean-tidied .Rda file</li>
+</ul>
+</section>
+<section id="outputs" class="level6">
+<h6 class="anchored" data-anchor-id="outputs">Outputs:</h6>
+<ul>
+<li>Many plots! Many options for plots! The more you tell me what you need, the more I can make this do automatically. For now, I tried best to anticipate things we would always want to peek at, but this can easily be expanded.</li>
+</ul>
+</section>
+<section id="requirements" class="level6">
+<h6 class="anchored" data-anchor-id="requirements">Requirements:</h6>
+<p>The following files must be saved in your default working directory (run <code>library(here)</code> to find out where this is!)</p>
+<ul>
+<li>.Rda file output from Cal_Clean.R. This contains cleaned dataframe at original sampling rate (typically, 1-3 minutes), 1h-binned dataframe, and photoperiod-binned dataframes for further plotting and statistical analyses.</li>
+</ul>
+</section>
+<section id="known-bugs" class="level6">
+<h6 class="anchored" data-anchor-id="known-bugs">Known bugs:</h6>
+<ul>
+<li>No flag for recording days with fewer than 24h - may misrepresent day/photoperiod total data</li>
+<li>By default does not plot smoothed variables - fix so if smooth &lt;- TRUE, smoothed variables calculated AND plotted</li>
+</ul>
+</section>
+<section id="to-do" class="level6">
+<h6 class="anchored" data-anchor-id="to-do">To do:</h6>
+<ul>
+<li><p>Normalize various measures by body weight</p></li>
+<li><p>Convert to function? Must decide on best user-provided function ins and outs</p></li>
+<li><p>Statistical analyses in separate function/script? Look to CalR paper for code reference on ANCOVA. If stats done in separate function, how best to annotate significance?</p></li>
+</ul>
+</section>
+<section id="load-packages" class="level2">
+<h2 class="anchored" data-anchor-id="load-packages">Load packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr, <span class="at">include.only =</span> <span class="st">'mapvalues'</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="define-inputs-to-script-for-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="define-inputs-to-script-for-analysis">Define inputs to script for analysis</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cohort           <span class="ot">&lt;-</span> <span class="st">"mon001"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>rundate          <span class="ot">&lt;-</span> <span class="st">"2021-10-18"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify grouping &amp; list of variables for smoothing via moving mean</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>group            <span class="ot">&lt;-</span> <span class="st">'Treatment'</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>smooth           <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>cols2smooth      <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'VO2'</span>,<span class="st">'VCO2'</span>,<span class="st">'VH2O'</span>,<span class="st">'EE'</span>,<span class="st">'RER'</span>,<span class="st">'BodyMass'</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Defaults</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>tsvars           <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'EE'</span>,<span class="st">'EBalance'</span>,<span class="st">'RER'</span>,<span class="st">'AllMeters.cum'</span>,<span class="st">'FoodIn.cum'</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'WaterIn.cum'</span>,<span class="st">'FoodIn.kcal'</span>,<span class="st">'BodyMass'</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>boxplotvars      <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'EE'</span>,<span class="st">'EBalance'</span>,<span class="st">'RER'</span>,<span class="st">'AllMeters'</span>,<span class="st">'WaterIn.g'</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                      <span class="st">'FoodIn.kcal'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="load-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-data">Load data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="fu">paste</span>(cohort,rundate,<span class="st">"Clean.Rda"</span>,<span class="at">sep =</span> <span class="st">"_"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If you look in your R environment, you should see a few new objects have appeared - <code>df</code>,<code>df.hourly</code>,<code>pp.avg.daily</code>, and <code>pp.avg.total</code>. These are the data frames we created using Cal_Clean.R. Take a peek using <code>View(object)</code> to be sure they’re what you expect. Here we’ll just view the top 6 rows for the sake of space.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pp.avg.daily)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["exp_day"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Photoperiod"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Group"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Treatment"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Sex"],"name":[5],"type":["chr"],"align":["left"]},{"label":["Animal"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["FoodIn.g"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["FoodIn.kcal"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["WaterIn.g"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["EBalance"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["AllMeters"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["VO2"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["VCO2"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["VH2O"],"name":[14],"type":["dbl"],"align":["right"]},{"label":["EE"],"name":[15],"type":["dbl"],"align":["right"]},{"label":["RER"],"name":[16],"type":["dbl"],"align":["right"]},{"label":["BodyMass"],"name":[17],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"0","3":"mHFD","4":"chABC","5":"F","6":"266","7":"0.3598423","8":"1.511338","9":"0.1750593","10":"-0.1887897","11":"28.61817","12":"0.9693921","13":"0.8157340","14":"0.1683932","15":"0.2833546","16":"0.8357697","17":"11.976974"},{"1":"1","2":"0","3":"mHFD","4":"chABC","5":"F","6":"267","7":"0.4912072","8":"2.063070","9":"0.1763303","10":"1.0380951","11":"42.41875","12":"0.5762791","13":"0.5208294","14":"0.1280557","15":"0.1708292","16":"0.9003193","17":"8.829304"},{"1":"1","2":"0","3":"mHFD","4":"chABC","5":"F","6":"269","7":"1.2283663","8":"5.159138","9":"0.2377007","10":"3.7791426","11":"24.45463","12":"0.7750902","13":"0.7040608","14":"0.1248272","15":"0.2299993","16":"0.9058260","17":"9.863861"},{"1":"1","2":"0","3":"mHFD","4":"chABC","5":"F","6":"270","7":"1.2116793","8":"5.089053","9":"1.1974557","10":"3.2698965","11":"24.62690","12":"1.0228564","13":"0.9241735","14":"0.1681114","15":"0.3031928","16":"0.9015377","17":"12.106588"},{"1":"1","2":"0","3":"mHFD","4":"chABC","5":"M","6":"264","7":"0.6125782","8":"2.572828","9":"0.6089191","10":"0.8432200","11":"30.56469","12":"0.9679361","13":"0.8949655","14":"0.1933731","15":"0.2882681","16":"0.9214370","17":"13.019402"},{"1":"1","2":"0","3":"mHFD","4":"chABC","5":"M","6":"265","7":"0.8983684","8":"3.773147","9":"0.8077990","10":"2.2872696","11":"27.35731","12":"0.8370630","13":"0.7491613","14":"0.1390617","15":"0.2476463","16":"0.8941201","17":"11.919458"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>To make our lives easier in annotating our plots with the appropriate units and titles for each variable, load in the “Cal_Units.csv” file containing a list of all abbreviated variables, and the corresponding units and full names.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>unitkeys         <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"Cal_Units.csv"</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>unitkeys</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Sable_Var"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Renamed_Var"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Title"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Unit"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Description"],"name":[5],"type":["chr"],"align":["left"]}],"data":[{"1":"AllMeters_M","2":"NA","3":"NA","4":"(m)","5":"Cumulative sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _M denotes mean during 30s sampling"},{"1":"AllMeters_R","2":"AllMeters","3":"Activity","4":"(m)","5":"Sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _R denotes range from last cage sample to current cage sample - in other words, the total distance the mouse traveled since the cage was last selected."},{"1":"Animal","2":"Cage","3":"NA","4":"NA","5":"Cage number"},{"1":"BodyMass_M","2":"BodyMass","3":"Body Mass","4":"(g)","5":"Mean body mass of animal"},{"1":"FoodInA_M","2":"FoodIn.cum","3":"Cumulative Food Intake","4":"(g)","5":"Mass of food consumed by animal during the cycle"},{"1":"kcal_hr_M","2":"EE","3":"Energy Expenditure","4":"(kcal/hr)","5":"Mean energy expenditure in kcal/hr. Calculated using the Weir equation"},{"1":"PedMeters_M","2":"NA","3":"NA","4":"(m)","5":"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."},{"1":"PedMeters_R","2":"PedMeters","3":"Directed Activity","4":"(m)","5":"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."},{"1":"PedSpeed_Mnz","2":"PedSpeed","3":"Directed Speed","4":"(m/s)","5":"Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean"},{"1":"RER_M","2":"RER","3":"RER","4":"NA","5":"Mean respiratory exchange ratio, VCO2/VO2, unitless"},{"1":"VCO2_M","2":"VCO2","3":"vCO2 Emission","4":"(mL/min)","5":"Rate of carbon dioxide emission"},{"1":"VH2O_M","2":"VH2O","3":"vH2O Loss","4":"(g/hr)","5":"Rate of water vapor loss"},{"1":"VO2_M","2":"VO2","3":"vO2 Consumption","4":"(mL/min)","5":"Rate of oxygen consumption"},{"1":"WaterInA_M","2":"WaterIn.cum","3":"Cumulative Water Intake","4":"(g)","5":"Mass of water consumed by animal during the cycle"},{"1":"Xbreak_R","2":"XBreak","3":"Beam Breaks (x)","4":"(count)","5":"Number of x-axis beam breaks"},{"1":"Ybreak_R","2":"YBreak","3":"Beam Breaks (y)","4":"(count)","5":"Number of y-axis beam breaks"},{"1":"EnviroTemp_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroRH_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroBP_M","2":"NA","3":"NA","4":"kPa","5":"NA"},{"1":"EnviroLightlux_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroOccupancy_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroSound_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"Stilltime_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"Sleeptime_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"NA","2":"EE.kcal.bin","3":"NA","4":"(kcal)","5":"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"},{"1":"NA","2":"AllMeters.cum","3":"Cumulative Activity","4":"(m)","5":"Calculated from AllMeters using cumsum()"},{"1":"NA","2":"FoodIn.g","3":"Food Intake","4":"(g)","5":"Calculated from FoodIn.cum using diff()"},{"1":"NA","2":"WaterIn.g","3":"Water Intake","4":"(g)","5":"Calculated from WaterIn.cum using diff()"},{"1":"NA","2":"FoodIn.kcal","3":"Food Intake","4":"(kcal)","5":"Calculated from FoodIn.g*4.2"},{"1":"NA","2":"Ebalance","3":"Energy Balance","4":"(kcal)","5":"Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin"},{"1":"NA","2":"EE.norm","3":"Normalized Energy Expenditure","4":"(kcal/g)","5":"Energy expenditure normalized to body mass (g). Calculated as EE/BodyMass"},{"1":"NA","2":"EB.norm","3":"Normalized Energy Balance","4":"(kcal/g)","5":"Energy balance normalized to body mass (g). Calculated as EBalance/BodyMass"},{"1":"NA","2":"EE.cum","3":"Cumulative Energy Expenditure","4":"(kcal)","5":"Cumulative energy expenditure"},{"1":"NA","2":"EB.cum","3":"Cumulative Energy Balance","4":"(kcal)","5":"Cumulative energy balance"},{"1":"NA","2":"FoodIn.cum.kcal","3":"Cumulative Food Intake","4":"(kcal)","5":"Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>OK, let’s start getting plots together. First we have some more tidying to do…</p>
+</section>
+<section id="optional-smoothing-via-moving-mean" class="level2">
+<h2 class="anchored" data-anchor-id="optional-smoothing-via-moving-mean">(Optional) Smoothing via moving mean</h2>
+<p>Sometimes, the 1-hr binned data looks very messy. Here we can optionally employ smoothing via a moving mean to denoise the plots. This code section will run if <code>smooth &lt;- TRUE</code>. If <code>smooth &lt;- FALSE</code>, it will not run.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (smooth) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  smooth_win <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co"># in hours</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  df.hourly <span class="sc">%&lt;&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Animal) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">all_of</span>(cols2smooth) , </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> zoo<span class="sc">::</span><span class="fu">rollmean</span>(., smooth_win, <span class="at">fill =</span> <span class="cn">NA</span>), </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.names =</span> <span class="st">"smooth{smooth_win}_{.col}"</span> )) <span class="sc">%&gt;%</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()  </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s visualize one variable from a single animal to see the difference that smoothing makes. First, the unsmoothed:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">filter</span>(df.hourly, Animal <span class="sc">==</span> <span class="dv">276</span>)) <span class="sc">+</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Time, <span class="at">y =</span> RER))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now the smoothed:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">filter</span>(df.hourly, Animal <span class="sc">==</span> <span class="dv">276</span>)) <span class="sc">+</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Time, <span class="at">y =</span> smooth3_RER))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="timeseries-plots" class="level2">
+<h2 class="anchored" data-anchor-id="timeseries-plots">Timeseries plots</h2>
+<p>The following code creates some functions to help us automatically generate timeseries plots for the variables specified in <code>tsvars</code>.</p>
+<p>We want to generate timeseries plots wherein a line connects the means of the grouping variable (specified in <code>group</code>), and the SEM is shaded above and below the mean line. To do this, we need to generate some summary reports for each variable. First, we create the following function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create function to generate hourly summaries by variable</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>group_summarize <span class="ot">&lt;-</span> <span class="cf">function</span>(group,var) {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  df.hourly <span class="sc">%&gt;%</span> </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>( <span class="fu">get</span>(group) ,Time) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">value =</span> <span class="fu">mean</span>( <span class="fu">get</span>(var) ), </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">sd =</span> <span class="fu">sd</span>( <span class="fu">get</span>(var) ), </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">n =</span> <span class="fu">n</span>(), </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">sem =</span> <span class="fu">sd</span>(<span class="fu">get</span>(var)) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">n</span>()), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>( {{group}} <span class="sc">:</span><span class="er">=</span> <span class="st">"get(group)"</span>) </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>group_summarize()</code> requires two inputs: <code>group</code> and <code>var</code>. To the <code>df.hourly</code> dataframe, <code>group_summarize</code> first groups the data by this grouping variable and by <code>Time</code>, then summarizes the mean value, the standard deviation, the number of observations within the group, and the standard error of the mean (sem).</p>
+<p>Let’s try it out on one variable and one grouping to make sure it works.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">group_summarize</span>(<span class="st">"Sex"</span>,<span class="st">"EE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Sex"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Time"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["value"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["sd"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["n"],"name":[5],"type":["int"],"align":["right"]},{"label":["sem"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"F","2":"0","3":"0.1994927","4":"0.04387097","5":"6","6":"0.017910247"},{"1":"F","2":"1","3":"0.2205416","4":"0.06017069","5":"6","6":"0.024564580"},{"1":"F","2":"2","3":"0.2058411","4":"0.04721862","5":"6","6":"0.019276919"},{"1":"F","2":"3","3":"0.2371195","4":"0.04862723","5":"6","6":"0.019851982"},{"1":"F","2":"4","3":"0.2175044","4":"0.05893483","5":"6","6":"0.024060045"},{"1":"F","2":"5","3":"0.2200038","4":"0.05716183","5":"6","6":"0.023336221"},{"1":"F","2":"6","3":"0.2390663","4":"0.04528873","5":"6","6":"0.018489045"},{"1":"F","2":"7","3":"0.2527062","4":"0.05094670","5":"6","6":"0.020798902"},{"1":"F","2":"8","3":"0.2382454","4":"0.04639556","5":"6","6":"0.018940907"},{"1":"F","2":"9","3":"0.2600625","4":"0.05830099","5":"6","6":"0.023801281"},{"1":"F","2":"10","3":"0.2482219","4":"0.06248704","5":"6","6":"0.025510229"},{"1":"F","2":"11","3":"0.2658759","4":"0.08010696","5":"6","6":"0.032703530"},{"1":"F","2":"12","3":"0.2865508","4":"0.07138086","5":"6","6":"0.029141116"},{"1":"F","2":"13","3":"0.2593292","4":"0.07812497","5":"6","6":"0.031894385"},{"1":"F","2":"14","3":"0.2826247","4":"0.08651284","5":"6","6":"0.035318719"},{"1":"F","2":"15","3":"0.2420062","4":"0.08962621","5":"6","6":"0.036589745"},{"1":"F","2":"16","3":"0.2235002","4":"0.05878279","5":"6","6":"0.023997975"},{"1":"F","2":"17","3":"0.2186761","4":"0.04536013","5":"6","6":"0.018518196"},{"1":"F","2":"18","3":"0.2350199","4":"0.07854535","5":"6","6":"0.032066004"},{"1":"F","2":"19","3":"0.2426143","4":"0.07569502","5":"6","6":"0.030902362"},{"1":"F","2":"20","3":"0.2319207","4":"0.05171738","5":"6","6":"0.021113534"},{"1":"F","2":"21","3":"0.2224669","4":"0.06068592","5":"6","6":"0.024774925"},{"1":"F","2":"22","3":"0.2268028","4":"0.05279593","5":"6","6":"0.021553847"},{"1":"F","2":"23","3":"0.2226195","4":"0.08143214","5":"6","6":"0.033244532"},{"1":"F","2":"24","3":"0.2448678","4":"0.05517241","5":"6","6":"0.022524042"},{"1":"F","2":"25","3":"0.2301661","4":"0.04679070","5":"6","6":"0.019102222"},{"1":"F","2":"26","3":"0.2304909","4":"0.06325596","5":"6","6":"0.025824136"},{"1":"F","2":"27","3":"0.2276744","4":"0.05896496","5":"6","6":"0.024072342"},{"1":"F","2":"28","3":"0.2412091","4":"0.03787422","5":"6","6":"0.015462086"},{"1":"F","2":"29","3":"0.2387033","4":"0.05647171","5":"6","6":"0.023054477"},{"1":"F","2":"30","3":"0.2637777","4":"0.06271883","5":"6","6":"0.025604857"},{"1":"F","2":"31","3":"0.2554163","4":"0.04451892","5":"6","6":"0.018174772"},{"1":"F","2":"32","3":"0.2608317","4":"0.04029675","5":"6","6":"0.016451078"},{"1":"F","2":"33","3":"0.2675430","4":"0.04848540","5":"6","6":"0.019794081"},{"1":"F","2":"34","3":"0.2881117","4":"0.04309764","5":"6","6":"0.017594539"},{"1":"F","2":"35","3":"0.3012811","4":"0.05217911","5":"6","6":"0.021302031"},{"1":"F","2":"36","3":"0.2766644","4":"0.07033973","5":"6","6":"0.028716073"},{"1":"F","2":"37","3":"0.3089481","4":"0.06599175","5":"6","6":"0.026941020"},{"1":"F","2":"38","3":"0.2945991","4":"0.06858551","5":"6","6":"0.027999915"},{"1":"F","2":"39","3":"0.2685009","4":"0.08939069","5":"6","6":"0.036493597"},{"1":"F","2":"40","3":"0.2650579","4":"0.07986459","5":"6","6":"0.032604584"},{"1":"F","2":"41","3":"0.2552356","4":"0.05434871","5":"6","6":"0.022187769"},{"1":"F","2":"42","3":"0.2548224","4":"0.04806481","5":"6","6":"0.019622376"},{"1":"F","2":"43","3":"0.2368588","4":"0.06809865","5":"6","6":"0.027801158"},{"1":"F","2":"44","3":"0.2506204","4":"0.04571676","5":"6","6":"0.018663787"},{"1":"F","2":"45","3":"0.2622775","4":"0.05968820","5":"6","6":"0.024367604"},{"1":"F","2":"46","3":"0.2338910","4":"0.04226823","5":"6","6":"0.017255933"},{"1":"F","2":"47","3":"0.2429426","4":"0.05800109","5":"6","6":"0.023678844"},{"1":"F","2":"48","3":"0.2580931","4":"0.06079937","5":"6","6":"0.024821240"},{"1":"F","2":"49","3":"0.2269253","4":"0.04421992","5":"6","6":"0.018052707"},{"1":"F","2":"50","3":"0.2495475","4":"0.05307917","5":"6","6":"0.021669481"},{"1":"F","2":"51","3":"0.2570954","4":"0.06087691","5":"6","6":"0.024852894"},{"1":"F","2":"52","3":"0.2542103","4":"0.06006708","5":"6","6":"0.024522282"},{"1":"F","2":"53","3":"0.2580376","4":"0.06566165","5":"6","6":"0.026806255"},{"1":"F","2":"54","3":"0.2816005","4":"0.06756060","5":"6","6":"0.027581501"},{"1":"F","2":"55","3":"0.2707902","4":"0.05022392","5":"6","6":"0.020503829"},{"1":"F","2":"56","3":"0.2703738","4":"0.03955062","5":"6","6":"0.016146473"},{"1":"F","2":"57","3":"0.2844825","4":"0.04849642","5":"6","6":"0.019798580"},{"1":"F","2":"58","3":"0.2832130","4":"0.04696048","5":"6","6":"0.019171535"},{"1":"F","2":"59","3":"0.2849146","4":"0.04337949","5":"6","6":"0.017709605"},{"1":"F","2":"60","3":"0.3273298","4":"0.04717940","5":"6","6":"0.019260910"},{"1":"F","2":"61","3":"0.3295331","4":"0.06015563","5":"6","6":"0.024558433"},{"1":"F","2":"62","3":"0.3147270","4":"0.06316833","5":"6","6":"0.025788363"},{"1":"F","2":"63","3":"0.2644693","4":"0.08435397","5":"6","6":"0.034437362"},{"1":"F","2":"64","3":"0.2843227","4":"0.05620253","5":"6","6":"0.022944589"},{"1":"F","2":"65","3":"0.2811007","4":"0.06148424","5":"6","6":"0.025100836"},{"1":"F","2":"66","3":"0.2729288","4":"0.05456164","5":"6","6":"0.022274695"},{"1":"F","2":"67","3":"0.2742564","4":"0.05656584","5":"6","6":"0.023092908"},{"1":"F","2":"68","3":"0.2595607","4":"0.04670200","5":"6","6":"0.019066013"},{"1":"F","2":"69","3":"0.2446538","4":"0.05641125","5":"6","6":"0.023029797"},{"1":"F","2":"70","3":"0.2492248","4":"0.05404515","5":"6","6":"0.022063840"},{"1":"F","2":"71","3":"0.2728394","4":"0.06226001","5":"6","6":"0.025417542"},{"1":"F","2":"72","3":"0.2473238","4":"0.04560351","5":"6","6":"0.018617554"},{"1":"F","2":"73","3":"0.2500971","4":"0.05144995","5":"6","6":"0.021004355"},{"1":"F","2":"74","3":"0.2666151","4":"0.04678431","5":"6","6":"0.019099616"},{"1":"F","2":"75","3":"0.2581600","4":"0.06475888","5":"6","6":"0.026437702"},{"1":"F","2":"76","3":"0.2498200","4":"0.04858691","5":"6","6":"0.019835524"},{"1":"F","2":"77","3":"0.2602144","4":"0.02523344","5":"6","6":"0.010301510"},{"1":"F","2":"78","3":"0.2815141","4":"0.07540696","5":"6","6":"0.030784760"},{"1":"F","2":"79","3":"0.2824384","4":"0.05305384","5":"6","6":"0.021659138"},{"1":"F","2":"80","3":"0.2830929","4":"0.07625526","5":"6","6":"0.031131081"},{"1":"F","2":"81","3":"0.3001983","4":"0.03713810","5":"6","6":"0.015161566"},{"1":"F","2":"82","3":"0.3099340","4":"0.05056873","5":"6","6":"0.020644598"},{"1":"F","2":"83","3":"0.2972475","4":"0.04701250","5":"6","6":"0.019192771"},{"1":"F","2":"84","3":"0.2946467","4":"0.08155565","5":"6","6":"0.033294956"},{"1":"F","2":"85","3":"0.2797267","4":"0.09636807","5":"6","6":"0.039342101"},{"1":"F","2":"86","3":"0.3182497","4":"0.07790359","5":"6","6":"0.031804007"},{"1":"F","2":"87","3":"0.3032491","4":"0.09335414","5":"6","6":"0.038111667"},{"1":"F","2":"88","3":"0.2578311","4":"0.08957269","5":"6","6":"0.036567898"},{"1":"F","2":"89","3":"0.2616583","4":"0.05087834","5":"6","6":"0.020770996"},{"1":"F","2":"90","3":"0.2676123","4":"0.06451474","5":"6","6":"0.026338032"},{"1":"F","2":"91","3":"0.2406231","4":"0.08920442","5":"6","6":"0.036417554"},{"1":"F","2":"92","3":"0.2394676","4":"0.07128144","5":"6","6":"0.029100524"},{"1":"F","2":"93","3":"0.2301918","4":"0.07500279","5":"6","6":"0.030619761"},{"1":"F","2":"94","3":"0.2401382","4":"0.08790709","5":"6","6":"0.035887917"},{"1":"F","2":"95","3":"0.2208708","4":"0.07078583","5":"6","6":"0.028898192"},{"1":"F","2":"96","3":"0.2581396","4":"0.05460892","5":"6","6":"0.022293999"},{"1":"F","2":"97","3":"0.2475122","4":"0.06655805","5":"6","6":"0.027172212"},{"1":"F","2":"98","3":"0.2681403","4":"0.05180049","5":"6","6":"0.021147461"},{"1":"M","2":"0","3":"0.1881422","4":"0.03004773","5":"6","6":"0.012266935"},{"1":"M","2":"1","3":"0.2435059","4":"0.03656174","5":"6","6":"0.014926267"},{"1":"M","2":"2","3":"0.2155048","4":"0.03874297","5":"6","6":"0.015816753"},{"1":"M","2":"3","3":"0.2088065","4":"0.02344755","5":"6","6":"0.009572424"},{"1":"M","2":"4","3":"0.2225767","4":"0.04690676","5":"6","6":"0.019149603"},{"1":"M","2":"5","3":"0.2540202","4":"0.02915423","5":"6","6":"0.011902163"},{"1":"M","2":"6","3":"0.2242626","4":"0.05189904","5":"6","6":"0.021187693"},{"1":"M","2":"7","3":"0.2693565","4":"0.03400166","5":"6","6":"0.013881120"},{"1":"M","2":"8","3":"0.2517941","4":"0.03957932","5":"6","6":"0.016158188"},{"1":"M","2":"9","3":"0.2650442","4":"0.04472184","5":"6","6":"0.018257613"},{"1":"M","2":"10","3":"0.2544332","4":"0.05441383","5":"6","6":"0.022214352"},{"1":"M","2":"11","3":"0.2882167","4":"0.04465692","5":"6","6":"0.018231111"},{"1":"M","2":"12","3":"0.2989288","4":"0.03476146","5":"6","6":"0.014191308"},{"1":"M","2":"13","3":"0.2772062","4":"0.06213737","5":"6","6":"0.025367476"},{"1":"M","2":"14","3":"0.2839558","4":"0.03618949","5":"6","6":"0.014774296"},{"1":"M","2":"15","3":"0.2576724","4":"0.03409037","5":"6","6":"0.013917335"},{"1":"M","2":"16","3":"0.2098035","4":"0.03107561","5":"6","6":"0.012686564"},{"1":"M","2":"17","3":"0.2412120","4":"0.04909737","5":"6","6":"0.020043919"},{"1":"M","2":"18","3":"0.2270759","4":"0.02328395","5":"6","6":"0.009505631"},{"1":"M","2":"19","3":"0.2165203","4":"0.04391537","5":"6","6":"0.017928376"},{"1":"M","2":"20","3":"0.2167926","4":"0.04399057","5":"6","6":"0.017959074"},{"1":"M","2":"21","3":"0.2145620","4":"0.04114409","5":"6","6":"0.016797003"},{"1":"M","2":"22","3":"0.2232565","4":"0.04371121","5":"6","6":"0.017845027"},{"1":"M","2":"23","3":"0.2275210","4":"0.04598917","5":"6","6":"0.018775001"},{"1":"M","2":"24","3":"0.2176342","4":"0.02067841","5":"6","6":"0.008441925"},{"1":"M","2":"25","3":"0.2411266","4":"0.05749648","5":"6","6":"0.023472838"},{"1":"M","2":"26","3":"0.2315726","4":"0.04420795","5":"6","6":"0.018047820"},{"1":"M","2":"27","3":"0.2411282","4":"0.01960625","5":"6","6":"0.008004218"},{"1":"M","2":"28","3":"0.2538874","4":"0.04922741","5":"6","6":"0.020097008"},{"1":"M","2":"29","3":"0.2471089","4":"0.05557315","5":"6","6":"0.022687644"},{"1":"M","2":"30","3":"0.2483339","4":"0.04275581","5":"6","6":"0.017454987"},{"1":"M","2":"31","3":"0.2699593","4":"0.05580877","5":"6","6":"0.022783837"},{"1":"M","2":"32","3":"0.2650616","4":"0.05028045","5":"6","6":"0.020526909"},{"1":"M","2":"33","3":"0.2631950","4":"0.06100137","5":"6","6":"0.024903704"},{"1":"M","2":"34","3":"0.2587328","4":"0.03407673","5":"6","6":"0.013911767"},{"1":"M","2":"35","3":"0.2872552","4":"0.06241700","5":"6","6":"0.025481634"},{"1":"M","2":"36","3":"0.3165013","4":"0.02713697","5":"6","6":"0.011078622"},{"1":"M","2":"37","3":"0.3291206","4":"0.03903230","5":"6","6":"0.015934869"},{"1":"M","2":"38","3":"0.3224327","4":"0.04192171","5":"6","6":"0.017114468"},{"1":"M","2":"39","3":"0.2883938","4":"0.05047553","5":"6","6":"0.020606550"},{"1":"M","2":"40","3":"0.2665439","4":"0.05369306","5":"6","6":"0.021920101"},{"1":"M","2":"41","3":"0.2318467","4":"0.04572429","5":"6","6":"0.018666863"},{"1":"M","2":"42","3":"0.2514092","4":"0.05997480","5":"6","6":"0.024484609"},{"1":"M","2":"43","3":"0.2501673","4":"0.03137371","5":"6","6":"0.012808264"},{"1":"M","2":"44","3":"0.2324757","4":"0.04047906","5":"6","6":"0.016525507"},{"1":"M","2":"45","3":"0.2371692","4":"0.04993362","5":"6","6":"0.020385316"},{"1":"M","2":"46","3":"0.2492496","4":"0.05143360","5":"6","6":"0.020997679"},{"1":"M","2":"47","3":"0.2305727","4":"0.02393612","5":"6","6":"0.009771880"},{"1":"M","2":"48","3":"0.2268565","4":"0.04411494","5":"6","6":"0.018009850"},{"1":"M","2":"49","3":"0.2544214","4":"0.05810273","5":"6","6":"0.023720340"},{"1":"M","2":"50","3":"0.2300339","4":"0.02032538","5":"6","6":"0.008297802"},{"1":"M","2":"51","3":"0.2540077","4":"0.05126488","5":"6","6":"0.020928802"},{"1":"M","2":"52","3":"0.2673937","4":"0.05499030","5":"6","6":"0.022449698"},{"1":"M","2":"53","3":"0.2521404","4":"0.03265983","5":"6","6":"0.013333319"},{"1":"M","2":"54","3":"0.2668571","4":"0.05286225","5":"6","6":"0.021580922"},{"1":"M","2":"55","3":"0.2985064","4":"0.05742326","5":"6","6":"0.023442949"},{"1":"M","2":"56","3":"0.2634235","4":"0.04114999","5":"6","6":"0.016799415"},{"1":"M","2":"57","3":"0.2647179","4":"0.06989258","5":"6","6":"0.028533524"},{"1":"M","2":"58","3":"0.2719850","4":"0.02660654","5":"6","6":"0.010862073"},{"1":"M","2":"59","3":"0.3058640","4":"0.05042061","5":"6","6":"0.020584129"},{"1":"M","2":"60","3":"0.3072126","4":"0.04365841","5":"6","6":"0.017823469"},{"1":"M","2":"61","3":"0.3310785","4":"0.04513820","5":"6","6":"0.018427591"},{"1":"M","2":"62","3":"0.3358377","4":"0.04925452","5":"6","6":"0.020108074"},{"1":"M","2":"63","3":"0.3072495","4":"0.05992669","5":"6","6":"0.024464967"},{"1":"M","2":"64","3":"0.3050135","4":"0.07063086","5":"6","6":"0.028834929"},{"1":"M","2":"65","3":"0.2822920","4":"0.04711550","5":"6","6":"0.019234821"},{"1":"M","2":"66","3":"0.2623081","4":"0.03428823","5":"6","6":"0.013998111"},{"1":"M","2":"67","3":"0.2497644","4":"0.03847653","5":"6","6":"0.015707977"},{"1":"M","2":"68","3":"0.2778617","4":"0.06015379","5":"6","6":"0.024557683"},{"1":"M","2":"69","3":"0.2645892","4":"0.03071964","5":"6","6":"0.012541239"},{"1":"M","2":"70","3":"0.2527175","4":"0.03770051","5":"6","6":"0.015391167"},{"1":"M","2":"71","3":"0.2365904","4":"0.04871326","5":"6","6":"0.019887104"},{"1":"M","2":"72","3":"0.2581841","4":"0.06366515","5":"6","6":"0.025991188"},{"1":"M","2":"73","3":"0.2457309","4":"0.03350258","5":"6","6":"0.013677371"},{"1":"M","2":"74","3":"0.2542422","4":"0.03351926","5":"6","6":"0.013684182"},{"1":"M","2":"75","3":"0.3017870","4":"0.03400730","5":"6","6":"0.013883421"},{"1":"M","2":"76","3":"0.2533619","4":"0.03025132","5":"6","6":"0.012350048"},{"1":"M","2":"77","3":"0.2670564","4":"0.05978607","5":"6","6":"0.024407562"},{"1":"M","2":"78","3":"0.3206861","4":"0.03246624","5":"6","6":"0.013254286"},{"1":"M","2":"79","3":"0.3061807","4":"0.06614886","5":"6","6":"0.027005159"},{"1":"M","2":"80","3":"0.2947294","4":"0.05547988","5":"6","6":"0.022649566"},{"1":"M","2":"81","3":"0.2820399","4":"0.05127652","5":"6","6":"0.020933551"},{"1":"M","2":"82","3":"0.2663454","4":"0.04979621","5":"6","6":"0.020329218"},{"1":"M","2":"83","3":"0.2848138","4":"0.08175257","5":"6","6":"0.033375347"},{"1":"M","2":"84","3":"0.3262638","4":"0.03874776","5":"6","6":"0.015818708"},{"1":"M","2":"85","3":"0.3174449","4":"0.04249518","5":"6","6":"0.017348584"},{"1":"M","2":"86","3":"0.3524028","4":"0.04296166","5":"6","6":"0.017539025"},{"1":"M","2":"87","3":"0.3119434","4":"0.08024594","5":"6","6":"0.032760270"},{"1":"M","2":"88","3":"0.2890892","4":"0.08462126","5":"6","6":"0.034546484"},{"1":"M","2":"89","3":"0.2907097","4":"0.05854347","5":"6","6":"0.023900270"},{"1":"M","2":"90","3":"0.2518306","4":"0.04001372","5":"6","6":"0.016335534"},{"1":"M","2":"91","3":"0.2155723","4":"0.04902126","5":"6","6":"0.020012844"},{"1":"M","2":"92","3":"0.2252974","4":"0.06870908","5":"6","6":"0.028050366"},{"1":"M","2":"93","3":"0.2264649","4":"0.07155840","5":"6","6":"0.029213595"},{"1":"M","2":"94","3":"0.2260955","4":"0.03498328","5":"6","6":"0.014281864"},{"1":"M","2":"95","3":"0.2330350","4":"0.05525964","5":"6","6":"0.022559654"},{"1":"M","2":"96","3":"0.2492573","4":"0.06692959","5":"6","6":"0.027323891"},{"1":"M","2":"97","3":"0.2579484","4":"0.06006449","5":"6","6":"0.024521224"},{"1":"M","2":"98","3":"0.2766189","4":"0.03610410","5":"6","6":"0.014739439"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Now, loop through all variables in <code>tsvars</code> and run this function. We’ll store the result in a list called <code>grp.summaries</code>. Run <code>View(grp.summaries)</code> to see the structure. You can access the individual data frames within this list by using the <code>$</code> indexing syntax, for example, <code>grp.summaries$RER</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize empty list</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>grp.summaries     <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>, <span class="at">length =</span> <span class="fu">length</span>(tsvars)) <span class="co"># initialize empty list</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(tsvars)) {</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  var <span class="ot">&lt;-</span> tsvars[i]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(grp.summaries)[i] <span class="ot">&lt;-</span> var</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  grp.summaries[[i]] <span class="ot">&lt;-</span> <span class="fu">group_summarize</span>(group,var)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>grp.summaries<span class="sc">$</span>RER</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Treatment"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Time"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["value"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["sd"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["n"],"name":[5],"type":["int"],"align":["right"]},{"label":["sem"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"chABC","2":"0","3":"0.8724056","4":"0.058853455","5":"7","6":"0.022244515"},{"1":"chABC","2":"1","3":"0.9064162","4":"0.022152936","5":"7","6":"0.008373023"},{"1":"chABC","2":"2","3":"0.8539518","4":"0.037126803","5":"7","6":"0.014032613"},{"1":"chABC","2":"3","3":"0.8605731","4":"0.039147049","5":"7","6":"0.014796194"},{"1":"chABC","2":"4","3":"0.8598186","4":"0.067130513","5":"7","6":"0.025372949"},{"1":"chABC","2":"5","3":"0.8851683","4":"0.057729452","5":"7","6":"0.021819682"},{"1":"chABC","2":"6","3":"0.9010196","4":"0.032076450","5":"7","6":"0.012123758"},{"1":"chABC","2":"7","3":"0.8761132","4":"0.028187602","5":"7","6":"0.010653912"},{"1":"chABC","2":"8","3":"0.8894516","4":"0.036769274","5":"7","6":"0.013897479"},{"1":"chABC","2":"9","3":"0.9017756","4":"0.035156018","5":"7","6":"0.013287726"},{"1":"chABC","2":"10","3":"0.9133633","4":"0.018066283","5":"7","6":"0.006828413"},{"1":"chABC","2":"11","3":"0.9355829","4":"0.016971379","5":"7","6":"0.006414578"},{"1":"chABC","2":"12","3":"0.9265017","4":"0.015122317","5":"7","6":"0.005715698"},{"1":"chABC","2":"13","3":"0.9215657","4":"0.014471205","5":"7","6":"0.005469602"},{"1":"chABC","2":"14","3":"0.9281567","4":"0.018490582","5":"7","6":"0.006988783"},{"1":"chABC","2":"15","3":"0.9202180","4":"0.014904731","5":"7","6":"0.005633459"},{"1":"chABC","2":"16","3":"0.9105877","4":"0.019850400","5":"7","6":"0.007502746"},{"1":"chABC","2":"17","3":"0.9237893","4":"0.035511431","5":"7","6":"0.013422059"},{"1":"chABC","2":"18","3":"0.8939083","4":"0.049002612","5":"7","6":"0.018521246"},{"1":"chABC","2":"19","3":"0.8593619","4":"0.068484657","5":"7","6":"0.025884767"},{"1":"chABC","2":"20","3":"0.8603658","4":"0.046930315","5":"7","6":"0.017737992"},{"1":"chABC","2":"21","3":"0.8381454","4":"0.063101668","5":"7","6":"0.023850189"},{"1":"chABC","2":"22","3":"0.8441613","4":"0.041512773","5":"7","6":"0.015690353"},{"1":"chABC","2":"23","3":"0.8763882","4":"0.061984399","5":"7","6":"0.023427901"},{"1":"chABC","2":"24","3":"0.8615457","4":"0.045713961","5":"7","6":"0.017278253"},{"1":"chABC","2":"25","3":"0.8717496","4":"0.068620396","5":"7","6":"0.025936072"},{"1":"chABC","2":"26","3":"0.8709315","4":"0.064696446","5":"7","6":"0.024452958"},{"1":"chABC","2":"27","3":"0.9069313","4":"0.021484795","5":"7","6":"0.008120489"},{"1":"chABC","2":"28","3":"0.8875233","4":"0.054499945","5":"7","6":"0.020599043"},{"1":"chABC","2":"29","3":"0.9059947","4":"0.038247282","5":"7","6":"0.014456114"},{"1":"chABC","2":"30","3":"0.9078237","4":"0.031896582","5":"7","6":"0.012055775"},{"1":"chABC","2":"31","3":"0.9148060","4":"0.052358258","5":"7","6":"0.019789561"},{"1":"chABC","2":"32","3":"0.8986372","4":"0.070168314","5":"7","6":"0.026521130"},{"1":"chABC","2":"33","3":"0.9043142","4":"0.053739428","5":"7","6":"0.020311595"},{"1":"chABC","2":"34","3":"0.9393341","4":"0.024495996","5":"7","6":"0.009258616"},{"1":"chABC","2":"35","3":"0.9576306","4":"0.010037564","5":"7","6":"0.003793843"},{"1":"chABC","2":"36","3":"0.9510889","4":"0.007436896","5":"7","6":"0.002810883"},{"1":"chABC","2":"37","3":"0.9444302","4":"0.015064962","5":"7","6":"0.005694021"},{"1":"chABC","2":"38","3":"0.9369302","4":"0.012960879","5":"7","6":"0.004898752"},{"1":"chABC","2":"39","3":"0.9312170","4":"0.012227308","5":"7","6":"0.004621488"},{"1":"chABC","2":"40","3":"0.9268420","4":"0.034589762","5":"7","6":"0.013073701"},{"1":"chABC","2":"41","3":"0.9240821","4":"0.033992858","5":"7","6":"0.012848093"},{"1":"chABC","2":"42","3":"0.9441412","4":"0.016051011","5":"7","6":"0.006066712"},{"1":"chABC","2":"43","3":"0.8733572","4":"0.046078617","5":"7","6":"0.017416080"},{"1":"chABC","2":"44","3":"0.8396117","4":"0.057939458","5":"7","6":"0.021899057"},{"1":"chABC","2":"45","3":"0.8633407","4":"0.063193154","5":"7","6":"0.023884767"},{"1":"chABC","2":"46","3":"0.8687181","4":"0.029999560","5":"7","6":"0.011338768"},{"1":"chABC","2":"47","3":"0.8406138","4":"0.061458547","5":"7","6":"0.023229147"},{"1":"chABC","2":"48","3":"0.8634674","4":"0.047280444","5":"7","6":"0.017870328"},{"1":"chABC","2":"49","3":"0.8595954","4":"0.041406023","5":"7","6":"0.015650006"},{"1":"chABC","2":"50","3":"0.8756382","4":"0.056594804","5":"7","6":"0.021390825"},{"1":"chABC","2":"51","3":"0.8793397","4":"0.059747519","5":"7","6":"0.022582439"},{"1":"chABC","2":"52","3":"0.8748111","4":"0.053574973","5":"7","6":"0.020249436"},{"1":"chABC","2":"53","3":"0.9410398","4":"0.037610502","5":"7","6":"0.014215434"},{"1":"chABC","2":"54","3":"0.9733527","4":"0.012557493","5":"7","6":"0.004746286"},{"1":"chABC","2":"55","3":"0.9524013","4":"0.009722116","5":"7","6":"0.003674614"},{"1":"chABC","2":"56","3":"0.9657538","4":"0.014677696","5":"7","6":"0.005547648"},{"1":"chABC","2":"57","3":"0.9555311","4":"0.048736081","5":"7","6":"0.018420507"},{"1":"chABC","2":"58","3":"0.9494290","4":"0.023390023","5":"7","6":"0.008840598"},{"1":"chABC","2":"59","3":"0.9586589","4":"0.031055203","5":"7","6":"0.011737764"},{"1":"chABC","2":"60","3":"0.9650035","4":"0.016823153","5":"7","6":"0.006358554"},{"1":"chABC","2":"61","3":"0.9607566","4":"0.008301060","5":"7","6":"0.003137506"},{"1":"chABC","2":"62","3":"0.9471757","4":"0.011273379","5":"7","6":"0.004260937"},{"1":"chABC","2":"63","3":"0.9573376","4":"0.013252724","5":"7","6":"0.005009059"},{"1":"chABC","2":"64","3":"0.9476217","4":"0.018427078","5":"7","6":"0.006964781"},{"1":"chABC","2":"65","3":"0.9360286","4":"0.025470030","5":"7","6":"0.009626767"},{"1":"chABC","2":"66","3":"0.9213842","4":"0.041128330","5":"7","6":"0.015545048"},{"1":"chABC","2":"67","3":"0.8684558","4":"0.059497500","5":"7","6":"0.022487941"},{"1":"chABC","2":"68","3":"0.8886306","4":"0.053088091","5":"7","6":"0.020065412"},{"1":"chABC","2":"69","3":"0.8455344","4":"0.060460991","5":"7","6":"0.022852107"},{"1":"chABC","2":"70","3":"0.8437681","4":"0.056600977","5":"7","6":"0.021393158"},{"1":"chABC","2":"71","3":"0.8539876","4":"0.060408672","5":"7","6":"0.022832332"},{"1":"chABC","2":"72","3":"0.8378250","4":"0.044768891","5":"7","6":"0.016921050"},{"1":"chABC","2":"73","3":"0.8193897","4":"0.057232903","5":"7","6":"0.021632004"},{"1":"chABC","2":"74","3":"0.8539635","4":"0.086672867","5":"7","6":"0.032759264"},{"1":"chABC","2":"75","3":"0.9179087","4":"0.045350877","5":"7","6":"0.017141020"},{"1":"chABC","2":"76","3":"0.9042143","4":"0.035593791","5":"7","6":"0.013453189"},{"1":"chABC","2":"77","3":"0.8737985","4":"0.065236213","5":"7","6":"0.024656971"},{"1":"chABC","2":"78","3":"0.9662548","4":"0.017011612","5":"7","6":"0.006429785"},{"1":"chABC","2":"79","3":"0.9397926","4":"0.041901494","5":"7","6":"0.015837276"},{"1":"chABC","2":"80","3":"0.9471031","4":"0.013646992","5":"7","6":"0.005158078"},{"1":"chABC","2":"81","3":"0.9581354","4":"0.020670444","5":"7","6":"0.007812694"},{"1":"chABC","2":"82","3":"0.9576279","4":"0.027795235","5":"7","6":"0.010505612"},{"1":"chABC","2":"83","3":"0.9389900","4":"0.051933166","5":"7","6":"0.019628892"},{"1":"chABC","2":"84","3":"0.9559702","4":"0.031186346","5":"7","6":"0.011787331"},{"1":"chABC","2":"85","3":"0.9310728","4":"0.058915811","5":"7","6":"0.022268083"},{"1":"chABC","2":"86","3":"0.9473640","4":"0.018232833","5":"7","6":"0.006891363"},{"1":"chABC","2":"87","3":"0.9458759","4":"0.019683781","5":"7","6":"0.007439770"},{"1":"chABC","2":"88","3":"0.9459053","4":"0.021786532","5":"7","6":"0.008234535"},{"1":"chABC","2":"89","3":"0.9000507","4":"0.035582223","5":"7","6":"0.013448816"},{"1":"chABC","2":"90","3":"0.8595803","4":"0.040418489","5":"7","6":"0.015276753"},{"1":"chABC","2":"91","3":"0.8680003","4":"0.052653598","5":"7","6":"0.019901189"},{"1":"chABC","2":"92","3":"0.8572364","4":"0.063080080","5":"7","6":"0.023842029"},{"1":"chABC","2":"93","3":"0.8309444","4":"0.045751231","5":"7","6":"0.017292340"},{"1":"chABC","2":"94","3":"0.8244483","4":"0.072201366","5":"7","6":"0.027289551"},{"1":"chABC","2":"95","3":"0.8125954","4":"0.046720201","5":"7","6":"0.017658576"},{"1":"chABC","2":"96","3":"0.8593873","4":"0.042426094","5":"7","6":"0.016035556"},{"1":"chABC","2":"97","3":"0.8142364","4":"0.058276662","5":"7","6":"0.022026508"},{"1":"chABC","2":"98","3":"0.8439226","4":"0.061828651","5":"7","6":"0.023369033"},{"1":"HIchABC","2":"0","3":"0.8513747","4":"0.061601770","5":"5","6":"0.027549149"},{"1":"HIchABC","2":"1","3":"0.8860045","4":"0.032577341","5":"5","6":"0.014569030"},{"1":"HIchABC","2":"2","3":"0.9047119","4":"0.023782483","5":"5","6":"0.010635850"},{"1":"HIchABC","2":"3","3":"0.8736592","4":"0.049821592","5":"5","6":"0.022280893"},{"1":"HIchABC","2":"4","3":"0.8685467","4":"0.029648389","5":"5","6":"0.013259163"},{"1":"HIchABC","2":"5","3":"0.8994975","4":"0.019968759","5":"5","6":"0.008930301"},{"1":"HIchABC","2":"6","3":"0.8650468","4":"0.062392362","5":"5","6":"0.027902713"},{"1":"HIchABC","2":"7","3":"0.8780813","4":"0.021313772","5":"5","6":"0.009531809"},{"1":"HIchABC","2":"8","3":"0.8896808","4":"0.022990878","5":"5","6":"0.010281833"},{"1":"HIchABC","2":"9","3":"0.9156010","4":"0.022320384","5":"5","6":"0.009981979"},{"1":"HIchABC","2":"10","3":"0.9155617","4":"0.007198769","5":"5","6":"0.003219387"},{"1":"HIchABC","2":"11","3":"0.9005584","4":"0.026506447","5":"5","6":"0.011854043"},{"1":"HIchABC","2":"12","3":"0.9361045","4":"0.020796374","5":"5","6":"0.009300421"},{"1":"HIchABC","2":"13","3":"0.9198652","4":"0.021489753","5":"5","6":"0.009610510"},{"1":"HIchABC","2":"14","3":"0.9294390","4":"0.005239802","5":"5","6":"0.002343311"},{"1":"HIchABC","2":"15","3":"0.9129833","4":"0.021939844","5":"5","6":"0.009811796"},{"1":"HIchABC","2":"16","3":"0.9050857","4":"0.038883952","5":"5","6":"0.017389432"},{"1":"HIchABC","2":"17","3":"0.9193841","4":"0.022826343","5":"5","6":"0.010208251"},{"1":"HIchABC","2":"18","3":"0.8993321","4":"0.050703426","5":"5","6":"0.022675261"},{"1":"HIchABC","2":"19","3":"0.8641766","4":"0.058280533","5":"5","6":"0.026063847"},{"1":"HIchABC","2":"20","3":"0.8677471","4":"0.030900499","5":"5","6":"0.013819123"},{"1":"HIchABC","2":"21","3":"0.8439900","4":"0.043564491","5":"5","6":"0.019482633"},{"1":"HIchABC","2":"22","3":"0.8403784","4":"0.041687617","5":"5","6":"0.018643269"},{"1":"HIchABC","2":"23","3":"0.8494752","4":"0.056747550","5":"5","6":"0.025378276"},{"1":"HIchABC","2":"24","3":"0.9022841","4":"0.047584586","5":"5","6":"0.021280474"},{"1":"HIchABC","2":"25","3":"0.8765718","4":"0.031680139","5":"5","6":"0.014167789"},{"1":"HIchABC","2":"26","3":"0.8833566","4":"0.051497988","5":"5","6":"0.023030600"},{"1":"HIchABC","2":"27","3":"0.9100922","4":"0.043111275","5":"5","6":"0.019279948"},{"1":"HIchABC","2":"28","3":"0.8824508","4":"0.048620649","5":"5","6":"0.021743815"},{"1":"HIchABC","2":"29","3":"0.8898827","4":"0.064217180","5":"5","6":"0.028718796"},{"1":"HIchABC","2":"30","3":"0.9203918","4":"0.018296816","5":"5","6":"0.008182585"},{"1":"HIchABC","2":"31","3":"0.9177874","4":"0.026534942","5":"5","6":"0.011866787"},{"1":"HIchABC","2":"32","3":"0.9212599","4":"0.028833675","5":"5","6":"0.012894812"},{"1":"HIchABC","2":"33","3":"0.9010427","4":"0.016849833","5":"5","6":"0.007535474"},{"1":"HIchABC","2":"34","3":"0.9288165","4":"0.020386961","5":"5","6":"0.009117326"},{"1":"HIchABC","2":"35","3":"0.9316117","4":"0.017993664","5":"5","6":"0.008047011"},{"1":"HIchABC","2":"36","3":"0.9358593","4":"0.019290477","5":"5","6":"0.008626964"},{"1":"HIchABC","2":"37","3":"0.9334060","4":"0.016307134","5":"5","6":"0.007292772"},{"1":"HIchABC","2":"38","3":"0.9341271","4":"0.013346875","5":"5","6":"0.005968904"},{"1":"HIchABC","2":"39","3":"0.9401229","4":"0.013826704","5":"5","6":"0.006183490"},{"1":"HIchABC","2":"40","3":"0.9367530","4":"0.018300608","5":"5","6":"0.008184281"},{"1":"HIchABC","2":"41","3":"0.8994905","4":"0.034553393","5":"5","6":"0.015452747"},{"1":"HIchABC","2":"42","3":"0.8720680","4":"0.048197073","5":"5","6":"0.021554386"},{"1":"HIchABC","2":"43","3":"0.8685243","4":"0.050495951","5":"5","6":"0.022582476"},{"1":"HIchABC","2":"44","3":"0.8420557","4":"0.036860751","5":"5","6":"0.016484629"},{"1":"HIchABC","2":"45","3":"0.8509714","4":"0.079544202","5":"5","6":"0.035573248"},{"1":"HIchABC","2":"46","3":"0.8620746","4":"0.080264186","5":"5","6":"0.035895235"},{"1":"HIchABC","2":"47","3":"0.8959643","4":"0.043786255","5":"5","6":"0.019581808"},{"1":"HIchABC","2":"48","3":"0.8633845","4":"0.065747201","5":"5","6":"0.029403042"},{"1":"HIchABC","2":"49","3":"0.8842415","4":"0.049366168","5":"5","6":"0.022077221"},{"1":"HIchABC","2":"50","3":"0.8582890","4":"0.041732911","5":"5","6":"0.018663525"},{"1":"HIchABC","2":"51","3":"0.8773719","4":"0.060687773","5":"5","6":"0.027140397"},{"1":"HIchABC","2":"52","3":"0.9296384","4":"0.029823214","5":"5","6":"0.013337347"},{"1":"HIchABC","2":"53","3":"0.9107005","4":"0.033392158","5":"5","6":"0.014933427"},{"1":"HIchABC","2":"54","3":"0.9162552","4":"0.044310527","5":"5","6":"0.019816270"},{"1":"HIchABC","2":"55","3":"0.9396300","4":"0.015868544","5":"5","6":"0.007096629"},{"1":"HIchABC","2":"56","3":"0.9493247","4":"0.029425558","5":"5","6":"0.013159510"},{"1":"HIchABC","2":"57","3":"0.9668625","4":"0.032852175","5":"5","6":"0.014691939"},{"1":"HIchABC","2":"58","3":"0.9428082","4":"0.016545769","5":"5","6":"0.007399493"},{"1":"HIchABC","2":"59","3":"0.9507681","4":"0.052774893","5":"5","6":"0.023601650"},{"1":"HIchABC","2":"60","3":"0.9768121","4":"0.011567995","5":"5","6":"0.005173364"},{"1":"HIchABC","2":"61","3":"0.9765778","4":"0.016574096","5":"5","6":"0.007412161"},{"1":"HIchABC","2":"62","3":"0.9647650","4":"0.015456582","5":"5","6":"0.006912394"},{"1":"HIchABC","2":"63","3":"0.9409627","4":"0.017556095","5":"5","6":"0.007851324"},{"1":"HIchABC","2":"64","3":"0.9205748","4":"0.034411337","5":"5","6":"0.015389218"},{"1":"HIchABC","2":"65","3":"0.9105542","4":"0.026230944","5":"5","6":"0.011730835"},{"1":"HIchABC","2":"66","3":"0.9133726","4":"0.023983774","5":"5","6":"0.010725870"},{"1":"HIchABC","2":"67","3":"0.8583411","4":"0.056251654","5":"5","6":"0.025156504"},{"1":"HIchABC","2":"68","3":"0.8447285","4":"0.077914738","5":"5","6":"0.034844530"},{"1":"HIchABC","2":"69","3":"0.8307248","4":"0.030352603","5":"5","6":"0.013574097"},{"1":"HIchABC","2":"70","3":"0.8238310","4":"0.057121580","5":"5","6":"0.025545547"},{"1":"HIchABC","2":"71","3":"0.8642046","4":"0.065865382","5":"5","6":"0.029455894"},{"1":"HIchABC","2":"72","3":"0.8759029","4":"0.059846317","5":"5","6":"0.026764086"},{"1":"HIchABC","2":"73","3":"0.8445490","4":"0.055273835","5":"5","6":"0.024719211"},{"1":"HIchABC","2":"74","3":"0.9082048","4":"0.053973808","5":"5","6":"0.024137821"},{"1":"HIchABC","2":"75","3":"0.9182051","4":"0.038890398","5":"5","6":"0.017392315"},{"1":"HIchABC","2":"76","3":"0.9058881","4":"0.067207457","5":"5","6":"0.030056088"},{"1":"HIchABC","2":"77","3":"0.9264811","4":"0.023572186","5":"5","6":"0.010541802"},{"1":"HIchABC","2":"78","3":"0.9268332","4":"0.011929407","5":"5","6":"0.005334993"},{"1":"HIchABC","2":"79","3":"0.9218908","4":"0.032536872","5":"5","6":"0.014550931"},{"1":"HIchABC","2":"80","3":"0.9061503","4":"0.021711200","5":"5","6":"0.009709544"},{"1":"HIchABC","2":"81","3":"0.9342883","4":"0.010857514","5":"5","6":"0.004855628"},{"1":"HIchABC","2":"82","3":"0.9243838","4":"0.017440318","5":"5","6":"0.007799547"},{"1":"HIchABC","2":"83","3":"0.9009211","4":"0.028169331","5":"5","6":"0.012597708"},{"1":"HIchABC","2":"84","3":"0.8999267","4":"0.021258751","5":"5","6":"0.009507202"},{"1":"HIchABC","2":"85","3":"0.8967662","4":"0.033024911","5":"5","6":"0.014769189"},{"1":"HIchABC","2":"86","3":"0.9260098","4":"0.014876704","5":"5","6":"0.006653064"},{"1":"HIchABC","2":"87","3":"0.8999382","4":"0.022789086","5":"5","6":"0.010191589"},{"1":"HIchABC","2":"88","3":"0.8566318","4":"0.042398234","5":"5","6":"0.018961067"},{"1":"HIchABC","2":"89","3":"0.8734805","4":"0.040024026","5":"5","6":"0.017899289"},{"1":"HIchABC","2":"90","3":"0.8483146","4":"0.033350926","5":"5","6":"0.014914987"},{"1":"HIchABC","2":"91","3":"0.7907623","4":"0.028043182","5":"5","6":"0.012541292"},{"1":"HIchABC","2":"92","3":"0.8154717","4":"0.023774397","5":"5","6":"0.010632234"},{"1":"HIchABC","2":"93","3":"0.8160497","4":"0.040861703","5":"5","6":"0.018273909"},{"1":"HIchABC","2":"94","3":"0.8184283","4":"0.059895973","5":"5","6":"0.026786294"},{"1":"HIchABC","2":"95","3":"0.8327647","4":"0.065821614","5":"5","6":"0.029436321"},{"1":"HIchABC","2":"96","3":"0.9364158","4":"0.018064319","5":"5","6":"0.008078609"},{"1":"HIchABC","2":"97","3":"0.8944882","4":"0.046217009","5":"5","6":"0.020668875"},{"1":"HIchABC","2":"98","3":"0.8885775","4":"0.039884622","5":"5","6":"0.017836945"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Almost ready to plot, but we need a couple more things to make sure we can automate the plot generation and make them pretty.</p>
+<p>First, let’s extract the photoperiod information - this will allow us to have shaded boxes corresponding to dark cycle, and light boxes corresponding to the light cycle.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract time-series as small df for plotting</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>pp_data <span class="ot">&lt;-</span> df.hourly <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Time,Photoperiod)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pp_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Time"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Photoperiod"],"name":[2],"type":["fct"],"align":["left"]}],"data":[{"1":"0","2":"1"},{"1":"1","2":"1"},{"1":"2","2":"1"},{"1":"3","2":"1"},{"1":"4","2":"1"},{"1":"5","2":"0"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Okay last step - let’s write a function that will generate our plots for us! We want them to all look the same, but automatically have the correct title and x-axis labels. The following function, <code>group_tsplot()</code>, (should) accomplish this. If it looks busy, imagine having to copy/paste this 10x for each of your variables!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create function to generate time-series plots</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>group_tsplot <span class="ot">&lt;-</span> <span class="cf">function</span>(data,group,title,ylab) {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data) <span class="sc">+</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Shaded light/dark boxes</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_tile</span>(<span class="at">data =</span> pp_data,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">fill =</span> Photoperiod,<span class="at">y=</span><span class="dv">0</span>),</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">height =</span> <span class="cn">Inf</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">show.legend =</span> <span class="cn">NA</span>) <span class="sc">+</span> <span class="co"># tiles will go all the way up and down</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> Time, <span class="at">y =</span> value) <span class="sc">+</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> <span class="fu">get</span>(group))) <span class="sc">+</span> </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set color scheme</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(group,<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"turquoise4"</span>, <span class="st">"darkorange3"</span>)) <span class="sc">+</span>   <span class="co"># colors for the group</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Smooth SEM ribbon </span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">ymin =</span> value<span class="sc">-</span>sem, </span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">ymax =</span> value<span class="sc">+</span>sem,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="fu">get</span>(group)),</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">linetype =</span> <span class="dv">0</span>,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.3</span>)<span class="sc">+</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set color scheme for filled areas: light/dark boxes and SEM ribbon</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"gray45"</span>,<span class="st">"1"</span> <span class="ot">=</span> <span class="st">"white"</span>,<span class="st">"chABC"</span> <span class="ot">=</span> <span class="st">"turquoise4"</span>,<span class="st">"HIchABC"</span> <span class="ot">=</span> <span class="st">"darkorange3"</span>),<span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span>   </span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time (hours)"</span>, <span class="at">y =</span> ylab)<span class="sc">+</span> </span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span>   <span class="co"># no padding on the x-axis</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(title)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s break down what this function does. The first line <code>group_tsplot &lt;- function(data,group,title,ylab)</code> indicates our function requires 4 inputs: <code>data</code>, <code>group</code>, <code>title</code>, and <code>ylab</code>.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
