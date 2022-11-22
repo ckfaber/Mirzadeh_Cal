@@ -82,7 +82,7 @@ pp_data <- df.hourly %>%
   distinct(Time,Photoperiod)
 
 # Create function to generate time-series plots
-group_tsplot <- function(data,group,title,ylab) {
+tsplot <- function(data,group,title,ylab) {
   
   plot <- ggplot(data) + 
     
@@ -128,7 +128,7 @@ for (i in 1:length(tsvars)) {
   
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
-  ts.plots[[i]] <- group_tsplot(data,group,title,ylab)
+  ts.plots[[i]] <- tsplot(data,group,title,ylab)
   names(ts.plots)[i] <- var
   print(ts.plots[[i]])
   

@@ -166,7 +166,7 @@ head(pp_data)
 Okay last step - let's write a function that will generate our plots for us! We want them to all look the same, but automatically have the correct title and x-axis labels. The following function, `group_tsplot()`, (should) accomplish this. If it looks busy, imagine having to copy/paste this 10x for each of your variables!
 ```{r}
 # Create function to generate time-series plots
-group_tsplot <- function(data,group,title,ylab) {
+tsplot <- function(data,group,title,ylab) {
   
   plot <- ggplot(data) + 
     
@@ -199,7 +199,7 @@ group_tsplot <- function(data,group,title,ylab) {
   
 }
 ```
-Let's break down what this function does. The first line `group_tsplot <- function(data,group,title,ylab)` indicates our function requires 4 inputs: `data`, `group`, `title`, and `ylab`. 
+Let's break down what this function does. The first line `tsplot <- function(data,group,title,ylab)` indicates our function requires 4 inputs: `data`, `group`, `title`, and `ylab`. 
 
 Let's test this "manually" on one set of data before we loop through all of `tsvars` again. 
 ```{r}
