@@ -13,7 +13,7 @@ editor: visual
 
 -   
 
-###### Outputs: 
+###### Outputs:
 
 -   
 
@@ -35,11 +35,11 @@ library(here)
 ```{r}
 # First df to be merged
 cohort1       <- "mon001" 
-rundate1      <- "_2021-10-18" 
+rundate1      <- "2021-10-18" 
 
 # Second df to be merged
-cohort1       <- "mon002" 
-rundate1      <- "_2021-11-03" 
+cohort2       <- "mon002" 
+rundate2      <- "2021-11-03" 
 ```
 
 ## Load data frames
@@ -52,7 +52,7 @@ load(here::here(run1))
 
 # Only need df.hourly, so save this to df1 and df2 and remove all other data from workspace
 df1          <- df.hourly
-rm(list = setdiff(ls(), "df1"))
+rm(list = setdiff(ls(), c("df1","run2")))
 
 load(here::here(run2))
 df2          <- df.hourly
