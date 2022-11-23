@@ -18,7 +18,7 @@ editor: visual
 
 ###### Requirements:
 
--   TimeSeries sheet from Macro-processed .exp data files (MI < v2.46) in 1 or 3-minute bins
+-   TimeSeries sheet from Macro-processed .exp data files (MI \< v2.46) in 1 or 3-minute bins
 -   TimeSeries sheet as a .csv saved in your default working directory (run `library(here)` to find out where this is!)
 -   Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
 
@@ -44,12 +44,12 @@ If everything is working properly, these variables are the only ones a user shou
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "mon001"
-rundate         <- "2021-10-18"  
-remove_animals  <- 274 
+cohort          <- "mon002"
+rundate         <- "2021-11-03"  
+remove_animals  <- NA
 
 # Default parameters
-trim.short.days <- FALSE
+trim.short.days <- TRUE
 diet.kcal       <- 4.2
 cols2excl       <- c('Age','Cage','Stilltime_M',
                'Sleeptime_M','XBreak_R','YBreak_R',
@@ -91,9 +91,11 @@ Here, we remove any animals that we had previously specified, and perform some g
 ```{r}
 #| warning: false
 
-# Remove dead/sick animals
-df %<>%
-  filter(ID_Code != remove_animals)
+# Remove dead/sick animals; if NA, don't run
+if (!is.na(remove_animals)) {
+   df %<>%
+    filter(ID_Code != remove_animals)
+}
 
 # Parse date-times and sort by animal ID (ID_Code) and date-time
 df %<>% 
