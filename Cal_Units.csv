@@ -28,7 +28,7 @@ Sleeptime_M,NA,,,
 ,FoodIn.g,Food Intake,(g),Calculated from FoodIn.cum using diff()
 ,WaterIn.g,Water Intake,(g),Calculated from WaterIn.cum using diff()
 ,FoodIn.kcal,Food Intake,(kcal),Calculated from FoodIn.g*4.2
-,Ebalance,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
+,EBalance,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
 ,EE.norm,Normalized Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/BodyMass
 ,EB.norm,Normalized Energy Balance,(kcal/g),Energy balance normalized to body mass (g). Calculated as EBalance/BodyMass
 ,EE.cum,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure

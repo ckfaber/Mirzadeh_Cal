@@ -219,7 +219,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["Sable_Var"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Renamed_Var"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Title"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Unit"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Description"],"name":[5],"type":["chr"],"align":["left"]}],"data":[{"1":"AllMeters_M","2":"NA","3":"NA","4":"(m)","5":"Cumulative sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _M denotes mean during 30s sampling"},{"1":"AllMeters_R","2":"AllMeters","3":"Activity","4":"(m)","5":"Sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _R denotes range from last cage sample to current cage sample - in other words, the total distance the mouse traveled since the cage was last selected."},{"1":"Animal","2":"Cage","3":"NA","4":"NA","5":"Cage number"},{"1":"BodyMass_M","2":"BodyMass","3":"Body Mass","4":"(g)","5":"Mean body mass of animal"},{"1":"FoodInA_M","2":"FoodIn.cum","3":"Cumulative Food Intake","4":"(g)","5":"Mass of food consumed by animal during the cycle"},{"1":"kcal_hr_M","2":"EE","3":"Energy Expenditure","4":"(kcal/hr)","5":"Mean energy expenditure in kcal/hr. Calculated using the Weir equation"},{"1":"PedMeters_M","2":"NA","3":"NA","4":"(m)","5":"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."},{"1":"PedMeters_R","2":"PedMeters","3":"Directed Activity","4":"(m)","5":"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."},{"1":"PedSpeed_Mnz","2":"PedSpeed","3":"Directed Speed","4":"(m/s)","5":"Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean"},{"1":"RER_M","2":"RER","3":"RER","4":"NA","5":"Mean respiratory exchange ratio, VCO2/VO2, unitless"},{"1":"VCO2_M","2":"VCO2","3":"vCO2 Emission","4":"(mL/min)","5":"Rate of carbon dioxide emission"},{"1":"VH2O_M","2":"VH2O","3":"vH2O Loss","4":"(g/hr)","5":"Rate of water vapor loss"},{"1":"VO2_M","2":"VO2","3":"vO2 Consumption","4":"(mL/min)","5":"Rate of oxygen consumption"},{"1":"WaterInA_M","2":"WaterIn.cum","3":"Cumulative Water Intake","4":"(g)","5":"Mass of water consumed by animal during the cycle"},{"1":"Xbreak_R","2":"XBreak","3":"Beam Breaks (x)","4":"(count)","5":"Number of x-axis beam breaks"},{"1":"Ybreak_R","2":"YBreak","3":"Beam Breaks (y)","4":"(count)","5":"Number of y-axis beam breaks"},{"1":"EnviroTemp_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroRH_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroBP_M","2":"NA","3":"NA","4":"kPa","5":"NA"},{"1":"EnviroLightlux_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroOccupancy_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroSound_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"Stilltime_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"Sleeptime_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"NA","2":"EE.kcal.bin","3":"NA","4":"(kcal)","5":"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"},{"1":"NA","2":"AllMeters.cum","3":"Cumulative Activity","4":"(m)","5":"Calculated from AllMeters using cumsum()"},{"1":"NA","2":"FoodIn.g","3":"Food Intake","4":"(g)","5":"Calculated from FoodIn.cum using diff()"},{"1":"NA","2":"WaterIn.g","3":"Water Intake","4":"(g)","5":"Calculated from WaterIn.cum using diff()"},{"1":"NA","2":"FoodIn.kcal","3":"Food Intake","4":"(kcal)","5":"Calculated from FoodIn.g*4.2"},{"1":"NA","2":"Ebalance","3":"Energy Balance","4":"(kcal)","5":"Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin"},{"1":"NA","2":"EE.norm","3":"Normalized Energy Expenditure","4":"(kcal/g)","5":"Energy expenditure normalized to body mass (g). Calculated as EE/BodyMass"},{"1":"NA","2":"EB.norm","3":"Normalized Energy Balance","4":"(kcal/g)","5":"Energy balance normalized to body mass (g). Calculated as EBalance/BodyMass"},{"1":"NA","2":"EE.cum","3":"Cumulative Energy Expenditure","4":"(kcal)","5":"Cumulative energy expenditure"},{"1":"NA","2":"EB.cum","3":"Cumulative Energy Balance","4":"(kcal)","5":"Cumulative energy balance"},{"1":"NA","2":"FoodIn.cum.kcal","3":"Cumulative Food Intake","4":"(kcal)","5":"Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["Sable_Var"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Renamed_Var"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Title"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Unit"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Description"],"name":[5],"type":["chr"],"align":["left"]}],"data":[{"1":"AllMeters_M","2":"NA","3":"NA","4":"(m)","5":"Cumulative sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _M denotes mean during 30s sampling"},{"1":"AllMeters_R","2":"AllMeters","3":"Activity","4":"(m)","5":"Sum of all distances traveled within the beam break system (excluding running wheel if present). This includes fine movement (such as grooming and scratching), as well as directed locomotion. _R denotes range from last cage sample to current cage sample - in other words, the total distance the mouse traveled since the cage was last selected."},{"1":"Animal","2":"Cage","3":"NA","4":"NA","5":"Cage number"},{"1":"BodyMass_M","2":"BodyMass","3":"Body Mass","4":"(g)","5":"Mean body mass of animal"},{"1":"FoodInA_M","2":"FoodIn.cum","3":"Cumulative Food Intake","4":"(g)","5":"Mass of food consumed by animal during the cycle"},{"1":"kcal_hr_M","2":"EE","3":"Energy Expenditure","4":"(kcal/hr)","5":"Mean energy expenditure in kcal/hr. Calculated using the Weir equation"},{"1":"PedMeters_M","2":"NA","3":"NA","4":"(m)","5":"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."},{"1":"PedMeters_R","2":"PedMeters","3":"Directed Activity","4":"(m)","5":"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."},{"1":"PedSpeed_Mnz","2":"PedSpeed","3":"Directed Speed","4":"(m/s)","5":"Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean"},{"1":"RER_M","2":"RER","3":"RER","4":"NA","5":"Mean respiratory exchange ratio, VCO2/VO2, unitless"},{"1":"VCO2_M","2":"VCO2","3":"vCO2 Emission","4":"(mL/min)","5":"Rate of carbon dioxide emission"},{"1":"VH2O_M","2":"VH2O","3":"vH2O Loss","4":"(g/hr)","5":"Rate of water vapor loss"},{"1":"VO2_M","2":"VO2","3":"vO2 Consumption","4":"(mL/min)","5":"Rate of oxygen consumption"},{"1":"WaterInA_M","2":"WaterIn.cum","3":"Cumulative Water Intake","4":"(g)","5":"Mass of water consumed by animal during the cycle"},{"1":"Xbreak_R","2":"XBreak","3":"Beam Breaks (x)","4":"(count)","5":"Number of x-axis beam breaks"},{"1":"Ybreak_R","2":"YBreak","3":"Beam Breaks (y)","4":"(count)","5":"Number of y-axis beam breaks"},{"1":"EnviroTemp_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroRH_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroBP_M","2":"NA","3":"NA","4":"kPa","5":"NA"},{"1":"EnviroLightlux_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroOccupancy_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"EnviroSound_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"Stilltime_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"Sleeptime_M","2":"NA","3":"NA","4":"NA","5":"NA"},{"1":"NA","2":"EE.kcal.bin","3":"NA","4":"(kcal)","5":"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"},{"1":"NA","2":"AllMeters.cum","3":"Cumulative Activity","4":"(m)","5":"Calculated from AllMeters using cumsum()"},{"1":"NA","2":"FoodIn.g","3":"Food Intake","4":"(g)","5":"Calculated from FoodIn.cum using diff()"},{"1":"NA","2":"WaterIn.g","3":"Water Intake","4":"(g)","5":"Calculated from WaterIn.cum using diff()"},{"1":"NA","2":"FoodIn.kcal","3":"Food Intake","4":"(kcal)","5":"Calculated from FoodIn.g*4.2"},{"1":"NA","2":"EBalance","3":"Energy Balance","4":"(kcal)","5":"Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin"},{"1":"NA","2":"EE.norm","3":"Normalized Energy Expenditure","4":"(kcal/g)","5":"Energy expenditure normalized to body mass (g). Calculated as EE/BodyMass"},{"1":"NA","2":"EB.norm","3":"Normalized Energy Balance","4":"(kcal/g)","5":"Energy balance normalized to body mass (g). Calculated as EBalance/BodyMass"},{"1":"NA","2":"EE.cum","3":"Cumulative Energy Expenditure","4":"(kcal)","5":"Cumulative energy expenditure"},{"1":"NA","2":"EB.cum","3":"Cumulative Energy Balance","4":"(kcal)","5":"Cumulative energy balance"},{"1":"NA","2":"FoodIn.cum.kcal","3":"Cumulative Food Intake","4":"(kcal)","5":"Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -328,7 +328,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Okay last step - let’s write a function that will generate our plots for us! We want them to all look the same, but automatically have the correct title and x-axis labels. The following function, <code>group_tsplot()</code>, (should) accomplish this. If it looks busy, imagine having to copy/paste this 10x for each of your variables!</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create function to generate time-series plots</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>group_tsplot <span class="ot">&lt;-</span> <span class="cf">function</span>(data,group,title,ylab) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>tsplot <span class="ot">&lt;-</span> <span class="cf">function</span>(data,group,title,ylab) {</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data) <span class="sc">+</span> </span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -361,7 +361,165 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Let’s break down what this function does. The first line <code>group_tsplot &lt;- function(data,group,title,ylab)</code> indicates our function requires 4 inputs: <code>data</code>, <code>group</code>, <code>title</code>, and <code>ylab</code>.</p>
+<p>Let’s break down what this function does. The first line <code>tsplot &lt;- function(data,group,title,ylab)</code> indicates our function requires 4 inputs: <code>data</code>, <code>group</code>, <code>title</code>, and <code>ylab</code>.</p>
+<p>Let’s test this “manually” on one set of data before we loop through all of <code>tsvars</code> again.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>data      <span class="ot">&lt;-</span> grp.summaries<span class="sc">$</span>EE</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>group     <span class="ot">&lt;-</span> <span class="st">"Treatment"</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>title     <span class="ot">&lt;-</span> <span class="st">"Energy Expenditure"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>ylab      <span class="ot">&lt;-</span> <span class="st">"(kcal/hr)"</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p1        <span class="ot">&lt;-</span> <span class="fu">tsplot</span>(data,group,title,ylab)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Cool! It seems to work. Let’s loop through <code>tsvars</code> again and generate plots for all of our variables of interest. We’ll store the resulting ggplot objects in a list called <code>ts.plots</code>, so we can access or print out the individual plots using <code>$</code> indexing, as before with our grp.summaries.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through ggplot generation </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ts.plots <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>,<span class="at">length =</span> <span class="fu">length</span>(tsvars))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(tsvars)) {</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  data <span class="ot">&lt;-</span> grp.summaries[[i]]</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  var <span class="ot">&lt;-</span> <span class="fu">names</span>(grp.summaries)[i]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  title <span class="ot">&lt;-</span> <span class="fu">mapvalues</span>(var, <span class="at">from =</span> unitkeys<span class="sc">$</span>Renamed_Var, <span class="at">to =</span> unitkeys<span class="sc">$</span>Title, <span class="at">warn_missing =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  unit <span class="ot">&lt;-</span> <span class="fu">mapvalues</span>(var, <span class="at">from =</span> unitkeys<span class="sc">$</span>Renamed_Var, <span class="at">to =</span> unitkeys<span class="sc">$</span>Unit, <span class="at">warn_missing =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(unit)) ylab <span class="ot">&lt;-</span> title <span class="cf">else</span> ylab <span class="ot">&lt;-</span> <span class="fu">paste</span>(title,unit)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  ts.plots[[i]] <span class="ot">&lt;-</span> <span class="fu">tsplot</span>(data,group,title,ylab)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(ts.plots)[i] <span class="ot">&lt;-</span> var</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(ts.plots[[i]])</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-15-8.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="box-plots-dltotal-for-daily-and-overall-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="box-plots-dltotal-for-daily-and-overall-experiment">Box Plots (D/L/total for daily and overall experiment)</h2>
+<p>Now, we’ll use the same approach as above to generate box and whisker plots for dark/light/total values for each variable in <code>boxplotvars</code>. First, we’ll create a function, <code>bxplot()</code>, that generates plots how we’d like them to look:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create function to generate boxplots</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>bxplot <span class="ot">&lt;-</span> <span class="cf">function</span>(data,group,var,title,ylab) {</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(data,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>         <span class="fu">aes</span>(<span class="at">x =</span> Photoperiod,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> <span class="fu">get</span>(var))) <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">stage</span>(<span class="fu">get</span>(group), <span class="at">after_scale =</span> <span class="fu">alpha</span>(fill, <span class="fl">0.5</span>)))) <span class="sc">+</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(group,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"turquoise4"</span>, <span class="st">"darkorange3"</span>),</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">aesthetics =</span> <span class="fu">c</span>(<span class="st">"color"</span>, <span class="st">"fill"</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> ylab) <span class="sc">+</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Dark"</span>, <span class="st">"Light"</span>, <span class="st">"Total"</span>)) <span class="sc">+</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span> </span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(title)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we can loop through <code>boxplotvars</code>. First, let’s make box plots for the entire experiment…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through all variables for overall experiment plots</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>box.plots <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>,<span class="at">length =</span> <span class="fu">length</span>(boxplotvars))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(boxplotvars)) {</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  var <span class="ot">&lt;-</span> boxplotvars[i]</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  title <span class="ot">&lt;-</span> <span class="fu">mapvalues</span>(var, <span class="at">from =</span> unitkeys<span class="sc">$</span>Renamed_Var, <span class="at">to =</span> unitkeys<span class="sc">$</span>Title, <span class="at">warn_missing =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  unit <span class="ot">&lt;-</span> <span class="fu">mapvalues</span>(var, <span class="at">from =</span> unitkeys<span class="sc">$</span>Renamed_Var, <span class="at">to =</span> unitkeys<span class="sc">$</span>Unit, <span class="at">warn_missing =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(unit)) ylab <span class="ot">&lt;-</span> title <span class="cf">else</span> ylab <span class="ot">&lt;-</span> <span class="fu">paste</span>(title,unit)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(box.plots)[i] <span class="ot">&lt;-</span> var</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  plot <span class="ot">&lt;-</span> <span class="fu">bxplot</span>(<span class="at">data =</span> pp.avg.total,<span class="at">group =</span> group,<span class="at">var =</span> var,<span class="at">title =</span> title,<span class="at">ylab =</span> ylab)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(plot)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  box.plots[[i]] <span class="ot">&lt;-</span> plot</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Now let’s make daily box plots…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through all the variables for daily plots</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>daily.box.plots <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>,<span class="at">length =</span> <span class="fu">length</span>(boxplotvars))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(boxplotvars)) {</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  var <span class="ot">&lt;-</span> boxplotvars[i]</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  title <span class="ot">&lt;-</span> <span class="fu">mapvalues</span>(var, <span class="at">from =</span> unitkeys<span class="sc">$</span>Renamed_Var, <span class="at">to =</span> unitkeys<span class="sc">$</span>Title, <span class="at">warn_missing =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  unit <span class="ot">&lt;-</span> <span class="fu">mapvalues</span>(var, <span class="at">from =</span> unitkeys<span class="sc">$</span>Renamed_Var, <span class="at">to =</span> unitkeys<span class="sc">$</span>Unit, <span class="at">warn_missing =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(unit)) ylab <span class="ot">&lt;-</span> title <span class="cf">else</span> ylab <span class="ot">&lt;-</span> <span class="fu">paste</span>(title,unit)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(daily.box.plots)[i] <span class="ot">&lt;-</span> var</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  plot <span class="ot">&lt;-</span> <span class="fu">bxplot</span>(<span class="at">data =</span> pp.avg.daily,<span class="at">group =</span> group,<span class="at">var =</span> var,<span class="at">title =</span> title,<span class="at">ylab =</span> ylab) <span class="sc">+</span> </span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(<span class="at">cols =</span> <span class="fu">vars</span>(exp_day))</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(plot)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  daily.box.plots[[i]] <span class="ot">&lt;-</span> plot</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </section>
 
 </main>

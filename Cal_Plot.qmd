@@ -24,9 +24,14 @@ The following files must be saved in your default working directory (run `librar
 ###### Known bugs:
 
 -   No flag for recording days with fewer than 24h - may misrepresent day/photoperiod total data
--   By default does not plot smoothed variables - fix so if smooth \<- TRUE, smoothed variables calculated AND plotted
+-   By default does not plot smoothed variables - fix so if smooth <- TRUE, smoothed variables calculated AND plotted
+
 
 ###### To do:
+
+-   Batch saving/exporting vector graphic files of plots
+
+-   When generating grp.summaries list, currently other possibly desired groupings (e.g., Diet, Cohort, Sex) are omitted. Will revise so that they are included if faceting by other groupings is desired.
 
 -   Normalize various measures by body weight
 
@@ -203,5 +208,118 @@ Let's break down what this function does. The first line `tsplot <- function(dat
 
 Let's test this "manually" on one set of data before we loop through all of `tsvars` again. 
 ```{r}
+data      <- grp.summaries$EE
+group     <- "Treatment"
+title     <- "Energy Expenditure"
+ylab      <- "(kcal/hr)"
+p1        <- tsplot(data,group,title,ylab)
 
+p1
+```
+Cool! It seems to work. Let's loop through `tsvars` again and generate plots for all of our variables of interest. We'll store the resulting ggplot objects in a list called `ts.plots`, so we can access or print out the individual plots using `$` indexing, as before with our grp.summaries. 
+```{r}
+#| warning: false
+# Loop through ggplot generation 
+ts.plots <- vector(mode = "list",length = length(tsvars))
+
+for (i in 1:length(tsvars)) {
+  
+  data <- grp.summaries[[i]]
+  var <- names(grp.summaries)[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
+  ts.plots[[i]] <- tsplot(data,group,title,ylab)
+  names(ts.plots)[i] <- var
+  print(ts.plots[[i]])
+  
+}
+```
+## Box Plots (D/L/total for daily and overall experiment)
+Now, we'll use the same approach as above to generate box and whisker plots for dark/light/total values for each variable in `boxplotvars`. First, we'll create a function, `bxplot()`, that generates plots how we'd like them to look:
+
+```{r}
+# Create function to generate boxplots
+bxplot <- function(data,group,var,title,ylab) {
+  
+  ggplot(data,
+         aes(x = Photoperiod,
+             y = get(var))) +
+    geom_boxplot(aes(fill = stage(get(group), after_scale = alpha(fill, 0.5)))) +
+    scale_color_manual(group,
+      values = c("turquoise4", "darkorange3"),
+      aesthetics = c("color", "fill")
+    ) +
+    labs(x = NULL, y = ylab) +
+    scale_x_discrete(labels = c("Dark", "Light", "Total")) +
+    theme_classic() + 
+    ggtitle(title)
+  
+}
+```
+Now, we can loop through `boxplotvars`. First, let's make box plots for the entire experiment, saving them in a list called `box.plots`.
+
+```{r}
+# Loop through all variables for overall experiment plots
+box.plots <- vector(mode = "list",length = length(boxplotvars))
+for (i in 1:length(boxplotvars)) {
+  
+  var <- boxplotvars[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
+  names(box.plots)[i] <- var
+  plot <- bxplot(data = pp.avg.total,group = group,var = var,title = title,ylab = ylab)
+  print(plot)
+  
+  box.plots[[i]] <- plot
+}
+```
+Now let's make daily box plots, saving in a list called `daily.box.plots`...these are much busier, but may be useful to evaluate qualitatively for any day-specific effects.
+```{r}
+# Loop through all the variables for daily plots
+daily.box.plots <- vector(mode = "list",length = length(boxplotvars))
+for (i in 1:length(boxplotvars)) {
+  
+  var <- boxplotvars[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
+  names(daily.box.plots)[i] <- var
+  plot <- bxplot(data = pp.avg.daily,group = group,var = var,title = title,ylab = ylab) + 
+    facet_grid(cols = vars(exp_day))
+  print(plot)
+  
+  daily.box.plots[[i]] <- plot
+}
+```
+## Assemble figures
+From here, you can either export your plots into your desired format to assemble figures elsehwere (Lighroom, Photoshop, Powerpoint, God forbid). Or, you can play around with the `patchwork` library, which can arrange panels and labels for you in an intuitive syntax.
+```{r}
+Figure1 <- ts.plots$EE / ts.plots$RER
+Figure1 +
+  plot_layout(ncol = 1, guides = "collect") +
+  plot_annotation(
+    title = "Figure 1. Neonatal digestion of PNNs does stuff!",
+    caption = "from cohort mon001",
+    tag_levels = "a"
+  )
+```
+There are a few kinks to be worked out with font sizing and spacing, but it's pretty powerful! 
+
+```{r}
+Figure2 <- box.plots$EE + box.plots$RER
+Figure2 +
+  plot_layout(guides = "collect") + 
+  plot_annotation(title = "Figure 2. Photoperiod-averaged data is cool",
+                  tag_levels = "a")
 ```
