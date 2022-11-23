@@ -290,3 +290,10 @@ pp.avg.total <- pp.avg.daily %>%
 rm(total.avg)
 pp.avg.total
 ```
+
+## Save data
+
+```{r}
+savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
+save(df, df.hourly, pp.avg.total, pp.avg.daily,file = savename)
+```
