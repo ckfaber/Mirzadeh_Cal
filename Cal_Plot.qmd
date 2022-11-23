@@ -24,8 +24,7 @@ The following files must be saved in your default working directory (run `librar
 ###### Known bugs:
 
 -   No flag for recording days with fewer than 24h - may misrepresent day/photoperiod total data
--   By default does not plot smoothed variables - fix so if smooth <- TRUE, smoothed variables calculated AND plotted
-
+-   By default does not plot smoothed variables - fix so if smooth \<- TRUE, smoothed variables calculated AND plotted
 
 ###### To do:
 
@@ -89,9 +88,10 @@ unitkeys         <- read_csv(here::here("Cal_Units.csv"))
 unitkeys
 ```
 
-OK, let's start getting plots together. First we have some more tidying to do... 
+OK, let's start getting plots together. First we have some more tidying to do...
 
-## (Optional) Smoothing via moving mean 
+## (Optional) Smoothing via moving mean
+
 Sometimes, the 1-hr binned data looks very messy. Here we can optionally employ smoothing via a moving mean to denoise the plots. This code section will run if `smooth <- TRUE`. If `smooth <- FALSE`, it will not run.
 
 ```{r}
@@ -107,12 +107,16 @@ if (smooth) {
   ungroup()  
 }
 ```
+
 Let's visualize one variable from a single animal to see the difference that smoothing makes. First, the unsmoothed:
+
 ```{r}
 ggplot(data = filter(df.hourly, Animal == 276)) + 
   geom_line(mapping = aes(x = Time, y = RER))
 ```
+
 Now the smoothed:
+
 ```{r}
 #| warning: false
 ggplot(data = filter(df.hourly, Animal == 276)) + 
@@ -120,9 +124,11 @@ ggplot(data = filter(df.hourly, Animal == 276)) +
 ```
 
 ## Timeseries plots
-The following code creates some functions to help us automatically generate timeseries plots for the variables  specified in `tsvars`. 
+
+The following code creates some functions to help us automatically generate timeseries plots for the variables specified in `tsvars`.
 
 We want to generate timeseries plots wherein a line connects the means of the grouping variable (specified in `group`), and the SEM is shaded above and below the mean line. To do this, we need to generate some summary reports for each variable. First, we create the following function:
+
 ```{r}
 #| warning: false
 # Create function to generate hourly summaries by variable
@@ -137,14 +143,17 @@ group_summarize <- function(group,var) {
     rename( {{group}} := "get(group)") 
   }
 ```
-`group_summarize()` requires two inputs: `group` and `var`. To the `df.hourly` dataframe, `group_summarize` first groups the data by this grouping variable and by `Time`, then summarizes the mean value, the standard deviation, the number of observations within the group, and the standard error of the mean (sem). 
 
-Let's try it out on one variable and one grouping to make sure it works. 
+`group_summarize()` requires two inputs: `group` and `var`. To the `df.hourly` dataframe, `group_summarize` first groups the data by this grouping variable and by `Time`, then summarizes the mean value, the standard deviation, the number of observations within the group, and the standard error of the mean (sem).
+
+Let's try it out on one variable and one grouping to make sure it works.
+
 ```{r}
 group_summarize("Sex","EE")
 ```
 
 Now, loop through all variables in `tsvars` and run this function. We'll store the result in a list called `grp.summaries`. Run `View(grp.summaries)` to see the structure. You can access the individual data frames within this list by using the `$` indexing syntax, for example, `grp.summaries$RER`.
+
 ```{r}
 #| warning: false
 # initialize empty list
@@ -158,9 +167,11 @@ for (i in 1:length(tsvars)) {
 }
 grp.summaries$RER
 ```
-Almost ready to plot, but we need a couple more things to make sure we can automate the plot generation and make them pretty. 
 
-First, let's extract the photoperiod information - this will allow us to have shaded boxes corresponding to dark cycle, and light boxes corresponding to the light cycle. 
+Almost ready to plot, but we need a couple more things to make sure we can automate the plot generation and make them pretty.
+
+First, let's extract the photoperiod information - this will allow us to have shaded boxes corresponding to dark cycle, and light boxes corresponding to the light cycle.
+
 ```{r}
 #| warning: false
 # Extract time-series as small df for plotting
@@ -168,7 +179,9 @@ pp_data <- df.hourly %>%
   distinct(Time,Photoperiod)
 head(pp_data)
 ```
+
 Okay last step - let's write a function that will generate our plots for us! We want them to all look the same, but automatically have the correct title and x-axis labels. The following function, `group_tsplot()`, (should) accomplish this. If it looks busy, imagine having to copy/paste this 10x for each of your variables!
+
 ```{r}
 # Create function to generate time-series plots
 tsplot <- function(data,group,title,ylab) {
@@ -204,9 +217,11 @@ tsplot <- function(data,group,title,ylab) {
   
 }
 ```
-Let's break down what this function does. The first line `tsplot <- function(data,group,title,ylab)` indicates our function requires 4 inputs: `data`, `group`, `title`, and `ylab`. 
 
-Let's test this "manually" on one set of data before we loop through all of `tsvars` again. 
+Let's break down what this function does. The first line `tsplot <- function(data,group,title,ylab)` indicates our function requires 4 inputs: `data`, `group`, `title`, and `ylab`.
+
+Let's test this "manually" on one set of data before we loop through all of `tsvars` again.
+
 ```{r}
 data      <- grp.summaries$EE
 group     <- "Treatment"
@@ -216,7 +231,9 @@ p1        <- tsplot(data,group,title,ylab)
 
 p1
 ```
-Cool! It seems to work. Let's loop through `tsvars` again and generate plots for all of our variables of interest. We'll store the resulting ggplot objects in a list called `ts.plots`, so we can access or print out the individual plots using `$` indexing, as before with our grp.summaries. 
+
+Cool! It seems to work. Let's loop through `tsvars` again and generate plots for all of our variables of interest. We'll store the resulting ggplot objects in a list called `ts.plots`, so we can access or print out the individual plots using `$` indexing, as before with our grp.summaries.
+
 ```{r}
 #| warning: false
 # Loop through ggplot generation 
@@ -238,7 +255,9 @@ for (i in 1:length(tsvars)) {
   
 }
 ```
+
 ## Box Plots (D/L/total for daily and overall experiment)
+
 Now, we'll use the same approach as above to generate box and whisker plots for dark/light/total values for each variable in `boxplotvars`. First, we'll create a function, `bxplot()`, that generates plots how we'd like them to look:
 
 ```{r}
@@ -260,6 +279,7 @@ bxplot <- function(data,group,var,title,ylab) {
   
 }
 ```
+
 Now, we can loop through `boxplotvars`. First, let's make box plots for the entire experiment, saving them in a list called `box.plots`.
 
 ```{r}
@@ -281,7 +301,9 @@ for (i in 1:length(boxplotvars)) {
   box.plots[[i]] <- plot
 }
 ```
+
 Now let's make daily box plots, saving in a list called `daily.box.plots`...these are much busier, but may be useful to evaluate qualitatively for any day-specific effects.
+
 ```{r}
 # Loop through all the variables for daily plots
 daily.box.plots <- vector(mode = "list",length = length(boxplotvars))
@@ -302,8 +324,11 @@ for (i in 1:length(boxplotvars)) {
   daily.box.plots[[i]] <- plot
 }
 ```
+
 ## Assemble figures
+
 From here, you can either export your plots into your desired format to assemble figures elsehwere (Lighroom, Photoshop, Powerpoint, God forbid). Or, you can play around with the `patchwork` library, which can arrange panels and labels for you in an intuitive syntax.
+
 ```{r}
 Figure1 <- ts.plots$EE / ts.plots$RER
 Figure1 +
@@ -314,7 +339,8 @@ Figure1 +
     tag_levels = "a"
   )
 ```
-There are a few kinks to be worked out with font sizing and spacing, but it's pretty powerful! 
+
+There are a few kinks to be worked out with font sizing and spacing, but it's pretty powerful!
 
 ```{r}
 Figure2 <- box.plots$EE + box.plots$RER

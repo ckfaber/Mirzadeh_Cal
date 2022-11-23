@@ -162,6 +162,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="to-do" class="level6">
 <h6 class="anchored" data-anchor-id="to-do">To do:</h6>
 <ul>
+<li><p>Batch saving/exporting vector graphic files of plots</p></li>
+<li><p>When generating grp.summaries list, currently other possibly desired groupings (e.g., Diet, Cohort, Sex) are omitted. Will revise so that they are included if faceting by other groupings is desired.</p></li>
 <li><p>Normalize various measures by body weight</p></li>
 <li><p>Convert to function? Must decide on best user-provided function ins and outs</p></li>
 <li><p>Statistical analyses in separate function/script? Look to CalR paper for code reference on ANCOVA. If stats done in separate function, how best to annotate significance?</p></li>
@@ -443,7 +445,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, we can loop through <code>boxplotvars</code>. First, let’s make box plots for the entire experiment…</p>
+<p>Now, we can loop through <code>boxplotvars</code>. First, let’s make box plots for the entire experiment, saving them in a list called <code>box.plots</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through all variables for overall experiment plots</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>box.plots <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>,<span class="at">length =</span> <span class="fu">length</span>(boxplotvars))</span>
@@ -481,7 +483,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><img src="Cal_Plot_files/figure-html/unnamed-chunk-17-6.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Now let’s make daily box plots…</p>
+<p>Now let’s make daily box plots, saving in a list called <code>daily.box.plots</code>…these are much busier, but may be useful to evaluate qualitatively for any day-specific effects.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through all the variables for daily plots</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>daily.box.plots <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>,<span class="at">length =</span> <span class="fu">length</span>(boxplotvars))</span>
@@ -518,6 +520,34 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div class="cell-output-display">
 <p><img src="Cal_Plot_files/figure-html/unnamed-chunk-18-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="assemble-figures" class="level2">
+<h2 class="anchored" data-anchor-id="assemble-figures">Assemble figures</h2>
+<p>From here, you can either export your plots into your desired format to assemble figures elsehwere (Lighroom, Photoshop, Powerpoint, God forbid). Or, you can play around with the <code>patchwork</code> library, which can arrange panels and labels for you in an intuitive syntax.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Figure1 <span class="ot">&lt;-</span> ts.plots<span class="sc">$</span>EE <span class="sc">/</span> ts.plots<span class="sc">$</span>RER</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>Figure1 <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Figure 1. Neonatal digestion of PNNs does stuff!"</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"from cohort mon001"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">tag_levels =</span> <span class="st">"a"</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>There are a few kinks to be worked out with font sizing and spacing, but it’s pretty powerful!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>Figure2 <span class="ot">&lt;-</span> box.plots<span class="sc">$</span>EE <span class="sc">+</span> box.plots<span class="sc">$</span>RER</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>Figure2 <span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">title =</span> <span class="st">"Figure 2. Photoperiod-averaged data is cool"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">tag_levels =</span> <span class="st">"a"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Cal_Plot_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
