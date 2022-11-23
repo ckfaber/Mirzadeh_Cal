@@ -59,7 +59,7 @@ length2 <- end2-start2
 rec_lag <- as.integer(start2-start1)
 
 # Shift df2 to align with df1 by date: 
-if(setequal(df1$DateTime,df1$DateTime) & length1 == length2){
+if(setequal(df1$DateTime,df2$DateTime) & length1 == length2){
   print("DateTimes align, merging data frames into Merged_Data data frame")
   Merged_Data <- bind_rows(df1,df2,.id = "Df_ID")
   View(df_Merge)

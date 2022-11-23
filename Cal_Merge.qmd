@@ -1,0 +1,62 @@
+---
+title: "Cal_Merge: Script for Merging Independent Calorimetry Runs"
+author: "Chelsea Faber"
+format: 
+   html:
+     df-print: paged
+editor: visual
+---
+
+## How to use this script:
+
+###### Inputs:
+
+-   
+
+###### Outputs: 
+
+-   
+
+###### Requirements:
+
+###### Known Bugs:
+
+###### To Do:
+
+```{r}
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(here)
+```
+
+## Define inputs to script for analysis
+
+```{r}
+# First df to be merged
+cohort1       <- "mon001" 
+rundate1      <- "_2021-10-18" 
+
+# Second df to be merged
+cohort1       <- "mon002" 
+rundate1      <- "_2021-11-03" 
+```
+
+## Load data frames
+
+```{r}
+run1         <- paste(rundate1,cohort1,"Clean.Rda", sep = "_")
+run2         <- paste(rundate2,cohort2,"Clean.Rda", sep = "_")
+
+load(here::here(run1))
+
+# Only need df.hourly, so save this to df1 and df2 and remove all other data from workspace
+df1          <- df.hourly
+rm(list = setdiff(ls(), "df1"))
+
+load(here::here(run2))
+df2          <- df.hourly
+rm(list = setdiff(ls(), c("df1","df2")))
+```
+
+## Load data frames
