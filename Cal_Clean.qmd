@@ -29,8 +29,8 @@ editor: visual
 ## Load required packages
 
 ```{r}
-#| label: load-packages
-#| warning: false
+#/ label: load-packages
+#/ warning: false
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(magrittr)
@@ -64,8 +64,8 @@ To load your data, please ensure that it is located in the repository that the `
 A workaround, if you do not wish to load your data using the here() package, is to type the entire file path in the call to `read_csv()`.
 
 ```{r}
-#| warning: false
-#| code-overflow: wrap
+#/ warning: false
+#/ code-overflow: wrap
 filename        <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"DECODED",sep = "_")
 
@@ -89,7 +89,7 @@ head(df)
 Here, we remove any animals that we had previously specified, and perform some general data cleaning - most importantly, extraction of time of day information from the DateTime column.
 
 ```{r}
-#| warning: false
+#/ warning: false
 
 # Remove dead/sick animals; if NA, don't run
 if (!is.na(remove_animals)) {
@@ -198,7 +198,7 @@ if (trim.short.days) {
 Here, we compute hourly bins for each variable. Depending on variable, this is done by either summing all values within the hour (`cols2sum`: binned, non-cumulative measures), taking the mean of all values within the hour (`cols2avg`: rates), taking the maximum value within the hour (`cols4cum`: binned, cumulative measures), and taking the median value for assigning the new bin time (`cols2keep`: dates and times only).
 
 ```{r}
-#| warning: false
+#/ warning: false
 
 cols2sum <- c('FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','AllMeters')
 cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
@@ -236,7 +236,7 @@ Next, we compute the cumulative totals or averages of all variables for each exp
 If incomplete days were not trimmed above, then the daily and photoperiod averages will be affected by the start and end of recording where \<24-hours are included. Working on a fix for this, where each day starts from the start of the recording (day 1 = first 24 hours, and so on).
 
 ```{r}
-#| warning: false
+#/ warning: false
 # Compute average for each day
 total.avg.daily <- df %>%
   group_by(exp_day,Group,Treatment,Sex,Animal) %>% 
@@ -253,7 +253,7 @@ total.avg.daily
 Next, we compute cumulative totals or averages of all variables within each photoperiod per day. This is merged with the `total.avg.daily` data so that plots containing dark, light, and total can be obtained from the same data frame.
 
 ```{r}
-#| warning: false
+#/ warning: false
 # Compute average within each photoperiod, append to total.avg.daily
 pp.avg.daily <- df %>%
   group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
@@ -269,7 +269,7 @@ pp.avg.daily
 Finally, we compute cumulative totals and averages across the entire experiment, for each day...
 
 ```{r}
-#| warning: false
+#/ warning: false
 # Compute average across variables for entire experiment
 total.avg <- df %>%
   group_by(Group,Treatment,Sex,Animal) %>%
@@ -283,7 +283,7 @@ total.avg <- df %>%
 ... and within each photoperiod.
 
 ```{r}
-#| warning: false
+#/ warning: false
 # Compute the overall average daily value for every requested variable across the whole experiment
 pp.avg.total <- pp.avg.daily %>%
   group_by(Photoperiod,Group,Treatment,Sex,Animal) %>%
