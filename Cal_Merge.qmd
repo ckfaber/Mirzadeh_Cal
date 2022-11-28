@@ -11,23 +11,31 @@ editor: visual
 
 ###### Inputs:
 
--   
+-   Cohorts and associated run dates to be combined ([cohort1]{.underline}, [rundate1]{.underline}, [cohort2]{.underline}, [rundate2;]{.underline} type character)
+
+-   binsize in minutes (type double)
+
+-   csv and Rda specifying desired file type(s) for merged runs (type logical)
 
 ###### Outputs:
 
--   
+-   .Rda containing the trimmed and aligned runs
 
-###### Requirements:
+-   (optional) csv containing the trimmed and aligned runs
 
 ###### Known Bugs:
 
+-   Rendering this .qmd will fail - there is some issue with the exporting to csv that prevents rendering in HTML. The code will still run properly within R Studio, however.
+
 ###### To Do:
+
+1.  Add conditional loading of original binning if higher resolution than hourly is needed
 
 ```{r}
 #| label: load-packages
 #| warning: false
-library(plyr)
 library(tidyverse)
+library(magrittr)
 library(lubridate)
 library(here)
 ```
@@ -42,6 +50,13 @@ rundate1      <- "2021-10-18"
 # Second df to be merged
 cohort2       <- "mon002" 
 rundate2      <- "2021-11-03" 
+
+# Resolution needed, in minutes. Default 60.
+binsize       <- 60
+
+# Specify how results should be exported. Default Rda only.
+csv           <- FALSE
+Rda           <- TRUE
 ```
 
 ## Load data frames
@@ -63,12 +78,95 @@ rm(list = setdiff(ls(), c("df1","df2","cohort1","rundate1","cohort2","rundate2")
 
 ## Inspect data frames
 
+Check that the column names are equivalent between the two runs to be combined. If a different macro version was used to analyze the raw .exp data, some differences may be present that will have to be manually resolved in the Cal_Clean.R script.
+
 ```{r}
-if (length(colnames(df1)) != length(colnames(df2))) {
+if (!setequal(colnames(df1),colnames(df2))) {
   
-  
-  
+  stop('Different column names between df1 and df2. Examine the data frames and rerun raw data through Cal_Clean.R if necessary.')
+
 }
 ```
 
-## Align & merge data frames
+## Align and merge data frames
+
+First, shift one data frames dates to align with the other. Note that this will shift the calendar dates, but not clock time.
+
+```{r}
+# Shift one data frame so that start dates align
+start1 <- head(df1$DateTime,1)
+start2 <- head(df2$DateTime,1)
+
+if (start2 > start1) {
+  ordered <- TRUE
+  rec_lag <- as.integer(floor(start2 - start1))
+  df2_shifted <- df2 %>% 
+    mutate(DateTime = DateTime - days(rec_lag))
+  df2_shifted <- df2_shifted[order(df2_shifted$DateTime),] %>%
+    arrange(Animal)
+  
+} else {
+  ordered <- FALSE
+  rec_lag <- as.integer(floor(start1 - start2))
+  df2_shifted <- df2 %>% 
+    mutate(DateTime = DateTime + days(rec_lag))
+  df2_shifted <- df2_shifted[order(df2_shifted$DateTime),] %>%
+    arrange(Animal)
+}
+```
+
+Next, find the indices of matching DateTimes. Create new data frames containing matched times only.
+
+```{r}
+# Find locations where DateTimes in df1 match values in df2 and vice versa
+df1_match_idx <- match(df1$DateTime,df2_shifted$DateTime)
+df2_match_idx <- match(df2_shifted$DateTime,df1$DateTime)
+
+# Subset matching indices into new df_matched objects
+df1_matched <- df1[!is.na(df1_match_idx),]
+df2_matched <- df2_shifted[!is.na(df2_match_idx),]
+
+# Recompute Time column to start from 0 in both tables.
+start_time <- df1_matched$DateTime[1]
+df1_matched %<>%
+  mutate(Time = as.numeric(difftime(DateTime,start_time),units = "hours"))
+
+df2_matched %<>%
+  mutate(Time = as.numeric(difftime(DateTime,start_time),units = "hours"))
+```
+
+Combine data frames into one, stacking the tables with `bind_rows()`.
+
+```{r}
+# Final quality check before merging data frames
+if (setequal(df1_matched$DateTime,df2_matched$DateTime)) {
+  print("DateTimes are aligned, merging data frames into df_merge")
+  df_merge <- bind_rows(df1_matched,df2_matched,.id = "Df_ID")
+} else {
+  print("Warning: DateTimes not aligned. Contact Chelsea for help!")
+  paste("df1 has {length(unique(df1_matched$DateTime))} unique datetimes, while df2 has {length(unique(df2_matched$DateTime))} unique datetimes.")
+}
+```
+
+## Export data
+
+```{r}
+#| warning: false
+#| echo: false
+filename <- paste("MERGED",rundate1,cohort1,rundate2,cohort2, sep = "_")
+
+#/ warning: false
+if (csv != FALSE) {
+  print("Saving .csv with combined runs.")
+  write.csv(df_merge, paste(filename, ".csv", sep = ""),row.names = FALSE)
+} else {
+  print("No .csv will be saved. Set csv equal to TRUE to change.")
+}
+
+if (Rda) {
+  save(df_merge,file = paste(filename,".Rda", sep = ""))
+  print("Saving .Rda with combined runs.")
+} else {
+  print("No .Rda will be saved. Set Rda equal to TRUE to change.")
+}
+```
