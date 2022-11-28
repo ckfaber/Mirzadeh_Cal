@@ -24,6 +24,8 @@ editor: visual
 ###### To Do:
 
 ```{r}
+#| label: load-packages
+#| warning: false
 library(plyr)
 library(tidyverse)
 library(lubridate)
@@ -52,11 +54,21 @@ load(here::here(run1))
 
 # Only need df.hourly, so save this to df1 and df2 and remove all other data from workspace
 df1          <- df.hourly
-rm(list = setdiff(ls(), c("df1","run2")))
+rm(list = setdiff(ls(), c("df1","cohort1","rundate1","cohort2","rundate2", "run2")))
 
 load(here::here(run2))
 df2          <- df.hourly
-rm(list = setdiff(ls(), c("df1","df2")))
+rm(list = setdiff(ls(), c("df1","df2","cohort1","rundate1","cohort2","rundate2")))
 ```
 
-## Load data frames
+## Inspect data frames
+
+```{r}
+if (length(colnames(df1)) != length(colnames(df2))) {
+  
+  
+  
+}
+```
+
+## Align & merge data frames
