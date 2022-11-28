@@ -173,6 +173,9 @@ Next, we remove rows/columns with missing values (NAs) across entire row/column.
 # Remove any rows/columns with only NAs
 df <- df[rowSums(is.na(df)) != ncol(df), ]
 df <- df[, colSums(is.na(df)) != nrow(df)]
+
+# Trim last row with mostly NAs, created during some transformations above
+df <- head(df,-1)
 ```
 
 Here we can optionally remove data points that are not part of a full day's recording. I only recommend this if your first and last days of recording are not important to your analysis.
