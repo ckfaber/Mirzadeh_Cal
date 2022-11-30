@@ -29,8 +29,9 @@ editor: visual
 ## Load required packages
 
 ```{r}
-#/ label: load-packages
-#/ warning: false
+#| label: load-packages
+#| warning: false
+#| echo: false
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(magrittr)
@@ -44,17 +45,24 @@ If everything is working properly, these variables are the only ones a user shou
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "mon002"
-rundate         <- "2021-11-03"  
+cohort          <- "mon001"
+rundate         <- "2021-10-18"  
 remove_animals  <- NA
 
 # Default parameters
-trim.short.days <- TRUE
+trim.short.days <- FALSE
+diet.change     <- FALSE
+temp.change     <- FALSE
+intervention    <- FALSE
 diet.kcal       <- 4.2
-cols2excl       <- c('Age','Cage','Stilltime_M',
-               'Sleeptime_M','XBreak_R','YBreak_R',
-               'Mass_g','AllMeters_M')
-ext             <- ".csv"
+cols2excl       <- c('Age','Cage','Stilltime_M','Sleeptime_M',
+                     'XBreak_R','YBreak_R','Mass_g','AllMeters_M')
+```
+
+## More parameters, depending on inputs
+
+```{r}
+# insert if/then statements for diet.change, temp.change, and intervention (prompt user to give date/time of change) - for diet, also prompt for starting diet, ending diet
 ```
 
 ## Load data
@@ -64,8 +72,8 @@ To load your data, please ensure that it is located in the repository that the `
 A workaround, if you do not wish to load your data using the here() package, is to type the entire file path in the call to `read_csv()`.
 
 ```{r}
-#/ warning: false
-#/ code-overflow: wrap
+#| warning: false
+#| code-overflow: wrap
 filename        <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"DECODED",sep = "_")
 
@@ -81,7 +89,6 @@ df              <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
   select(!(starts_with("Enviro") 
            | starts_with("Ped") 
            | all_of(cols2excl)))
-head(df)
 ```
 
 ## Tidy data
@@ -89,7 +96,7 @@ head(df)
 Here, we remove any animals that we had previously specified, and perform some general data cleaning - most importantly, extraction of time of day information from the DateTime column.
 
 ```{r}
-#/ warning: false
+#| warning: false
 
 # Remove dead/sick animals; if NA, don't run
 if (!is.na(remove_animals)) {
@@ -109,7 +116,9 @@ df %<>%
 df <- df[order(df$DateTime),] %>%
   arrange(ID_Code)
 
-head(df)
+# Remove any rows/columns with only NAs
+df <- df[rowSums(is.na(df)) != ncol(df), ]
+df <- df[, colSums(is.na(df)) != nrow(df)]
 ```
 
 ## Transform data
@@ -117,22 +126,62 @@ head(df)
 Here, we compute a handful of new variables from existing ones, including Zeitgeber time, Photoperiod, and experimental day from DateTime, etc.
 
 ```{r}
+# Extract original date-time information
+og.start         <- head(df$DateTime, n=1)
+og.end           <- last(df$DateTime)
+og.dur           <- og.end - og.start
+
+# Find index of first lights out (18:00) for each animal
+df %<>% group_by(ID_Code)
+idx.start        <- which(hour(df$DateTime) == 18)[1]-2
+time.start       <- as.POSIXct(df$DateTime[idx.start])
+
+# Trim everything before first lights out
+df %<>%
+  filter(DateTime > time.start)
+
+# Find index of last lights out
+idx.end          <- tail(which(hour(df$DateTime) == 17), n=1) + 1
+time.end         <- as.POSIXct(df$DateTime[idx.end])
+
+# Trim everything after last lights out
+df %<>% 
+  filter(DateTime < time.end)
 
 # Compute experimental day and ZT time, rename some variables
 df %<>%
-  mutate(ZT = plyr::mapvalues(hour, from = (0:23), to = c(18:23,0:17)),.before = Sex) %>%     
-  mutate(Photoperiod = as.factor(plyr::mapvalues(ZT, from = c(0:23), to = c(rep(1,12),rep(0,12)))),.before = ZT) %>%
-  mutate(exp_day = plyr::mapvalues(day, from = unique(day), to = 1:length(unique(day))),.after = DateTime) %>%
-  rename(VO2 = VO2_M, 
-         Animal = ID_Code, 
-         VCO2 = VCO2_M, 
-         EE = kcal_hr_M, 
-         RER = RER_M, 
-         FoodIn.cum = FoodInA_M, 
-         WaterIn.cum = WaterInA_M, 
-         AllMeters = AllMeters_R,
-         BodyMass = BodyMass_M,
-         VH2O = VH2O_M)
+  mutate(ZT = plyr::mapvalues(hour, 
+                              from = (0:23), 
+                              to = c(18:23,0:17)),.before = Sex) %>% 
+  mutate(Photoperiod = as.factor(
+    plyr::mapvalues(ZT, 
+                    from = c(0:23), 
+                    to = c(rep(1,12),rep(0,12)))),.before = ZT) %>% 
+  group_by(ID_Code) %>%
+  
+
+
+
+
+   
+  
+# %>%
+#   rename(VO2 = VO2_M, 
+#          Animal = ID_Code, 
+#          VCO2 = VCO2_M, 
+#          EE = kcal_hr_M, 
+#          RER = RER_M, 
+#          FoodIn.cum = FoodInA_M, 
+#          WaterIn.cum = WaterInA_M, 
+#          AllMeters = AllMeters_R,
+#          BodyMass = BodyMass_M,
+#          VH2O = VH2O_M)
+
+
+# Old way.
+#mutate(exp_day = plyr::mapvalues(day, 
+#                                   from = unique(day), 
+#                                   to = 1:length(unique(day))),.after = DateTime)
 ```
 
 For plotting purposes, here we create a new column containing the time from which the recording started, in hours.
@@ -170,9 +219,7 @@ df %<>%
 Next, we remove rows/columns with missing values (NAs) across entire row/column.
 
 ```{r}
-# Remove any rows/columns with only NAs
-df <- df[rowSums(is.na(df)) != ncol(df), ]
-df <- df[, colSums(is.na(df)) != nrow(df)]
+
 
 # Trim last row with mostly NAs, created during some transformations above
 df <- head(df,-1)
