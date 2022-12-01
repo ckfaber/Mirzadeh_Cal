@@ -47,15 +47,12 @@ If everything is working properly, these variables are the only ones a user shou
 # Run-specific user-defined parameters
 cohort          <- "mon001"
 rundate         <- "2021-10-18"  
-remove_animals  <- NA
+remove_animals  <- 274
 
-# Default parameters
-diet.change     <- FALSE
-temp.change     <- FALSE
+# Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
 intervention    <- FALSE
 segment.run     <- FALSE
-diet.kcal       <- 4.2
-cols2excl       <- c('Age','Cage','Stilltime_M','Sleeptime_M',
+cols2excl       <- c('Cage','Stilltime_M','Sleeptime_M',
                      'XBreak_R','YBreak_R','Mass_g','AllMeters_M')
 ```
 
@@ -63,6 +60,8 @@ cols2excl       <- c('Age','Cage','Stilltime_M','Sleeptime_M',
 
 ```{r}
 # insert if/then statements for diet.change, temp.change, and intervention (prompt user to give date/time of change) - for diet, also prompt for starting diet, ending diet
+
+
 ```
 
 ## Load data
@@ -174,6 +173,23 @@ df %<>%
          Time = as.numeric(difftime(DateTime,time.start), units = "hours"),
          .after = DateTime) %>%
   ungroup()
+
+# Calculate rolling Age, from the starting Age entered in the "DECODED" metadata file.
+if ("Age" %in% colnames(df)) {
+  df %<>% 
+    group_by(ExpDay,Animal) %>% 
+    mutate(Age = ExpDay-1 + first(Age)) %>% 
+    ungroup()
+} else {
+  print("No Age values found in DECODED. If this is in error, please revised DECODED sheet accordingly, save, and rerun script, otherwise, continue.")
+}
+
+# Recompute cumulative variables to begin at new start time
+df %<>%
+  group_by(Animal) %>% 
+  mutate(FoodIn.cum = FoodIn.cum - first(FoodIn.cum),
+         WaterIn.cum = WaterIn.cum - first(WaterIn.cum)) %>% 
+  ungroup()
 ```
 
 Next, we will compute some more parameters of interest, including binned food and water intake (from the original cumulative values), food intake in kcal (from grams), binned and cumulative energy expenditure (from the instantaneous estimate of hourly rate), cumulative distance traveled, and energy balance. The binned energy expenditure is questionable currently - please let me know if you find any issues.
@@ -187,14 +203,24 @@ df %<>%
   group_by(Animal, ExpDay) %>%
   mutate(meanBodyMass = mean(BodyMass),.after = BodyMass) %>%
   ungroup()
+
+# Detect diet from df_code and establish conversion
+if (sum(is.na(df_code$Diet)) ==length(df_code$Diet)) {
+  print('No diet type specified in DECODED file. Assigning default of chow (4.2 kcal/g). If this is in error, please revised the DECODED file and re-run the script from the beginning.')
+  df %<>% 
+    mutate(Diet = "NCD")
+}
   
 # Compute new columns
 df %<>%
   group_by(Animal) %>%
   mutate(FoodIn.g = c(diff(FoodIn.cum),0),.before = FoodIn.cum) %>% # convert cumulative to binned food intake
-  mutate(FoodIn.cum.kcal = FoodIn.cum *diet.kcal,.after = FoodIn.cum) %>%
   mutate(WaterIn.g = c(diff(WaterIn.cum),0),.before = WaterIn.cum) %>% # convert cumulative to binned water intake
-  mutate(FoodIn.kcal = FoodIn.g * diet.kcal, .before = FoodIn.g) %>% # convert g to kcal
+  mutate(FoodIn.kcal = case_when(
+    Diet == "NCD" ~ FoodIn.g * 3.35,
+    Diet == "HFD" ~ FoodIn.g * 5.47),
+    .before = FoodIn.g) %>% # convert g to kcal
+  mutate(FoodIn.cum.kcal = cumsum(FoodIn.kcal),.after = FoodIn.cum) %>%
   mutate(EE.kcal.bin = EE * int, .before = EE) %>% # EE is kcal/hr, multiply by int (x hours between samples) to get kcal/bin
   mutate(EE.cum = cumsum(EE.kcal.bin), .before = EE.kcal.bin) %>%
   mutate(EBalance = FoodIn.kcal - EE.kcal.bin, .before = VO2) %>% # compute energy balance per bin
@@ -212,11 +238,7 @@ df %<>%
                 ~ . / meanBodyMass,
          .names = "norm.{.col}")) %>% 
     ungroup()
-```
 
-Next, we remove rows/columns with missing values (NAs) across entire row/column.
-
-```{r}
 # Trim last row with mostly NAs, created during some transformations above
 df <- head(df,-1)
 ```
@@ -257,7 +279,7 @@ df.hourly <- df %>%
   ungroup()
 ```
 
-## <!--# pick up here -->Photoperiod and daily means
+## Photoperiod and daily means
 
 Next, we compute the cumulative totals or averages of all variables for each experimental day.
 
