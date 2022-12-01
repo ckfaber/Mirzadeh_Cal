@@ -274,6 +274,7 @@ df.hourly <- df %>%
   mutate(Animal = as.factor(Animal)) %>%
   group_by(Animal) %>%
   #slice(2:(n()-1)) %>% # trim incomplete hours at start and end
+  mutate(DateTime = round_date(DateTime, "30 minutes")) %>% 
   mutate(Time = as.numeric(
     difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
   ungroup()
