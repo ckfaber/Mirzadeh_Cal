@@ -50,7 +50,6 @@ rundate         <- "2021-10-18"
 remove_animals  <- NA
 
 # Default parameters
-trim.short.days <- FALSE
 diet.change     <- FALSE
 temp.change     <- FALSE
 intervention    <- FALSE
@@ -201,6 +200,17 @@ df %<>%
   mutate(EB.cum = cumsum(EBalance), .after = EBalance) %>%
   mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>% # compute cumulative distance traveled
   ungroup()
+
+# Compute measures normalized to body weight
+cols2norm <- c('FoodIn.kcal','FoodIn.cum.kcal','EE','EE.cum','EBalance',
+               'EB.cum')
+
+df %<>% 
+  group_by(Animal) %>% 
+  mutate(across(all_of(cols2norm),
+                ~ . / meanBodyMass,
+         .names = "norm.{.col}")) %>% 
+    ungroup()
 ```
 
 Next, we remove rows/columns with missing values (NAs) across entire row/column.
@@ -210,38 +220,25 @@ Next, we remove rows/columns with missing values (NAs) across entire row/column.
 df <- head(df,-1)
 ```
 
-Here we can optionally remove data points that are not part of a full day's recording. I only recommend this if your first and last days of recording are not important to your analysis.
-
-By default, this will not run. If you want to trim the incomplete days, run `trim.short.days <- TRUE` (default is `FALSE`).
-
-```{r}
-# Remove days with <24h
-if (trim.short.days) {
-  trim.df <- df %>%
-  group_by(ExpDay) %>%
-  mutate(n = n()) %>% 
-  ungroup() %>%
-  filter(!(n < max(n)))  
-}
-```
-
 ## Bin to hourly
 
-Here, we compute hourly bins for each variable. Depending on variable, this is done by either summing all values within the hour (`cols2sum`: binned, non-cumulative measures), taking the mean of all values within the hour (`cols2avg`: rates), taking the maximum value within the hour (`cols4cum`: binned, cumulative measures), and taking the median value for assigning the new bin time (`cols2keep`: dates and times only).
+Here, we compute hourly bins for each variable. Depending on variable, this is done by either summing all values within the hour (`cols2sum`: binned, non-cumulative measures), taking the mean of all values within the hour (`cols2avg`: rates), taking the maximum value within the hour (`cols4cum`: binned, cumulative measures), and taking the median value for assigning the new bin time (`cols2med`: dates and times only).
 
 ```{r}
 #/ warning: false
 
-cols2sum <- c('FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','AllMeters')
-cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass')
-cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum','EE.cum','EB.cum','FoodIn.cum.kcal')
-cols2keep <- c('DateTime','Time','minute')
+# DO NOT CHANGE WITHOUT EXPRESS PERMISSION FROM CHELSEA!!!!!!!!!!
+cols2sum <- c('norm.FoodIn.kcal','FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','norm.EBalance','AllMeters')
+cols2avg <- c('VO2','VCO2','VH2O','EE','RER','BodyMass','meanBodyMass','norm.EE')
+cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum','EE.cum','norm.EE.cum','EB.cum','norm.EB.cum','FoodIn.cum.kcal','norm.FoodIn.cum.kcal')
+cols2med <- c('DateTime','Time','minute')
 
+# Bin to hourly! 
 df.hourly <- df %>%
   group_by(Animal,ExpDay,hour) %>%
   select(!EE.kcal.bin) %>% # don't need the 1-3" bin anymore
   mutate(
-    across(all_of(cols2keep),median)) %>% # assign middle of time bin to new bin
+    across(all_of(cols2med),median)) %>% # assign middle of time bin to new bin
   mutate(across(
     all_of(cols2avg), mean)) %>% # rates get averaged
   mutate(across(
@@ -253,13 +250,13 @@ df.hourly <- df %>%
   select(!c(hour,minute,month,day)) %>% 
   mutate(Animal = as.factor(Animal)) %>%
   group_by(Animal) %>%
-  slice(2:(n()-1)) %>% # trim incomplete hours at start and end
+  #slice(2:(n()-1)) %>% # trim incomplete hours at start and end
   mutate(Time = as.numeric(
     difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
   ungroup()
 ```
 
-## Photoperiod and daily means
+## <!--# pick up here -->Photoperiod and daily means
 
 Next, we compute the cumulative totals or averages of all variables for each experimental day.
 
