@@ -41,7 +41,7 @@ library(here)
 
 ## Define inputs to script for analysis
 
-If everything is working properly, these variables are the only ones a user should have to change to clean a given file's calorimetry data. Eventually, this entire script will be converted to a function, such that the user would type these in-line when calling that function (e.g., `Cal_Clean(cohort = 'mon001',rundate = '2021-10-18',remove_animals = 274,trim.short.days = FALSE)`).
+If everything is working properly, these variables are the only ones a user should have to change to clean a given file's calorimetry data. Eventually, this entire script will be converted to a function, such that the user would type these in-line when calling that function (e.g., `Cal_Clean(cohort = 'mon001',rundate = '2021-10-18',remove_animals = 274)`).
 
 ```{r}
 # Run-specific user-defined parameters
@@ -53,6 +53,7 @@ remove_animals  <- NA
 diet.change     <- FALSE
 temp.change     <- FALSE
 intervention    <- FALSE
+segment.run     <- FALSE
 diet.kcal       <- 4.2
 cols2excl       <- c('Age','Cage','Stilltime_M','Sleeptime_M',
                      'XBreak_R','YBreak_R','Mass_g','AllMeters_M')
@@ -268,15 +269,13 @@ If incomplete days were not trimmed above, then the daily and photoperiod averag
 #/ warning: false
 # Compute average for each day
 total.avg.daily <- df %>%
-  group_by(Exp,Group,Treatment,Sex,Animal) %>% 
+  group_by(ExpDay,Animal) %>% 
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean)) %>%
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max)) %>%
   mutate(Photoperiod = "Total") %>%
-  ungroup()
-
-total.avg.daily
-
+  ungroup() 
 ```
 
 Next, we compute cumulative totals or averages of all variables within each photoperiod per day. This is merged with the `total.avg.daily` data so that plots containing dark, light, and total can be obtained from the same data frame.
@@ -285,12 +284,15 @@ Next, we compute cumulative totals or averages of all variables within each phot
 #/ warning: false
 # Compute average within each photoperiod, append to total.avg.daily
 pp.avg.daily <- df %>%
-  group_by(ExpDay,Photoperiod,Group,Treatment,Sex,Animal) %>%
+  group_by(ExpDay,Photoperiod,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean)) %>%
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max)) %>% 
   ungroup() %>%
-  bind_rows(.,total.avg.daily) 
+  bind_rows(.,total.avg.daily) %>% 
+  left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
+  select(-Animal.y)
 rm(total.avg.daily)
 pp.avg.daily
 ```
@@ -299,13 +301,14 @@ Finally, we compute cumulative totals and averages across the entire experiment,
 
 ```{r}
 #/ warning: false
-# Compute average across variables for entire experiment
+# Compute each animal's average/total per variable for entire experiment
 total.avg <- df %>%
-  group_by(Group,Treatment,Sex,Animal) %>%
+  group_by(Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean)) %>%
-  mutate(Photoperiod = "Total") %>%
+    across(all_of(cols2avg),mean),
+    across(all_of(cols4cum),max)) %>% 
+  mutate(Photoperiod = "Total") %>% 
   ungroup()
 ```
 
@@ -314,11 +317,17 @@ total.avg <- df %>%
 ```{r}
 #/ warning: false
 # Compute the overall average daily value for every requested variable across the whole experiment
-pp.avg.total <- pp.avg.daily %>%
-  group_by(Photoperiod,Group,Treatment,Sex,Animal) %>%
+pp.avg.total <- df %>%
+  group_by(Photoperiod,Animal) %>%
   summarize(
-    across(all_of(c(cols2sum,cols2avg)),mean)) %>% 
-  ungroup()
+    across(all_of(cols2sum),sum),
+    across(all_of(cols2avg), mean),
+    across(all_of(cols4cum),max)) %>% 
+  ungroup() %>%
+  bind_rows(., total.avg) %>% 
+  left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
+  select(-Animal.y)
+
 rm(total.avg)
 pp.avg.total
 ```

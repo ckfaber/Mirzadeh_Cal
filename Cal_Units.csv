@@ -23,14 +23,19 @@ EnviroOccupancy_M,NA,,,
 EnviroSound_M,NA,,,
 Stilltime_M,NA,,,
 Sleeptime_M,NA,,,
-,EE.kcal.bin,NA,(kcal),"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"
-,AllMeters.cum,Cumulative Activity,(m),Calculated from AllMeters using cumsum()
-,FoodIn.g,Food Intake,(g),Calculated from FoodIn.cum using diff()
-,WaterIn.g,Water Intake,(g),Calculated from WaterIn.cum using diff()
-,FoodIn.kcal,Food Intake,(kcal),Calculated from FoodIn.g*4.2
-,EBalance,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
-,EE.norm,Normalized Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/BodyMass
-,EB.norm,Normalized Energy Balance,(kcal/g),Energy balance normalized to body mass (g). Calculated as EBalance/BodyMass
-,EE.cum,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure
-,EB.cum,Cumulative Energy Balance,(kcal),Cumulative energy balance
-,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)
+NA,EE.kcal.bin,NA,(kcal),"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"
+NA,AllMeters.cum,Cumulative Activity,(m),Calculated from AllMeters using cumsum()
+NA,FoodIn.g,Food Intake,(g),Calculated from FoodIn.cum using diff()
+NA,WaterIn.g,Water Intake,(g),Calculated from WaterIn.cum using diff()
+NA,FoodIn.kcal,Food Intake,(kcal),Calculated from FoodIn.g*4.2
+NA,EBalance,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
+NA,norm.EE,Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass
+NA,norm.Ebalance,Energy Balance,(kcal/g),Energy balance normalized to body mass (g). Calculated as EBalance/meanBodyMass
+NA,EE.cum,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure
+NA,EB.cum,Cumulative Energy Balance,(kcal),Cumulative energy balance
+NA,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)
+,meanBodyMass,Mean Daily Body mass,(g),"Calculated from BodyMass. Averaged for each experimental day, used to compute all variables beginning with ""norm."""
+,norm.FoodIn.kcal,Food Intake,(kcal/g),Calculated as FoodIn.kcal / meanBodyMass
+,norm.FoodIn.cum.kcal,Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass
+,norm.EE.cum,Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass
+,norm.EB.cum,Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass
