@@ -1,0 +1,17 @@
+---
+title: "Cal_Segment"
+format: html
+editor: visual
+---
+
+## Goals
+
+-   Prompt user for additional info re: segmenting
+
+-   write separate function/script
+
+-   require two+ vector inputs defining seg1 start, seg1 stop, seg2 start, seg2 stop, etc. How to encode flexibility here..?
+
+-   recalculate cumulative values from 0 for each, recalculate elapsed time from 0 for each
+
+## 
