@@ -123,7 +123,7 @@ df <- df[, colSums(is.na(df)) != nrow(df)]
 
 ## Transform data
 
-Here, we compute a handful of new variables from existing ones, including Zeitgeber time, Photoperiod, and experimental day from DateTime, etc.
+Here, we first filter the data so that all recordings begin and end at ZT12 (18:00). Next we compute a handful of new variables from the original DateTime, including Zeitgeber time, Photoperiod, and experimental day.
 
 ```{r}
 # Extract original date-time information
@@ -133,7 +133,7 @@ og.dur           <- og.end - og.start
 
 # Find index of first lights out (18:00) for each animal
 df %<>% group_by(ID_Code)
-idx.start        <- which(hour(df$DateTime) == 18)[1]-2
+idx.start        <- which(hour(df$DateTime) == 18)[1]-1
 time.start       <- as.POSIXct(df$DateTime[idx.start])
 
 # Trim everything before first lights out
@@ -148,7 +148,7 @@ time.end         <- as.POSIXct(df$DateTime[idx.end])
 df %<>% 
   filter(DateTime < time.end)
 
-# Compute experimental day and ZT time, rename some variables
+# Compute ZT time, rename some variables
 df %<>%
   mutate(ZT = plyr::mapvalues(hour, 
                               from = (0:23), 
@@ -156,43 +156,24 @@ df %<>%
   mutate(Photoperiod = as.factor(
     plyr::mapvalues(ZT, 
                     from = c(0:23), 
-                    to = c(rep(1,12),rep(0,12)))),.before = ZT) %>% 
-  group_by(ID_Code) %>%
-  
+                    to = c(rep(1,12),rep(0,12)))),.before = ZT) %>%
+  rename(VO2 = VO2_M,
+         Animal = ID_Code,
+         VCO2 = VCO2_M,
+         EE = kcal_hr_M,
+         RER = RER_M,
+         FoodIn.cum = FoodInA_M,
+         WaterIn.cum = WaterInA_M,
+         AllMeters = AllMeters_R,
+         BodyMass = BodyMass_M,
+         VH2O = VH2O_M)
 
-
-
-
-   
-  
-# %>%
-#   rename(VO2 = VO2_M, 
-#          Animal = ID_Code, 
-#          VCO2 = VCO2_M, 
-#          EE = kcal_hr_M, 
-#          RER = RER_M, 
-#          FoodIn.cum = FoodInA_M, 
-#          WaterIn.cum = WaterInA_M, 
-#          AllMeters = AllMeters_R,
-#          BodyMass = BodyMass_M,
-#          VH2O = VH2O_M)
-
-
-# Old way.
-#mutate(exp_day = plyr::mapvalues(day, 
-#                                   from = unique(day), 
-#                                   to = 1:length(unique(day))),.after = DateTime)
-```
-
-For plotting purposes, here we create a new column containing the time from which the recording started, in hours.
-
-```{r}
-# Compute hours from recording start for plots
-start_time <- df$DateTime[1]
-df %<>%
-  mutate(Time = as.numeric(difftime(DateTime,start_time),units = "hours"),.after = DateTime)
-
-head(df$Time)
+# Compute experimental day (ExpDay) and elapsed time (Time) in hours
+df %<>% 
+  mutate(ExpDay = as.integer(ceiling(difftime(DateTime,time.start, units = "days"))),
+         Time = as.numeric(difftime(DateTime,time.start), units = "hours"),
+         .after = DateTime) %>%
+  ungroup()
 ```
 
 Next, we will compute some more parameters of interest, including binned food and water intake (from the original cumulative values), food intake in kcal (from grams), binned and cumulative energy expenditure (from the instantaneous estimate of hourly rate), cumulative distance traveled, and energy balance. The binned energy expenditure is questionable currently - please let me know if you find any issues.
@@ -201,6 +182,12 @@ Next, we will compute some more parameters of interest, including binned food an
 # Compute time interval (in hours) for estimating binned energy expenditure
 int <- df$Time[2] - df$Time[1]
 
+# Compute daily average for body mass
+df %<>%
+  group_by(Animal, ExpDay) %>%
+  mutate(meanBodyMass = mean(BodyMass),.after = BodyMass) %>%
+  ungroup()
+  
 # Compute new columns
 df %<>%
   group_by(Animal) %>%
@@ -213,14 +200,12 @@ df %<>%
   mutate(EBalance = FoodIn.kcal - EE.kcal.bin, .before = VO2) %>% # compute energy balance per bin
   mutate(EB.cum = cumsum(EBalance), .after = EBalance) %>%
   mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>% # compute cumulative distance traveled
-  ungroup() 
+  ungroup()
 ```
 
 Next, we remove rows/columns with missing values (NAs) across entire row/column.
 
 ```{r}
-
-
 # Trim last row with mostly NAs, created during some transformations above
 df <- head(df,-1)
 ```
@@ -233,7 +218,7 @@ By default, this will not run. If you want to trim the incomplete days, run `tri
 # Remove days with <24h
 if (trim.short.days) {
   trim.df <- df %>%
-  group_by(exp_day) %>%
+  group_by(ExpDay) %>%
   mutate(n = n()) %>% 
   ungroup() %>%
   filter(!(n < max(n)))  
@@ -253,7 +238,7 @@ cols4cum <- c('AllMeters.cum','FoodIn.cum','WaterIn.cum','EE.cum','EB.cum','Food
 cols2keep <- c('DateTime','Time','minute')
 
 df.hourly <- df %>%
-  group_by(Animal,exp_day,hour) %>%
+  group_by(Animal,ExpDay,hour) %>%
   select(!EE.kcal.bin) %>% # don't need the 1-3" bin anymore
   mutate(
     across(all_of(cols2keep),median)) %>% # assign middle of time bin to new bin
@@ -286,7 +271,7 @@ If incomplete days were not trimmed above, then the daily and photoperiod averag
 #/ warning: false
 # Compute average for each day
 total.avg.daily <- df %>%
-  group_by(exp_day,Group,Treatment,Sex,Animal) %>% 
+  group_by(Exp,Group,Treatment,Sex,Animal) %>% 
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean)) %>%
@@ -303,7 +288,7 @@ Next, we compute cumulative totals or averages of all variables within each phot
 #/ warning: false
 # Compute average within each photoperiod, append to total.avg.daily
 pp.avg.daily <- df %>%
-  group_by(exp_day,Photoperiod,Group,Treatment,Sex,Animal) %>%
+  group_by(ExpDay,Photoperiod,Group,Treatment,Sex,Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean)) %>%
