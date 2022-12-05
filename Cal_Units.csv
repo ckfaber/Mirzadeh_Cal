@@ -9,9 +9,9 @@ PedMeters_M,NA,NA,(m),"Sum of all directed ambulatory locomotion within the beam
 PedMeters_R,PedMeters,Directed Activity,(m),"Sum of all directed ambulatory locomotion within the beam break system (excludes wheel if present). For defining directed locomotion, the macros use a cutoff speed of 1 cm/s - if the animals travel at that speed or faster, it is considered to be directed locomotion."
 PedSpeed_Mnz,PedSpeed,Directed Speed,(m/s),Mean directed ambulatory locomotion speed. _Mnz indicates zero values were excluded in calculating the mean
 RER_M,RER,RER,NA,"Mean respiratory exchange ratio, VCO2/VO2, unitless"
-VCO2_M,VCO2,vCO2 Emission,(mL/min),Rate of carbon dioxide emission
-VH2O_M,VH2O,vH2O Loss,(g/hr),Rate of water vapor loss
-VO2_M,VO2,vO2 Consumption,(mL/min),Rate of oxygen consumption
+VCO2_M,VCO2,vCO2,(mL/min),Rate of carbon dioxide emission
+VH2O_M,VH2O,vH2O,(g/hr),Rate of water vapor loss
+VO2_M,VO2,vO2,(mL/min),Rate of oxygen consumption
 WaterInA_M,WaterIn.cum,Cumulative Water Intake,(g),Mass of water consumed by animal during the cycle
 Xbreak_R,XBreak,Beam Breaks (x),(count),Number of x-axis beam breaks
 Ybreak_R,YBreak,Beam Breaks (y),(count),Number of y-axis beam breaks
@@ -39,3 +39,14 @@ NA,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kiloc
 ,norm.FoodIn.cum.kcal,Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass
 ,norm.EE.cum,Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass
 ,norm.EB.cum,Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass
+,VO2_smooth3,vO2,(mL/min),"Rate of oxygen consumption, smoothed via moving mean"
+,VCO2_smooth3,vCO2,(mL/min),"Rate of carbon dioxide emission, smoothed via moving mean"
+,VH2O_smooth3,vH2O,(g/hr),"Rate of water vapor loss, smoothed via moving mean"
+,EE_smooth3,Energy Expenditure,(kcal/hr),Mean energy expenditure in kcal/hr. Calculated using the Weir equation. Smoothed via moving mean
+,EBalance_smooth3,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin. Smoothed via moving mean
+,RER_smooth3,RER,NA,"Mean respiratory exchange ratio, VCO2/VO2, unitless. Smoothed via moving mean"
+,AllMeters.cum_smooth3,Cumulative Activity,(m),"Calculated from AllMeters using cumsum(), smoothed via moving mean"
+,FoodIn.cum_smooth3,Cumulative Food Intake,(g),"Mass of food consumed by animal during the cycle, smoothed via moving mean"
+,WaterIn.cum_smooth3,Cumulative Water Intake,(g),"Mass of water consumed by animal during the cycle, smoothed via moving mean"
+,FoodIn.kcal_smooth3,Food Intake,(kcal),Calculated from FoodIn.g*3.35 (NCD) or 5.47 (HFD). Smoothed via moving mean
+,BodyMass_smooth3,Body Mass,(g),"Mean body mass of animal, smoothed via moving mean"
