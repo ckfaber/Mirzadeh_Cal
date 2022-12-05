@@ -292,11 +292,11 @@ If incomplete days were not trimmed above, then the daily and photoperiod averag
 #/ warning: false
 # Compute average for each day
 total.avg.daily <- df %>%
-  group_by(ExpDay,Animal) %>% 
+  group_by(Animal,ExpDay) %>% 
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) %>%
+    across(all_of(cols4cum),~ last(.) - first(.))) %>%
   mutate(Photoperiod = "Total") %>%
   ungroup() 
 ```
@@ -307,11 +307,11 @@ Next, we compute cumulative totals or averages of all variables within each phot
 #/ warning: false
 # Compute average within each photoperiod, append to total.avg.daily
 pp.avg.daily <- df %>%
-  group_by(ExpDay,Photoperiod,Animal) %>%
+  group_by(Animal,ExpDay,Photoperiod) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
-    across(all_of(cols4cum),max)) %>% 
+    across(all_of(cols4cum), ~ last(.) - first(.))) %>% 
   ungroup() %>%
   bind_rows(.,total.avg.daily) %>% 
   left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
@@ -341,7 +341,7 @@ total.avg <- df %>%
 #/ warning: false
 # Compute the overall average daily value for every requested variable across the whole experiment
 pp.avg.total <- df %>%
-  group_by(Photoperiod,Animal) %>%
+  group_by(Animal, Photoperiod) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg), mean),
@@ -359,5 +359,5 @@ pp.avg.total
 
 ```{r}
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
-save(df, df.hourly, pp.avg.total, pp.avg.daily,file = savename)
+save(df, df.hourly, pp.avg.total, pp.avg.daily,df_code,file = savename)
 ```
