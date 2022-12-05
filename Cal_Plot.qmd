@@ -4,6 +4,7 @@ author: "Chelsea Faber"
 format: 
    html:
      df-print: paged
+     embed-resources: true
 editor: visual
 ---
 
@@ -64,7 +65,7 @@ smooth           <- TRUE
 norm             <- TRUE
 
 # Defaults
-tsvars           <- c('VO2','VCO2','VH2O','EE','EBalance','RER',
+tsvars           <- c('VO2','VCO2','VH2O','EE','EE.cum','EBalance','RER',
                       'AllMeters.cum','FoodIn.cum','WaterIn.cum',
                       'FoodIn.kcal','BodyMass')
 boxplotvars      <- c('VO2','EE','EBalance','RER','AllMeters','WaterIn.g',
@@ -172,7 +173,9 @@ pp_data <- df.hourly %>%
 head(pp_data)
 ```
 
-Okay last step - let's write a function that will generate our plots for us! We want them to all look the same, but automatically have the correct title and x-axis labels. The following function, `group_tsplot()`, (should) accomplish this. If it looks busy, imagine having to copy/paste this 10x for each of your variables!
+Okay last step - let's write some functions that will generate our plots for us! We want them to all look the same, but automatically have the correct title and x-axis labels. The following functions, `tsplot()` and `tsmoothplot()`, (should) accomplish this. If it looks busy, imagine having to copy/paste this 10x for each of your variables!
+
+First, create general time-series plotting function:
 
 ```{r}
 # Create function to generate time-series plots
@@ -201,7 +204,7 @@ tsplot <- function(data,group,title,ylab) {
       alpha = 0.3)+
     
     # Set color scheme for filled areas: light/dark boxes and SEM ribbon
-    scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") +   
+    scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") + 
     labs(x = "Time (hours)", y = ylab)+ 
     scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
     theme_classic() + 
@@ -210,21 +213,45 @@ tsplot <- function(data,group,title,ylab) {
 }
 ```
 
-Let's break down what this function does. The first line `tsplot <- function(data,group,title,ylab)` indicates our function requires 4 inputs: `data`, `group`, `title`, and `ylab`.
-
-Let's test this "manually" on one set of data before we loop through all of `tsvars` again.
+Next, create smoothed time-series plotting function:
 
 ```{r}
-data      <- grp.summaries$EE_smooth3
-group     <- "Treatment"
-title     <- "Energy Expenditure"
-ylab      <- "(kcal/hr)"
-p1        <- tsplot(data,group,title,ylab)
-
-p1
+# Create function to generate smoothed time-series plots
+tsmoothplot <- function(data,group,title,ylab) {
+  
+  plot <- ggplot(data) + 
+    
+    # Shaded light/dark boxes
+    geom_tile(data = pp_data,
+              mapping = aes(fill = Photoperiod,y=0),
+              alpha = 0.2,
+              height = Inf,
+              show.legend = NA) + # tiles will go all the way up and down
+    aes(x = Time, y = value_smooth3) +
+    geom_line(aes(color = get(group))) + 
+    
+    # Set color scheme
+    scale_color_manual(group,values = c("turquoise4", "darkorange3")) +   # colors for the group
+    
+    # Smooth SEM ribbon 
+    geom_ribbon(aes(
+      ymin = value_smooth3-sem_smooth3, 
+      ymax = value_smooth3+sem_smooth3,
+      fill = get(group)),
+      linetype = 0,
+      alpha = 0.3)+
+    
+    # Set color scheme for filled areas: light/dark boxes and SEM ribbon
+    scale_fill_manual(values = c("0" = "gray45","1" = "white","chABC" = "turquoise4","HIchABC" = "darkorange3"),guide = "none") + 
+    labs(x = "Time (hours)", y = ylab)+ 
+    scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
+    theme_classic() + 
+    ggtitle(title)
+  
+}
 ```
 
-Cool! It seems to work. Let's loop through `tsvars` again and generate plots for all of our variables of interest. We'll store the resulting ggplot objects in a list called `ts.plots`, so we can access or print out the individual plots using `$` indexing, as before with our grp.summaries.
+Now let's loop through `tsvars` again and generate plots for all of our variables of interest. We'll store the resulting ggplot objects in a list called `ts.plots`, so we can access or print out the individual plots using `$` indexing, as before with our grp.summaries.
 
 ```{r}
 #| warning: false
@@ -244,6 +271,30 @@ for (i in 1:length(tsvars)) {
   ts.plots[[i]] <- tsplot(data,group,title,ylab)
   names(ts.plots)[i] <- var
   print(ts.plots[[i]])
+  
+}
+```
+
+Repeat for variables in `smoothvars`, storing resulting plots in `tsmooth.plots`.
+
+```{r}
+#| warning: false
+# Loop through ggplot generation 
+tsmooth.plots <- vector(mode = "list",length = length(smoothvars))
+
+for (i in 1:length(smoothvars)) {
+  
+  data <- grp.summaries[[i]]
+  var <- smoothvars[i]
+  
+  title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
+  unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
+  
+  if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
+  
+  tsmooth.plots[[i]] <- tsmoothplot(data,group,title,ylab)
+  names(tsmooth.plots)[i] <- var
+  print(tsmooth.plots[[i]])
   
 }
 ```
