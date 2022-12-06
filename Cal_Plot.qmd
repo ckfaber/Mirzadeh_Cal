@@ -338,6 +338,26 @@ bxplot <- function(data,group,var,title,ylab) {
 }
 ```
 
+```{r}
+# Create function to generate boxplots
+bxplot <- function(data,group,var,title,ylab) {
+  
+  ggplot(data,
+         aes(x = Photoperiod,
+             y = get(var))) +
+    geom_boxplot(aes(fill = stage(get(group), after_scale = alpha(fill, 0.5)))) +
+    scale_color_brewer(group,
+      palette = "Dark2",
+      aesthetics = c("color", "fill")
+    ) +
+    labs(x = NULL, y = ylab) +
+    scale_x_discrete(labels = c("Dark", "Light", "Total")) +
+    theme_classic() + 
+    ggtitle(title)
+  
+}
+```
+
 Now, we can loop through `boxplotvars`. First, let's make box plots for the entire experiment, saving them in a list called `box.plots`.
 
 ```{r}
@@ -353,7 +373,7 @@ for (i in 1:length(boxvars)) {
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
   names(box.plots)[i] <- var
-  plot <- bxplot(data = pp.avg.total,group = group,var = var,title = title,ylab = ylab)
+  plot <- bxplot(data = exp.pp.avg,group = group,var = var,title = title,ylab = ylab)
   print(plot)
   
   box.plots[[i]] <- plot
@@ -364,22 +384,22 @@ Now let's make daily box plots, saving in a list called `daily.box.plots`...thes
 
 ```{r}
 # Loop through all the variables for daily plots
-daily.box.plots <- vector(mode = "list",length = length(boxplotvars))
-for (i in 1:length(boxplotvars)) {
+daily.boxplots <- vector(mode = "list",length = length(boxvars))
+for (i in 1:length(boxvars)) {
   
-  var <- boxplotvars[i]
+  var <- boxvars[i]
   
   title <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Title, warn_missing = FALSE)
   unit <- mapvalues(var, from = unitkeys$Renamed_Var, to = unitkeys$Unit, warn_missing = FALSE)
   
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
-  names(daily.box.plots)[i] <- var
-  plot <- bxplot(data = pp.avg.daily,group = group,var = var,title = title,ylab = ylab) + 
-    facet_grid(cols = vars(exp_day))
+  names(daily.boxplots)[i] <- var
+  plot <- bxplot(data = daily.pp.avg,group = group,var = var,title = title,ylab = ylab) + 
+    facet_grid(cols = vars(ExpDay))
   print(plot)
   
-  daily.box.plots[[i]] <- plot
+  daily.boxplots[[i]] <- plot
 }
 ```
 
