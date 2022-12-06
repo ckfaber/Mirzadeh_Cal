@@ -57,15 +57,17 @@ library(here)
 
 ```{r}
 #| warning: false
-cohort           <- "mon001"
-rundate          <- "2021-10-18"
+cohort           <- "CAL009"
+rundate          <- "2022-07-11"
 
 # Specify grouping & list of variables for smoothing via moving mean
-group            <- c('Treatment')
-smooth           <- TRUE
-norm             <- TRUE
+group            <- c('Group')
+saveraw          <- FALSE
+export           <- 'all' # set to 'all','ts', 'box', or 'none'
 
 # Defaults
+smooth           <- TRUE
+norm             <- TRUE
 tsvars           <- c('VO2','VCO2','VH2O','EE','EE.cum','EBalance','RER',
                       'AllMeters.cum','FoodIn.cum','WaterIn.cum',
                       'FoodIn.kcal','BodyMass')
@@ -91,7 +93,7 @@ load(here::here(paste(rundate,cohort,"Clean.Rda",sep = "_")))
 If you look in your R environment, you should see a few new objects have appeared - `df`,`df.hourly`,`pp.avg.daily`, and `pp.avg.total`. These are the data frames we created using Cal_Clean.R. Take a peek using `View(object)` to be sure they're what you expect. Here we'll just view the top 6 rows for the sake of space.
 
 ```{r}
-head(pp.avg.daily)
+head(daily.pp.avg)
 ```
 
 To make our lives easier in annotating our plots with the appropriate units and titles for each variable, load in the "Cal_Units.csv" file containing a list of all abbreviated variables, and the corresponding units and full names.
@@ -395,11 +397,11 @@ for (i in 1:length(boxvars)) {
   if (is.na(unit)) ylab <- title else ylab <- paste(title,unit)
   
   names(daily.boxplots)[i] <- var
-  plot <- bxplot(data = daily.pp.avg,group = group,var = var,title = title,ylab = ylab) + 
+  plt <- bxplot(data = daily.pp.avg,group = group,var = var,title = title,ylab = ylab) + 
     facet_grid(cols = vars(ExpDay))
-  print(plot)
+  print(plt)
   
-  daily.boxplots[[i]] <- plot
+  daily.boxplots[[i]] <- plt
 }
 ```
 
@@ -426,4 +428,13 @@ Figure2 +
   plot_layout(guides = "collect") + 
   plot_annotation(title = "Figure 2. Photoperiod-averaged data is cool",
                   tag_levels = "a")
+```
+
+## Save & Export figures
+
+```{r}
+if (saveraw) {
+  savename <- paste(rundate,cohort,group,"Plots.Rda",sep = "_")
+  save(grp.summaries,ts.plots,tsmooth.plots,box.plots, file = savename)
+}
 ```
