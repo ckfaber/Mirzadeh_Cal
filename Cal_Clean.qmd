@@ -166,7 +166,7 @@ df %<>%
          FoodIn.cum = FoodInA_M,
          WaterIn.cum = WaterInA_M,
          AllMeters = AllMeters_R,
-         BodyMass = BodyMass_M,
+         BodyMass = BodyMass_Mnz,
          VH2O = VH2O_M)
 
 # Compute experimental day (ExpDay) and elapsed time (Time) in hours
@@ -362,4 +362,5 @@ exp.pp.avg
 ```{r}
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
 save(df, df.hourly, daily.pp.avg, exp.pp.avg, df_code, file = savename)
+rm(list = ls())
 ```
