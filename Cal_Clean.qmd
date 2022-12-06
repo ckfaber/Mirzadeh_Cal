@@ -47,14 +47,14 @@ If everything is working properly, these variables are the only ones a user shou
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "mon001"
-rundate         <- "2021-10-18"  
-remove_animals  <- 274
+cohort          <- "CAL009"
+rundate         <- "2022-07-11"  
+remove_animals  <- NA
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
 intervention    <- FALSE
 segment.run     <- FALSE
-cols2excl       <- c('Cage','Stilltime_M','Sleeptime_M',
+cols2excl       <- c('Cage','Still_pct_M','Sleep_pct_M',
                      'XBreak_R','YBreak_R','Mass_g','AllMeters_M')
 ```
 
