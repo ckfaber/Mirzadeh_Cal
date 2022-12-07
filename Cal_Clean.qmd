@@ -54,7 +54,7 @@ remove_animals  <- NA
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
 intervention    <- FALSE
 segment.run     <- FALSE
-cols2excl       <- c('Cage','Still_pct_M','Sleep_pct_M',
+cols2excl       <- c('Still_pct_M','Sleep_pct_M',
                      'XBreak_R','YBreak_R','Mass_g','AllMeters_M')
 ```
 
