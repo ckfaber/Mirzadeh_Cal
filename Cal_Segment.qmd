@@ -4,14 +4,181 @@ format: html
 editor: visual
 ---
 
-## Goals
+## About
 
--   Prompt user for additional info re: segmenting
+**Note that this script (like the Cal_Clean script) has a default behavior of trimming the segmented data frames such that they each start and stop at 18:00 (ZT12).** This ensures that there are always an even number of L/D photoperiods, and that each always contains a full 12h, and guarantees subsequent statistical analysis will be more straightforward.
 
--   write separate function/script
+------------------------------------------------------------------------
 
--   require two+ vector inputs defining seg1 start, seg1 stop, seg2 start, seg2 stop, etc. How to encode flexibility here..?
+## To do:
 
--   recalculate cumulative values from 0 for each, recalculate elapsed time from 0 for each
+-   Improve speed/efficiency - vectorize code instead of for loops?
 
-## 
+## Load required packages
+
+```{r}
+#| label: load-packages
+#| warning: false
+#| echo: false
+library(plyr, include.only = 'mapvalues')
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library(here)
+```
+
+## Load data
+
+```{r}
+cohort          <- "CAL009"
+rundate         <- "2022-07-11"
+load(here::here(paste(rundate,cohort,"Clean.Rda",sep = "_")))
+rm(list = setdiff(ls(), c("df","cohort","rundate", "df_code")))
+```
+
+## Prompt user for more information about reason for segmentation
+
+```{r}
+# Experimental parameters that could change
+expvars         <- c("Treatment","Diet","Light","Temp")
+
+# Prompt user to identify which, if any, parameters have changed
+change          <- menu(c("Treatment","Diet","Light","Temp","none - segment only"), title = "Which experimental condition changed during the run?")
+
+# If none change, exit loop
+if (change == 5) {
+  changevar     <- NA
+  break
+} else {
+  changevar     <- expvars[[change]] # Index experimental name
+  changetime    <- as.numeric(readline(prompt = paste("In units of hours from the start of the recording, when did the", changevar, "change?")))
+  cages         <- menu(c("All","Custom"), title = "Which calorimetry cages were affected?")
+  
+  # Easiest case if all cages change the same way
+  if (cages == 1) {
+    cond1      <- readline(
+      prompt = paste("What was the first condition for", changevar, "?"))
+    cond2      <- readline(
+      prompt = paste("What was the second condition for", changevar, "?"))
+  } else {
+    
+    # Get more input on more complicated cases where there are more groups
+    if (cages == 2) {
+      
+      n <- c(2,3,4)
+      prompt <- "How many cage groupings exist for this intervention?"
+      grouping   <- menu(c("2 groups","3 groups","4 groups","other"), title = prompt)
+  
+      # Prompt user to stop trying to automate for extreme cases
+      if (grouping == 4) {
+        print("Seek help. This is too custom for Chelsea to automate.")
+      } else {
+        
+        # Create list with n groupings for user to enter cage #s
+        ngroup <- n[grouping]
+        groups <- vector(mode = "list", length = ngroup)
+        for (i in 1:ngroup) {
+          
+          prompt <- paste("Please enter cages for group", as.character(i),"as a space-separated list.")
+          temp <- strsplit(readline(prompt)," ")[[1]]
+          temp <- as.integer(temp)
+          groups[[i]] <- temp
+          rm(temp)
+          
+        }
+      }
+    }
+  }
+}
+
+
+```
+
+## Prompt user for segmentation times
+
+```{# {r}
+# span            <- last(unique(df$Time))
+# print(paste("Recording spans", as.character(span), "hours."))
+# n.segments      <- as.integer(readline(prompt = "Into how many segments should the run be split? "))
+# 
+# segtimes        <- data.frame(start = rep(0, each = n.segments), 
+#                               stop = rep(0, each = n.segments))
+# 
+# for (i in 1 : n.segments) {
+#   
+#   segtimes[i,1] = as.integer(readline(prompt = 
+#                                       paste("In units of hours from the start of the recording, where is the START of segment",as.character(i),"?")))
+#   segtimes[i,2] = as.integer(readline(prompt = 
+#                                       paste("In units of hours from the start of the recording, where is the STOP of segment",as.character(i),"?")))
+#   
+# }
+```
+
+## Filter df into segments
+
+```{r}
+df.segments     <- vector(mode = "list", length = n.segments)
+for (i in 1 : n.segments) {
+  
+  start <- segtimes[i,1]
+  stop <- segtimes[i,2]
+  df.segments[[i]] = df %>% filter(Time >= start & Time <= stop)
+  
+}
+#rm(df)
+```
+
+## Trim new segments to start/stop at 18:00
+
+```{r}
+for (i in 1 : n.segments) {
+  
+  tempdf <- df.segments[[i]] 
+  
+  # Find first lights out (18:00) for each animal
+  tempdf %<>% group_by(Animal)
+  idx.start        <- which(hour(tempdf$DateTime) == 18)[1]
+  time.start       <- as.POSIXct(tempdf$DateTime[idx.start])
+  
+  # Filter
+  tempdf %<>% filter(DateTime >= time.start)
+  
+  # Find last lights out
+  idx.end          <- tail(which(hour(tempdf$DateTime) == 17), n=1)
+  if (idx.end != nrow(tempdf)) {
+    idx.end <- idx.end+1
+  }
+  time.end         <- as.POSIXct(tempdf$DateTime[idx.end])
+
+  # Filter again
+  tempdf %<>% filter(DateTime < time.end) %>% ungroup() %>% mutate(Segment = as.integer(i))
+  
+  df.segments[[i]] <- tempdf
+  rm(tempdf)
+}
+```
+
+## Restart the clock & recompute cumulative variables
+
+```{r}
+for (i in 1 : n.segments) {
+  
+    tempdf <- df.segments[[i]]
+    tempdf %<>% group_by(Animal) %>%
+      mutate(
+        ExpDay = as.integer(ceiling(difftime(DateTime,time.start, 
+                                             units = "days"))),
+        Time = as.numeric(difftime(DateTime,time.start), 
+                          units = "hours"),.after = DateTime) %>% 
+      mutate(FoodIn.cum = cumsum(FoodIn.g)) %>%
+      mutate(FoodIn.cum.kcal = case_when(
+        Diet == "NCD" ~ FoodIn.g * 3.35,
+        Diet == "HFD" ~ FoodIn.g * 5.47)) %>% 
+      mutate(WaterIn.cum = cumsum(WaterIn.g)) %>% 
+      mutate(EE.cum = cumsum(EE.kcal.bin)) %>%
+      mutate(EB.cum = cumsum(EBalance)) %>%
+      mutate(AllMeters.cum = cumsum(AllMeters)) %>% 
+      ungroup()
+  
+}
+```
