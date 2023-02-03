@@ -78,14 +78,18 @@ if (change == 5) {
         ngroup <- n[grouping]
         groups <- vector(mode = "list", length = ngroup)
         for (i in 1:ngroup) {
-          
           prompt <- paste("Please enter cages for group", as.character(i),"as a space-separated list.")
           temp <- strsplit(readline(prompt)," ")[[1]]
           temp <- as.integer(temp)
           groups[[i]] <- temp
           rm(temp)
-          
         }
+        
+        # Add check to make sure all cages within unique(df$Cage) are in groups
+        
+        # If not, prompt user to reconcile discrepancy
+        
+        
       }
     }
   }

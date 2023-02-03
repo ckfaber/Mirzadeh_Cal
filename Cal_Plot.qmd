@@ -43,9 +43,7 @@ The following files must be saved in your default working directory (run `librar
 
 ## Load packages
 
-```{r}
-#| warning: false
-#| echo: false
+```{r message = FALSE}
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(ggnewscale)
@@ -55,8 +53,7 @@ library(here)
 
 ## Define inputs to script for analysis
 
-```{r}
-#| warning: false
+```{r message = FALSE, warning = FALSE}
 cohort           <- "CAL009"
 rundate          <- "2022-07-11"
 
