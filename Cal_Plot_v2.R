@@ -5,6 +5,26 @@
 # photoperiod shading shows 12 rectangles per photoperiod, resulting in dark
 # vertical lines at each hourly bin
 
+# Solution from Nicola Rennie, needs to be validated: 
+
+# pp_data <- data.frame(Time = 0:71, 
+#                       Photoperiod = as.factor(rep(rep(c(0,1),each = 12),3)))
+# 
+# maxheight <- 20
+# plot_df <- purrr::map_dfr(seq_len(maxheight), ~pp_data)
+# plot_df$y <- rep(1:maxheight, each = nrow(pp_data))
+# 
+# ggplot(plot_df)+
+#   geom_raster(mapping = aes(x = Time, fill = Photoperiod, y = y),
+#               alpha = 0.1,
+#               show.legend = NA) + 
+#   scale_fill_manual(values = c("0" = "gray45",
+#                                "1" = "white"),
+#                     guide = "none")+
+#   theme_classic() +
+#   scale_x_continuous()
+
+
 # To do: 
 # - Add shaded rectangle to dark period of box plots? 
 # - Add statistics!!!
@@ -15,6 +35,9 @@ library(tidyverse)
 library(ggnewscale)
 library(zoo, include.only = 'rollmean')
 library(here)
+library(broom)
+library(ggpubr)
+library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
 
@@ -54,6 +77,24 @@ if (smooth) {
 
 load(here::here(paste(rundate,cohort,"Clean.Rda",sep = "_")))
 unitkeys         <- read_csv(here::here("Cal_Units.csv"))
+
+# Statistics -----------------------------------------------------------------
+
+# From Longitudinal_Phenotyping:
+# Needs to be revised to run ANOVA, post hoc comparisons between/within groups
+
+plotvar <- "RER"
+RER_ttest <- exp.pp.avg %>%
+  group_by(.data[[facetvar]]) %>% # group by variable that will be used to facet. .data[[]] subsets variable name within string (see https://ggplot2.tidyverse.org/reference/tidyeval.html)
+  t_test(as.formula(paste(plotvar, "~", groupvar))) %>% # 
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance() %>%
+  add_xy_position()
+
+# Line below needs to be added to call to bxplot:
+stat_pvalue_manual(RER_ttest,
+                   bracket.nudge.y = -0.5,
+                   label = "{p.adj.signif}")
 
 ## Plot functions -------------------------------------------------------------
 # Create ggplot function for time-series plots with SEM ribbon
@@ -180,6 +221,7 @@ for (i in 1:length(boxvars)) {
   names(box.plots)[i] <- var
   box.plots[[i]] <- bxplot(var,groupvar,facetvar,ylab)
   #print(plot)
-  ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = fpath)
-  
+  if (export) {
+    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = fpath)
+  }
 }
