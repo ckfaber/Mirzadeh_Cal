@@ -29,8 +29,8 @@ NA,FoodIn.g,Food Intake,(g),Calculated from FoodIn.cum using diff()
 NA,WaterIn.g,Water Intake,(g),Calculated from WaterIn.cum using diff()
 NA,FoodIn.kcal,Food Intake,(kcal),Calculated from FoodIn.g*4.2
 NA,EBalance,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin
-NA,norm.EE,Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass
-NA,norm.Ebalance,Energy Balance,(kcal/g),Energy balance normalized to body mass (g). Calculated as EBalance/meanBodyMass
+NA,norm.EE,Normalized Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass
+NA,norm.Ebalance,Normalized Energy Balance,(kcal/g),Energy balance normalized to body mass (g). Calculated as EBalance/meanBodyMass
 NA,EE.cum,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure
 NA,EB.cum,Cumulative Energy Balance,(kcal),Cumulative energy balance
 NA,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)
@@ -51,7 +51,7 @@ NA,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kiloc
 ,FoodIn.kcal_smooth3,Food Intake,(kcal),Calculated from FoodIn.g*3.35 (NCD) or 5.47 (HFD). Smoothed via moving mean
 ,BodyMass_smooth3,Body Mass,(g),Body mass of animal. Smoothed via moving mean
 ,norm.FoodIn.cum.kcal_smooth3,Normalized Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass. Smoothed via moving mean
-,norm.EE_smooth3,Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass. Smoothed via moving mean
+,norm.EE_smooth3,Normalized Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass. Smoothed via moving mean
 ,norm.EE.cum_smooth3,Normalized Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass. Smoothed via moving mean
 ,norm.EB.cum_smooth3,Normalized Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass. Smoothed via moving mean
 ,EE.cum_smooth3,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure. Smoothed via moving mean
