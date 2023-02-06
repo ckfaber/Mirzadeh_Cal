@@ -317,7 +317,9 @@ daily.pp.avg <- df %>%
   ungroup() %>%
   bind_rows(.,total.avg.daily) %>% 
   left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
-  select(-Animal.y)
+  select(-Animal.y) %>%
+  mutate(Photoperiod = as.factor(Photoperiod),
+         Animal = as.factor(Animal))
 rm(total.avg.daily)
 daily.pp.avg
 ```
@@ -351,7 +353,9 @@ exp.pp.avg <- daily.pp.avg %>%
   ungroup() %>%
   bind_rows(., exp.avg) %>% 
   left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
-  select(-Animal.y)
+  select(-Animal.y) %>%
+  mutate(Photoperiod = as.factor(Photoperiod),
+         Animal = as.factor(Animal))
 
 rm(exp.avg)
 exp.pp.avg
