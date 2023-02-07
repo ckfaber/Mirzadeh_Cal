@@ -4,6 +4,7 @@ author: "Chelsea Faber"
 format: 
    html:
      df-print: paged
+     embed-resources: true
 editor: visual
 ---
 

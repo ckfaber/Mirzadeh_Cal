@@ -1,6 +1,9 @@
 ---
 title: "Cal_Segment"
-format: html
+format: 
+   html:
+     df-print: paged
+     embed-resources: true
 editor: visual
 ---
 
@@ -100,23 +103,7 @@ if (change == 5) {
 
 ## Prompt user for segmentation times
 
-```{# {r}
-# span            <- last(unique(df$Time))
-# print(paste("Recording spans", as.character(span), "hours."))
-# n.segments      <- as.integer(readline(prompt = "Into how many segments should the run be split? "))
-# 
-# segtimes        <- data.frame(start = rep(0, each = n.segments), 
-#                               stop = rep(0, each = n.segments))
-# 
-# for (i in 1 : n.segments) {
-#   
-#   segtimes[i,1] = as.integer(readline(prompt = 
-#                                       paste("In units of hours from the start of the recording, where is the START of segment",as.character(i),"?")))
-#   segtimes[i,2] = as.integer(readline(prompt = 
-#                                       paste("In units of hours from the start of the recording, where is the STOP of segment",as.character(i),"?")))
-#   
-# }
-```
+`{# {r} # span            <- last(unique(df$Time)) # print(paste("Recording spans", as.character(span), "hours.")) # n.segments      <- as.integer(readline(prompt = "Into how many segments should the run be split? ")) #  # segtimes        <- data.frame(start = rep(0, each = n.segments),  #                               stop = rep(0, each = n.segments)) #  # for (i in 1 : n.segments) { #    #   segtimes[i,1] = as.integer(readline(prompt =  #                                       paste("In units of hours from the start of the recording, where is the START of segment",as.character(i),"?"))) #   segtimes[i,2] = as.integer(readline(prompt =  #                                       paste("In units of hours from the start of the recording, where is the STOP of segment",as.character(i),"?"))) #    # }`
 
 ## Filter df into segments
 
