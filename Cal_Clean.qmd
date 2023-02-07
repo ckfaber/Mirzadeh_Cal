@@ -102,12 +102,12 @@ Here, we remove any animals that we had previously specified, and perform some g
 
 # Remove dead/sick animals; if NA, don't run
 if (!is.na(remove_animals)) {
-   df %<>%
+   df <- df %>%
     filter(ID_Code != remove_animals)
 }
 
 # Parse date-times and sort by animal ID (ID_Code) and date-time
-df %<>% 
+df <- df %>% 
   relocate(c(DateTime,Sex,Group,Treatment,Cohort,ID_Code)) %>%
   mutate(DateTime = round_date(ymd_hms(df$DateTime),unit = "minute")) %>%
   mutate(month = as.numeric(month(DateTime)),
@@ -134,12 +134,12 @@ og.end           <- last(df$DateTime)
 og.dur           <- og.end - og.start
 
 # Find index of first lights out (18:00) for each animal
-df %<>% group_by(ID_Code)
+df <- df %>% group_by(ID_Code)
 idx.start        <- which(hour(df$DateTime) == 18)[1]-1
 time.start       <- as.POSIXct(df$DateTime[idx.start])
 
 # Trim everything before first lights out
-df %<>%
+df <- df %>%
   filter(DateTime > time.start)
 
 # Find index of last lights out
@@ -147,11 +147,11 @@ idx.end          <- tail(which(hour(df$DateTime) == 17), n=1) + 1
 time.end         <- as.POSIXct(df$DateTime[idx.end])
 
 # Trim everything after last lights out
-df %<>% 
+df <- df %>%
   filter(DateTime < time.end)
 
 # Compute ZT time, rename some variables
-df %<>%
+df <- df %>%
   mutate(ZT = plyr::mapvalues(hour, 
                               from = (0:23), 
                               to = c(18:23,0:17)),.before = Sex) %>% 
@@ -171,7 +171,7 @@ df %<>%
          VH2O = VH2O_M)
 
 # Compute experimental day (ExpDay) and elapsed time (Time) in hours
-df %<>% 
+df <- df %>%
   mutate(ExpDay = as.integer(ceiling(difftime(DateTime,time.start, units = "days"))),
          Time = as.numeric(difftime(DateTime,time.start), units = "hours"),
          .after = DateTime) %>%
@@ -188,7 +188,7 @@ if ("Age" %in% colnames(df)) {
 }
 
 # Recompute cumulative variables to begin at new start time
-df %<>%
+df <- df %>%
   group_by(Animal) %>% 
   mutate(FoodIn.cum = FoodIn.cum - first(FoodIn.cum),
          WaterIn.cum = WaterIn.cum - first(WaterIn.cum)) %>% 
@@ -202,7 +202,7 @@ Next, we will compute some more parameters of interest, including binned food an
 int <- df$Time[2] - df$Time[1]
 
 # Compute daily average for body mass
-df %<>%
+df <- df %>%
   group_by(Animal, ExpDay) %>%
   mutate(meanBodyMass = mean(BodyMass),.after = BodyMass) %>%
   ungroup()
@@ -210,12 +210,12 @@ df %<>%
 # Detect diet from df_code and establish conversion
 if (sum(is.na(df_code$Diet)) ==length(df_code$Diet)) {
   print('No diet type specified in DECODED file. Assigning default of chow (4.2 kcal/g). If this is in error, please revised the DECODED file and re-run the script from the beginning.')
-  df %<>% 
+  df <- df %>%
     mutate(Diet = "NCD")
 }
   
 # Compute new columns
-df %<>%
+df <- df %>%
   group_by(Animal) %>%
   mutate(FoodIn.g = c(diff(FoodIn.cum),0),.before = FoodIn.cum) %>% # convert cumulative to binned food intake
   mutate(WaterIn.g = c(diff(WaterIn.cum),0),.before = WaterIn.cum) %>% # convert cumulative to binned water intake
@@ -235,7 +235,7 @@ df %<>%
 cols2norm <- c('FoodIn.kcal','FoodIn.cum.kcal','EE','EE.cum','EBalance',
                'EB.cum')
 
-df %<>% 
+df <- df %>% 
   group_by(Animal) %>% 
   mutate(across(all_of(cols2norm),
                 ~ . / meanBodyMass,
