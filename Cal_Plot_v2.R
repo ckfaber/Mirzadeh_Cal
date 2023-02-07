@@ -41,15 +41,15 @@ library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
 
-cohort           <- "mon001"
-rundate          <- "2021-10-18"
+cohort          <- "CAL009"
+rundate         <- "2022-07-11"
+fpath            <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/OLD_Calorimetry/macro_processed/r_cleaned"
 
 # Specify grouping & list of variables for smoothing via moving mean
-groupvar         <- "Treatment"
+groupvar         <- "Group"
 facetvar         <- "Sex" # set to NA (no quotes!) if no faceting desired
 plt              <- "Dark2"
 export           <- T
-fpath            <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/OLD_Calorimetry/r_cleaned/2021-10-18_mon001"
 ftype            <- ".pdf" # default to export pdfs
 
 ## Defaults -------------------------------------------------------------------
@@ -73,9 +73,18 @@ if (smooth) {
     }
 } 
 
+if (export) {
+  repo <- paste(rundate,cohort,sep="_")
+  repo <- paste0(fpath,"/",repo)
+  
+  if (!dir.exists(repo)) {
+    dir.create(repo)
+  }
+}
+
 ## Load data ------------------------------------------------------------------
 
-load(here::here(paste(rundate,cohort,"Clean.Rda",sep = "_")))
+load(paste(fpath,"/",paste(rundate,cohort,"Clean.Rda",sep = "_"),sep=""))
 unitkeys         <- read_csv(here::here("Cal_Units.csv"))
 
 # Statistics -----------------------------------------------------------------
@@ -83,18 +92,18 @@ unitkeys         <- read_csv(here::here("Cal_Units.csv"))
 # From Longitudinal_Phenotyping:
 # Needs to be revised to run ANOVA, post hoc comparisons between/within groups
 
-plotvar <- "RER"
-RER_ttest <- exp.pp.avg %>%
-  group_by(.data[[facetvar]]) %>% # group by variable that will be used to facet. .data[[]] subsets variable name within string (see https://ggplot2.tidyverse.org/reference/tidyeval.html)
-  t_test(as.formula(paste(plotvar, "~", groupvar))) %>% # 
-  adjust_pvalue(method = "bonferroni") %>%
-  add_significance() %>%
-  add_xy_position()
-
-# Line below needs to be added to call to bxplot:
-stat_pvalue_manual(RER_ttest,
-                   bracket.nudge.y = -0.5,
-                   label = "{p.adj.signif}")
+# plotvar <- "RER"
+# RER_ttest <- df.exp.summary %>%
+#   group_by(.data[[facetvar]]) %>% # group by variable that will be used to facet. .data[[]] subsets variable name within string (see https://ggplot2.tidyverse.org/reference/tidyeval.html)
+#   t_test(as.formula(paste(plotvar, "~", groupvar))) %>% # 
+#   adjust_pvalue(method = "bonferroni") %>%
+#   add_significance() %>%
+#   add_xy_position()
+# 
+# # Line below needs to be added to call to bxplot:
+# stat_pvalue_manual(RER_ttest,
+#                    bracket.nudge.y = -0.5,
+#                    label = "{p.adj.signif}")
 
 ## Plot functions -------------------------------------------------------------
 # Create ggplot function for time-series plots with SEM ribbon
@@ -123,8 +132,8 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
             height = Inf, # tiles will go all the way up and down
             show.legend = NA,
             inherit.aes = FALSE) + 
-  scale_fill_manual(values = c("0" = "gray45",
-                               "1" = "white"),guide = "none") +
+  scale_fill_manual(values = c("Dark" = "gray45",
+                               "Light" = "white"),guide = "none") +
   
   # Plot annotations and formatting
   labs(x = "Time (hours)", y = ylab) + 
@@ -135,7 +144,7 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
 # Create function to generate boxplots
 bxplot <- function(var,groupvar,facetvar,ylab) {
   
-  ggplot(exp.pp.avg,
+  ggplot(df.exp.summary,
          aes(x = Photoperiod,
              y = .data[[var]])) +
     facet_grid(~.data[[facetvar]]) +
@@ -194,7 +203,7 @@ for (i in 1:length(tsvars)) {
     } else {
       fname <- var
     }
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = fpath)
+    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = repo)
   }
 }
 
@@ -222,6 +231,6 @@ for (i in 1:length(boxvars)) {
   box.plots[[i]] <- bxplot(var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = fpath)
+    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = repo)
   }
 }
