@@ -12,7 +12,7 @@ editor: visual
 
 ###### Inputs:
 
--   Cohort and rundate of calorimetry run
+-   Date and run ID of calorimetry run
 -   List of animal ID numbers to be excluded (NA if none)
 
 ###### Outputs:
@@ -21,13 +21,9 @@ editor: visual
 
 ###### Requirements:
 
--   TimeSeries sheet from Macro-processed .exp data files (MI \< v2.46) in 1 or 3-minute bins
--   TimeSeries sheet as a .csv saved in your default working directory (run `library(here)` to find out where this is!)
--   Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
-
-###### Known bugs:
-
--   EnviroLightlux_M is inconsistent in numbering (sometimes has 0s and 1s, or 1s and 3s, or 3s and 7s), therefore photoperiod assignment is done based on ZT/clock time and NOT from sensor. This will need to be updated for DD or other light schedule experiments
+-   TimeSeries sheet from Macro-processed .exp data files (MI \> v2.46) in 1 minute bins
+-   TimeSeries \<yyyy-mm-dd_cohort.csv\> saved in your default working directory (run `library(here)` to find out where this is!)
+-   Key \<yyyy-mm-dd_run_KEY.csv\> - must have same prefix as TimeSeries sheet, and be saved in the same directory
 
 ## Load required packages
 
@@ -38,7 +34,6 @@ editor: visual
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(lubridate)
-library(here)
 ```
 
 ## Define inputs to script for analysis
@@ -48,10 +43,13 @@ If everything is working properly, these variables are the only ones a user shou
 ```{r}
 # Run-specific user-defined parameters
 cohort          <- "CAL009"
-rundate         <- "2022-07-11"  
+rundate         <- "2022-07-11"
+fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/OLD_Calorimetry/macro_processed"
 remove_animals  <- NA
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
+NCDgcal         <- 3.35 #default conversion 
+HFDgcal         <- 5.47 # default conversion
 intervention    <- FALSE
 segment.run     <- FALSE
 cols2excl       <- c('Still_pct_M','Sleep_pct_M',
@@ -75,22 +73,22 @@ A workaround, if you do not wish to load your data using the here() package, is 
 ```{r}
 #| warning: false
 #| code-overflow: wrap
-filename        <- paste(rundate,cohort,sep = "_")
-code            <- paste(rundate,cohort,"DECODED",sep = "_")
+fname           <- paste(rundate,cohort,sep = "_")
+code            <- paste(rundate,cohort,"KEY",sep = "_")
 
 # Load csv with run metadata
-key             <- read_csv(here::here(paste(code,".csv",sep = ""))) 
-key             <- key %>%
-  mutate(across(c(Animal,Sex,ID_Code,Group,Cohort,Treatment,Diet), as.factor))
+key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/")) 
 
 # Load cal.csv and merge metadata
-df              <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
+df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/")) %>%
   left_join(key, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
-  rename(Cage = Animal)%>%
+  rename(Cage = Animal,
+         Animal = ID_Code)%>%
   select(!(starts_with("Enviro") 
            | starts_with("Ped") 
-           | all_of(cols2excl)))
+           | all_of(cols2excl))) %>%
+  mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment,Diet), as.factor))
 ```
 
 ## Tidy data
@@ -103,12 +101,12 @@ Here, we remove any animals that we had previously specified, and perform some g
 # Remove dead/sick animals; if NA, don't run
 if (!is.na(remove_animals)) {
    df <- df %>%
-    filter(ID_Code != remove_animals)
+    filter(Animal != remove_animals)
 }
 
 # Parse date-times and sort by animal ID (ID_Code) and date-time
 df <- df %>% 
-  relocate(c(DateTime,Sex,Group,Treatment,Cohort,ID_Code)) %>%
+  relocate(c(DateTime,Sex,Group,Treatment,Cohort,Animal)) %>%
   mutate(DateTime = round_date(ymd_hms(df$DateTime),unit = "minute")) %>%
   mutate(month = as.numeric(month(DateTime)),
          day = as.numeric(day(DateTime)),
@@ -116,7 +114,7 @@ df <- df %>%
          minute = as.numeric(minute(DateTime))) 
 
 df <- df[order(df$DateTime),] %>%
-  arrange(ID_Code)
+  arrange(Animal)
 
 # Remove any rows/columns with only NAs
 df <- df[rowSums(is.na(df)) != ncol(df), ]
@@ -136,7 +134,7 @@ og.dur           <- og.end - og.start
 print(paste("Trimmming df to start and end at ZT18. Original recording length =", round(og.dur,2), "days."))
 
 # Find index of first lights out (18:00) for each animal
-df <- df %>% group_by(ID_Code)
+df <- df %>% group_by(Animal)
 idx.start        <- which(hour(df$DateTime) == 18)[1]-1
 time.start       <- as.POSIXct(df$DateTime[idx.start])
 
@@ -163,9 +161,8 @@ df <- df %>%
   mutate(Photoperiod = as.factor(
     plyr::mapvalues(ZT, 
                     from = c(0:23), 
-                    to = c(rep(1,12),rep(0,12)))),.before = ZT) %>%
+                    to = c(rep("Light",12),rep("Dark",12)))),.before = ZT) %>%
   rename(VO2 = VO2_M,
-         Animal = ID_Code,
          VCO2 = VCO2_M,
          EE = kcal_hr_M,
          RER = RER_M,
@@ -229,8 +226,8 @@ df <- df %>%
   mutate(FoodIn.g = c(diff(FoodIn.cum),0),.before = FoodIn.cum) %>% # convert cumulative to binned food intake
   mutate(WaterIn.g = c(diff(WaterIn.cum),0),.before = WaterIn.cum) %>% # convert cumulative to binned water intake
   mutate(FoodIn.kcal = case_when(
-    Diet == "NCD" ~ FoodIn.g * 3.35,
-    Diet == "HFD" ~ FoodIn.g * 5.47),
+    Diet == "NCD" ~ FoodIn.g * NCDgcal,
+    Diet == "HFD" ~ FoodIn.g * HFDgcal),
     .before = FoodIn.g) %>% # convert g to kcal
   mutate(FoodIn.cum.kcal = cumsum(FoodIn.kcal),.after = FoodIn.cum) %>%
   mutate(EE.kcal.bin = EE * int, .before = EE) %>% # EE is kcal/hr, multiply by int (x hours between samples) to get kcal/bin
@@ -296,14 +293,12 @@ df.hourly <- df %>%
 
 Next, we compute the cumulative totals or averages of all variables for each experimental day.
 
-***Note that the experimental day is derived from the calendar day.***
-
-If incomplete days were not trimmed above, then the daily and photoperiod averages will be affected by the start and end of recording where \<24-hours are included. Working on a fix for this, where each day starts from the start of the recording (day 1 = first 24 hours, and so on).
+If incomplete days were not trimmed above, then the daily and photoperiod averages will be affected by the start and end of recording where \<24-hours are included.
 
 ```{r}
 #/ warning: false
 # Compute averages/totals for each day
-total.avg.daily <- df %>%
+df.dailytot <- df %>%
   group_by(Animal,ExpDay) %>% 
   summarize(
     across(all_of(cols2sum),sum),
@@ -318,20 +313,18 @@ Next, we compute cumulative totals or averages of all variables within each phot
 ```{r}
 #/ warning: false
 # Compute average within each photoperiod, append to total.avg.daily
-daily.pp.avg <- df %>%
+df.daily <- df %>%
   group_by(Animal,ExpDay,Photoperiod) %>%
   summarize(
     across(all_of(cols2sum),sum),
     across(all_of(cols2avg),mean),
     across(all_of(cols4cum), ~ last(.) - first(.))) %>% 
   ungroup() %>%
-  bind_rows(.,total.avg.daily) %>% 
+  bind_rows(.,df.dailytot) %>% 
   left_join(key, by = c("Animal" = "ID_Code")) %>% 
   select(-Animal.y) %>%
-  mutate(Photoperiod = as.factor(Photoperiod),
-         Animal = as.factor(Animal))
-rm(total.avg.daily)
-daily.pp.avg
+  arrange(Animal,ExpDay,Photoperiod)
+rm(df.dailytot)
 ```
 
 Finally, we compute cumulative totals and averages across the entire experiment, for each day...
@@ -339,7 +332,7 @@ Finally, we compute cumulative totals and averages across the entire experiment,
 ```{r}
 #/ warning: false
 # Compute each animal's average/total per variable for entire experiment
-exp.avg <- df %>%
+df.exp.totals <- df %>%
   group_by(Animal) %>%
   summarize(
     across(all_of(cols2sum),sum),
@@ -354,27 +347,27 @@ exp.avg <- df %>%
 ```{r}
 #/ warning: false
 # Compute the overall average daily value for every requested variable across the whole experiment
-exp.pp.avg <- daily.pp.avg %>%
+df.exp.summary <- df.daily %>%
   group_by(Animal, Photoperiod) %>%
   summarize(
-    across(all_of(cols2sum), sum),
+    across(all_of(cols2sum), mean),
     across(all_of(cols2avg), mean),
     across(all_of(cols4cum), sum)) %>% 
+  #filter(Photoperiod != "Total") %>%
   ungroup() %>%
-  bind_rows(., exp.avg) %>% 
+  #bind_rows(., df.exp.totals) %>% 
   left_join(key, by = c("Animal" = "ID_Code")) %>% 
   select(-Animal.y) %>%
-  mutate(Photoperiod = as.factor(Photoperiod),
-         Animal = as.factor(Animal))
+  arrange(Animal,Photoperiod)
 
-rm(exp.avg)
-exp.pp.avg
+rm(df.exp.totals)
 ```
 
 ## Save data
 
 ```{r}
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
-save(df, df.hourly, daily.pp.avg, exp.pp.avg, key, file = savename)
+savename <- paste(fpath,"/r_cleaned/",savename,sep="")
+save(df, df.hourly, df.daily, df.exp.summary, key, file = savename)
 rm(list = ls())
 ```
