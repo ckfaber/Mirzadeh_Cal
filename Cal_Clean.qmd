@@ -37,7 +37,6 @@ editor: visual
 #| echo: false
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
-library(magrittr)
 library(lubridate)
 library(here)
 ```
@@ -80,12 +79,13 @@ filename        <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"DECODED",sep = "_")
 
 # Load csv with run metadata
-df_code         <- read_csv(here::here(paste(code,".csv",sep = ""))) 
-df_code
+key             <- read_csv(here::here(paste(code,".csv",sep = ""))) 
+key             <- key %>%
+  mutate(across(c(Animal,Sex,ID_Code,Group,Cohort,Treatment,Diet), as.factor))
 
 # Load cal.csv and merge metadata
 df              <- read_csv(here::here(paste(filename,".csv",sep = ""))) %>%
-  left_join(df_code, by = "Animal") %>%                 #unblind by merging with decoding df 
+  left_join(key, by = "Animal") %>%                 #unblind by merging with decoding df 
   mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
   rename(Cage = Animal)%>%
   select(!(starts_with("Enviro") 
@@ -133,6 +133,8 @@ og.start         <- head(df$DateTime, n=1)
 og.end           <- last(df$DateTime)
 og.dur           <- og.end - og.start
 
+print(paste("Trimmming df to start and end at ZT18. Original recording length =", round(og.dur,2), "days."))
+
 # Find index of first lights out (18:00) for each animal
 df <- df %>% group_by(ID_Code)
 idx.start        <- which(hour(df$DateTime) == 18)[1]-1
@@ -149,6 +151,9 @@ time.end         <- as.POSIXct(df$DateTime[idx.end])
 # Trim everything after last lights out
 df <- df %>%
   filter(DateTime < time.end)
+
+trim.dur         <- last(df$DateTime) - head(df$DateTime,n=1)
+print(paste(round(og.dur - trim.dur,2), "days trimmed. Trimmed df length =", round(trim.dur,2), "days."))
 
 # Compute ZT time, rename some variables
 df <- df %>%
@@ -179,7 +184,7 @@ df <- df %>%
 
 # Calculate rolling Age, from the starting Age entered in the "DECODED" metadata file.
 if ("Age" %in% colnames(df)) {
-  df %<>% 
+  df <- df %>%
     group_by(ExpDay,Animal) %>% 
     mutate(Age = ExpDay-1 + first(Age)) %>% 
     ungroup()
@@ -207,12 +212,16 @@ df <- df %>%
   mutate(meanBodyMass = mean(BodyMass),.after = BodyMass) %>%
   ungroup()
 
-# Detect diet from df_code and establish conversion
-if (sum(is.na(df_code$Diet)) ==length(df_code$Diet)) {
-  print('No diet type specified in DECODED file. Assigning default of chow (4.2 kcal/g). If this is in error, please revised the DECODED file and re-run the script from the beginning.')
+# Detect diet from key and establish conversion
+if (sum(is.na(key$Diet)) ==length(key$Diet)) {
+  
+  diet <- menu(c("NCD","HFD"), title = "No diet type specified in DECODED file. Which diet was provided?")
+  
   df <- df %>%
-    mutate(Diet = "NCD")
-}
+    mutate(Diet = case_when(
+      diet == 1 ~ "NCD",
+      diet == 2 ~ "HFD"))
+} 
   
 # Compute new columns
 df <- df %>%
@@ -317,7 +326,7 @@ daily.pp.avg <- df %>%
     across(all_of(cols4cum), ~ last(.) - first(.))) %>% 
   ungroup() %>%
   bind_rows(.,total.avg.daily) %>% 
-  left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
+  left_join(key, by = c("Animal" = "ID_Code")) %>% 
   select(-Animal.y) %>%
   mutate(Photoperiod = as.factor(Photoperiod),
          Animal = as.factor(Animal))
@@ -353,7 +362,7 @@ exp.pp.avg <- daily.pp.avg %>%
     across(all_of(cols4cum), sum)) %>% 
   ungroup() %>%
   bind_rows(., exp.avg) %>% 
-  left_join(df_code, by = c("Animal" = "ID_Code")) %>% 
+  left_join(key, by = c("Animal" = "ID_Code")) %>% 
   select(-Animal.y) %>%
   mutate(Photoperiod = as.factor(Photoperiod),
          Animal = as.factor(Animal))
@@ -366,6 +375,6 @@ exp.pp.avg
 
 ```{r}
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
-save(df, df.hourly, daily.pp.avg, exp.pp.avg, df_code, file = savename)
+save(df, df.hourly, daily.pp.avg, exp.pp.avg, key, file = savename)
 rm(list = ls())
 ```
