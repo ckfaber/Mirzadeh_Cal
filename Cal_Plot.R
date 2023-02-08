@@ -52,6 +52,7 @@ facetvar         <- "Sex" # set to NA (no quotes!) if no faceting desired
 plt              <- "Dark2"
 export           <- T
 ftype            <- ".pdf" # default to export pdfs
+segment          <- T
 
 ## Defaults -------------------------------------------------------------------
 smooth           <- T
@@ -83,6 +84,14 @@ if (export) {
   }
 }
 
+if (segment) {
+  trimtime           <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
+  while (is.na(trimtime)) {
+    message("You entered a non-numeric value for time to filter. Try again.")
+    swin  <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
+  }
+}
+
 ## Load data ------------------------------------------------------------------
 
 load(paste(fpath,"/",paste(rundate,cohort,"Clean.Rda",sep = "_"),sep=""))
@@ -110,6 +119,12 @@ unitkeys         <- read_csv(paste(fpath,"Cal_Units.csv",sep="/"))
 # Create ggplot function for time-series plots with SEM ribbon
 tsplot <- function(data,var,groupvar,facetvar,ylab) {
   
+  if(segment){
+    data <- data %>% filter(Time < trimtime)
+    photoperiods <- pp_data %>% filter(Time < trimtime)
+  } else {
+    photoperiods <- pp_data
+  }
   plot <- ggplot(data, aes(x = Time, 
                y = .data[[var]],
                color = .data[[groupvar]],
@@ -125,7 +140,7 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
   
 # Shaded tiles for photoperiod
   new_scale_fill() +
-  geom_tile(data = pp_data, 
+  geom_tile(data = photoperiods, 
             mapping = aes(x = Time, fill = Photoperiod,y=0),
             linewidth = 0,
             alpha = 0.1,
