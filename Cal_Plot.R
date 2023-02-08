@@ -5,6 +5,8 @@
 # photoperiod shading shows 12 rectangles per photoperiod, resulting in dark
 # vertical lines at each hourly bin
 
+# - If custom sizing needed, will need to change width and height specifications within calls to ggsave (lines 209 and 237)
+
 # Solution from Nicola Rennie, needs to be validated: 
 
 # pp_data <- data.frame(Time = 0:71, 
@@ -34,16 +36,15 @@
 library(tidyverse)
 library(ggnewscale)
 library(zoo, include.only = 'rollmean')
-library(here)
 library(broom)
 library(ggpubr)
 library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
 
-cohort          <- "CAL009"
-rundate         <- "2022-07-11"
-fpath            <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/OLD_Calorimetry/macro_processed/r_cleaned"
+cohort          <- "cal015"
+rundate         <- "2022-09-29"
+fpath            <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
 
 # Specify grouping & list of variables for smoothing via moving mean
 groupvar         <- "Group"
@@ -57,7 +58,7 @@ smooth           <- T
 norm             <- T
 tsvars           <- c('VO2','VCO2','VH2O','EE','EE.cum','EBalance','RER',
                       'AllMeters.cum','FoodIn.cum','WaterIn.cum',
-                      'FoodIn.kcal','BodyMass')
+                      'FoodIn.kcal','FoodIn.cum.kcal','EB.cum','BodyMass')
 boxvars          <- c('VO2','EE','EBalance','RER','AllMeters','WaterIn.g',
                   'FoodIn.kcal')
 
@@ -74,7 +75,7 @@ if (smooth) {
 } 
 
 if (export) {
-  repo <- paste(rundate,cohort,sep="_")
+  repo <- paste(rundate,cohort,"plots",sep="_")
   repo <- paste0(fpath,"/",repo)
   
   if (!dir.exists(repo)) {
@@ -85,7 +86,7 @@ if (export) {
 ## Load data ------------------------------------------------------------------
 
 load(paste(fpath,"/",paste(rundate,cohort,"Clean.Rda",sep = "_"),sep=""))
-unitkeys         <- read_csv(here::here("Cal_Units.csv"))
+unitkeys         <- read_csv(paste(fpath,"Cal_Units.csv",sep="/"))
 
 # Statistics -----------------------------------------------------------------
 
@@ -138,7 +139,8 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
   # Plot annotations and formatting
   labs(x = "Time (hours)", y = ylab) + 
   scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
-  theme_classic() 
+  theme_classic() + 
+  theme(text = element_text(size = 12))
 }
 
 # Create function to generate boxplots
@@ -158,7 +160,8 @@ bxplot <- function(var,groupvar,facetvar,ylab) {
     labs(x = NULL, y = ylab) +
     scale_x_discrete(labels = c("Dark", "Light", "Total")) +
     theme_classic() + 
-    ggtitle(title)
+    ggtitle(title) +
+    theme(text = element_text(size = 12))
   
 }
 
@@ -203,7 +206,7 @@ for (i in 1:length(tsvars)) {
     } else {
       fname <- var
     }
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = repo)
+    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), width=5,height=3,units="in",path = repo)
   }
 }
 
@@ -214,7 +217,7 @@ box.plots <- vector(mode = "list",length = length(boxvars))
 for (i in 1:length(boxvars)) {
   
   var <- boxvars[i]
-  fname <- paste(var,"_exp_boxplot")
+  fname <- paste0(var,"_exp_boxplot")
   
   ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
     select(Title,Unit) %>% 
@@ -231,6 +234,6 @@ for (i in 1:length(boxvars)) {
   box.plots[[i]] <- bxplot(var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), path = repo)
+    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
   }
 }

@@ -15,14 +15,14 @@ VO2_M,VO2,vO2,(mL/min),Rate of oxygen consumption
 WaterInA_M,WaterIn.cum,Cumulative Water Intake,(g),Mass of water consumed by animal during the cycle
 Xbreak_R,XBreak,Beam Breaks (x),(count),Number of x-axis beam breaks
 Ybreak_R,YBreak,Beam Breaks (y),(count),Number of y-axis beam breaks
-EnviroTemp_M,NA,,,
-EnviroRH_M,NA,,,
-EnviroBP_M,NA,,kPa,
-EnviroLightlux_M,NA,,,
-EnviroOccupancy_M,NA,,,
-EnviroSound_M,NA,,,
-Stilltime_M,NA,,,
-Sleeptime_M,NA,,,
+EnviroTemp_M,NA,NA,NA,NA
+EnviroRH_M,NA,NA,NA,NA
+EnviroBP_M,NA,NA,kPa,NA
+EnviroLightlux_M,NA,NA,NA,NA
+EnviroOccupancy_M,NA,NA,NA,NA
+EnviroSound_M,NA,NA,NA,NA
+Stilltime_M,NA,NA,NA,NA
+Sleeptime_M,NA,NA,NA,NA
 NA,EE.kcal.bin,NA,(kcal),"Temporary variable. Calculated from EE. Since each value in EE is an instantaneous measurement of kcal/hr, to get the approximate kcal burned across the sampling interval, EE was multiplied by the interval in hours (e.g., 0.05h for a 3-minute interval)"
 NA,AllMeters.cum,Cumulative Activity,(m),Calculated from AllMeters using cumsum()
 NA,FoodIn.g,Food Intake,(g),Calculated from FoodIn.cum using diff()
@@ -34,24 +34,24 @@ NA,norm.Ebalance,Normalized Energy Balance,(kcal/g),Energy balance normalized to
 NA,EE.cum,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure
 NA,EB.cum,Cumulative Energy Balance,(kcal),Cumulative energy balance
 NA,FoodIn.cum.kcal,Cumulative Food Intake,(kcal),Cumulative food intake in kilocalories; computed as FoodIn.cum * diet.kcal (hard-coded variable at front end of script)
-,meanBodyMass,Mean Daily Body mass,(g),"Calculated from BodyMass. Averaged for each experimental day, used to compute all variables beginning with ""norm."""
-,norm.FoodIn.kcal,Normalized Food Intake,(kcal/g),Calculated as FoodIn.kcal / meanBodyMass
-,norm.FoodIn.cum.kcal,Normalized Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass
-,norm.EE.cum,Normalized Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass
-,norm.EB.cum,Normalized Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass
-,VO2_smooth3,vO2,(mL/min),"Rate of oxygen consumption, smoothed via moving mean"
-,VCO2_smooth3,vCO2,(mL/min),"Rate of carbon dioxide emission, smoothed via moving mean"
-,VH2O_smooth3,vH2O,(g/hr),"Rate of water vapor loss, smoothed via moving mean"
-,EE_smooth3,Energy Expenditure,(kcal/hr),Mean energy expenditure in kcal/hr. Calculated using the Weir equation. Smoothed via moving mean
-,EBalance_smooth3,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin. Smoothed via moving mean
-,RER_smooth3,RER,NA,"Mean respiratory exchange ratio, VCO2/VO2, unitless. Smoothed via moving mean"
-,AllMeters.cum_smooth3,Cumulative Activity,(m),Calculated from AllMeters using cumsum() smoothed via moving mean
-,FoodIn.cum_smooth3,Cumulative Food Intake,(g),Mass of food consumed by animal during the cycle. Smoothed via moving mean
-,WaterIn.cum_smooth3,Cumulative Water Intake,(g),Mass of water consumed by animal during the cycle. Smoothed via moving mean
-,FoodIn.kcal_smooth3,Food Intake,(kcal),Calculated from FoodIn.g*3.35 (NCD) or 5.47 (HFD). Smoothed via moving mean
-,BodyMass_smooth3,Body Mass,(g),Body mass of animal. Smoothed via moving mean
-,norm.FoodIn.cum.kcal_smooth3,Normalized Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass. Smoothed via moving mean
-,norm.EE_smooth3,Normalized Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass. Smoothed via moving mean
-,norm.EE.cum_smooth3,Normalized Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass. Smoothed via moving mean
-,norm.EB.cum_smooth3,Normalized Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass. Smoothed via moving mean
-,EE.cum_smooth3,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure. Smoothed via moving mean
+NA,meanBodyMass,Mean Daily Body mass,(g),"Calculated from BodyMass. Averaged for each experimental day, used to compute all variables beginning with ""norm."""
+NA,norm.FoodIn.kcal,Normalized Food Intake,(kcal/g),Calculated as FoodIn.kcal / meanBodyMass
+NA,norm.FoodIn.cum.kcal,Normalized Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass
+NA,norm.EE.cum,Normalized Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass
+NA,norm.EB.cum,Normalized Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass
+NA,VO2_smooth3,vO2,(mL/min),"Rate of oxygen consumption, smoothed via moving mean"
+NA,VCO2_smooth3,vCO2,(mL/min),"Rate of carbon dioxide emission, smoothed via moving mean"
+NA,VH2O_smooth3,vH2O,(g/hr),"Rate of water vapor loss, smoothed via moving mean"
+NA,EE_smooth3,Energy Expenditure,(kcal/hr),Mean energy expenditure in kcal/hr. Calculated using the Weir equation. Smoothed via moving mean
+NA,EBalance_smooth3,Energy Balance,(kcal),Calculated as calories in minus calories out: FoodIn.kcal - EE.kcal.bin. Smoothed via moving mean
+NA,RER_smooth3,RER,NA,"Mean respiratory exchange ratio, VCO2/VO2, unitless. Smoothed via moving mean"
+NA,AllMeters.cum_smooth3,Cumulative Activity,(m),Calculated from AllMeters using cumsum() smoothed via moving mean
+NA,FoodIn.cum_smooth3,Cumulative Food Intake,(g),Mass of food consumed by animal during the cycle. Smoothed via moving mean
+NA,WaterIn.cum_smooth3,Cumulative Water Intake,(g),Mass of water consumed by animal during the cycle. Smoothed via moving mean
+NA,FoodIn.kcal_smooth3,Food Intake,(kcal),Calculated from FoodIn.g*3.35 (NCD) or 5.47 (HFD). Smoothed via moving mean
+NA,BodyMass_smooth3,Body Mass,(g),Body mass of animal. Smoothed via moving mean
+NA,norm.FoodIn.cum.kcal_smooth3,Normalized Cumulative Food Intake,(kcal/g),Calculated as FoodIn.cum.kcal / meanBodyMass. Smoothed via moving mean
+NA,norm.EE_smooth3,Normalized Energy Expenditure,(kcal/g),Energy expenditure normalized to body mass (g). Calculated as EE/meanBodyMass. Smoothed via moving mean
+NA,norm.EE.cum_smooth3,Normalized Cumulative Energy Expenditure,(kcal/g),Calculated as EE.cum / meanBodyMass. Smoothed via moving mean
+NA,norm.EB.cum_smooth3,Normalized Cumulative Energy Balance,(kcal/g),Calculated as EB.cum / meanBodyMass. Smoothed via moving mean
+NA,EE.cum_smooth3,Cumulative Energy Expenditure,(kcal),Cumulative energy expenditure. Smoothed via moving mean
