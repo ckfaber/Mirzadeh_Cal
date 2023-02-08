@@ -6,6 +6,10 @@ Requirements:
 - TimeSeries sheet as a .csv 
 - Group decoding sheet with same prefix as TimeSeries sheet (e.g., expID_date_code.csv), saved in same directory
 
+Please acknowledge use of this repo in any publications.
+
+For questions, issues, suggestions, please submit an issue or contact:
+
 **Chelsea Faber**<br>
 Mirzadeh Laboratory at Barrow Neurological Institute<br>
 kasper DOT chelsea AT gmail DOT com<br>
