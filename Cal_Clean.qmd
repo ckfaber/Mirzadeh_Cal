@@ -42,9 +42,9 @@ If everything is working properly, these variables are the only ones a user shou
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "CAL009"
-rundate         <- "2022-07-11"
-fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/OLD_Calorimetry/macro_processed"
+cohort          <- "cal015"
+rundate         <- "2022-09-29"
+fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
 remove_animals  <- NA
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
@@ -54,12 +54,6 @@ intervention    <- FALSE
 segment.run     <- FALSE
 cols2excl       <- c('Still_pct_M','Sleep_pct_M',
                      'XBreak_R','YBreak_R','Mass_g','AllMeters_M')
-```
-
-## Check for .Rda before loading and running
-
-```{r}
-
 ```
 
 ## Load data
@@ -75,7 +69,7 @@ fname           <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"KEY",sep = "_")
 
 # Load csv with run metadata
-key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/")) 
+key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/"),show_col_types=F) 
 
 # Load cal.csv and merge metadata
 df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),show_col_types = F) %>%
@@ -85,7 +79,7 @@ df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),sh
   select(!(starts_with("Enviro") 
            | starts_with("Ped") 
            | all_of(cols2excl))) %>%
-  mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment,Diet), as.factor))
+  mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment), as.factor))
 ```
 
 ## Tidy data
@@ -104,11 +98,12 @@ if (!is.na(remove_animals)) {
 # Parse date-times and sort by animal ID (ID_Code) and date-time
 df <- df %>% 
   relocate(c(DateTime,Sex,Group,Treatment,Cohort,Animal)) %>%
-  mutate(DateTime = round_date(ymd_hms(df$DateTime),unit = "minute")) %>%
-  mutate(month = as.numeric(month(DateTime)),
+  mutate(DateTime = round_date(ymd_hms(df$DateTime),unit = "minute"),
+         month = as.numeric(month(DateTime)),
          day = as.numeric(day(DateTime)),
          hour = as.numeric(hour(DateTime)),
-         minute = as.numeric(minute(DateTime))) 
+         minute = as.numeric(minute(DateTime))) %>%
+  mutate(DietChangeDateTime = round_date(mdy_hm(df$DietChangeDateTime)))
 
 df <- df[order(df$DateTime),] %>%
   arrange(Animal)
@@ -207,7 +202,7 @@ df <- df %>%
   ungroup()
 
 # Detect diet from key and establish conversion
-if (sum(is.na(key$Diet)) ==length(key$Diet)) {
+if (sum(is.na(key$Diet1))==length(key$Diet1) & sum(is.na(key$Diet2)) ==length(key$Diet2)) {
   
   diet <- menu(c("NCD","HFD"), title = "No diet type specified in DECODED file. Which diet was provided?")
   
@@ -215,7 +210,14 @@ if (sum(is.na(key$Diet)) ==length(key$Diet)) {
     mutate(Diet = case_when(
       diet == 1 ~ "NCD",
       diet == 2 ~ "HFD"))
-} 
+} else {
+  df <- df %>% 
+    group_by(Animal) %>%
+    mutate(Diet = case_when(
+      DateTime <= DietChangeDateTime ~ Diet1,
+      DateTime > DietChangeDateTime ~ Diet2)) %>%
+    ungroup()
+}
   
 # Compute new columns
 df <- df %>%
