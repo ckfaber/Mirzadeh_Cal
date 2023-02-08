@@ -59,16 +59,7 @@ cols2excl       <- c('Still_pct_M','Sleep_pct_M',
 ## Check for .Rda before loading and running
 
 ```{r}
-savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
-savename <- paste(fpath,"/r_cleaned/",savename,sep="")
 
-if (file.exists(savename)) {
-  go <- menu(c("Yes","No"), title = "A .Rda file for this file already exists. Re-run this script and overwrite?")
-}
-
-if (go == 2) {
-    print(paste("Aborting script, Clean.Rda file for this run already exists. "))
-}
 ```
 
 ## Load data
@@ -87,9 +78,8 @@ code            <- paste(rundate,cohort,"KEY",sep = "_")
 key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/")) 
 
 # Load cal.csv and merge metadata
-df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/")) %>%
+df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),show_col_types = F) %>%
   left_join(key, by = "Animal") %>%                 #unblind by merging with decoding df 
-  mutate(across(.cols = everything()),na_if(.,".")) %>% #replace "." with "NA"
   rename(Cage = Animal,
          Animal = ID_Code)%>%
   select(!(starts_with("Enviro") 
@@ -373,6 +363,8 @@ rm(df.exp.totals)
 ## Save data
 
 ```{r}
+savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
+savename <- paste(fpath,"/r_cleaned/",savename,sep="")
 save(df, df.hourly, df.daily, df.exp.summary, key, file = savename)
 rm(list = ls())
 ```
