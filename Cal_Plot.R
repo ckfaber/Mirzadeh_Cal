@@ -164,7 +164,7 @@ bxplot <- function(var,groupvar,facetvar,ylab) {
   ggplot(df.exp.summary,
          aes(x = Photoperiod,
              y = .data[[var]])) +
-    facet_grid(~.data[[facetvar]]) +
+    {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +
     geom_boxplot(aes(fill = .data[[groupvar]]), alpha = 0.5) +
     scale_fill_brewer(palette = plt) +
     geom_point(position = position_dodge(width = 0.75),
