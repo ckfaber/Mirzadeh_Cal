@@ -79,7 +79,7 @@ df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),sh
   select(!(starts_with("Enviro") 
            | starts_with("Ped") 
            | all_of(cols2excl))) %>%
-  mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment), as.factor))
+  mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment), factor))
 ```
 
 ## Tidy data
@@ -290,9 +290,7 @@ df.hourly <- df %>%
 
 ## Photoperiod and daily means
 
-Next, we compute the cumulative totals or averages of all variables for each experimental day.
-
-If incomplete days were not trimmed above, then the daily and photoperiod averages will be affected by the start and end of recording where \<24-hours are included.
+Next, we compute the totals/averages of all variables within each experimental day.
 
 ```{r}
 #/ warning: false
@@ -301,23 +299,16 @@ df.dailytot <- df %>%
   group_by(Animal,ExpDay) %>% 
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum), ~ last(.) - first(.))) %>%
+    across(all_of(cols2avg),mean)) %>%
   mutate(Photoperiod = "Total") %>%
   ungroup() 
-```
 
-Next, we compute cumulative totals or averages of all variables within each photoperiod per day. This is merged with the `total.avg.daily` data so that plots containing dark, light, and total can be obtained from the same data frame.
-
-```{r}
-#/ warning: false
 # Compute average within each photoperiod, append to total.avg.daily
 df.daily <- df %>%
   group_by(Animal,ExpDay,Photoperiod) %>%
   summarize(
     across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum), ~ last(.) - first(.))) %>% 
+    across(all_of(cols2avg),mean)) %>% 
   ungroup() %>%
   bind_rows(.,df.dailytot) %>% 
   left_join(key, by = c("Animal" = "ID_Code")) %>% 
@@ -326,40 +317,27 @@ df.daily <- df %>%
 rm(df.dailytot)
 ```
 
-Finally, we compute cumulative totals and averages across the entire experiment, for each day...
+Finally, we compute cumulative totals and averages across the entire experiment.
 
 ```{r}
 #/ warning: false
 # Compute each animal's average/total per variable for entire experiment
-df.exp.totals <- df %>%
-  group_by(Animal) %>%
-  summarize(
-    across(all_of(cols2sum),sum),
-    across(all_of(cols2avg),mean),
-    across(all_of(cols4cum), ~ last(.))) %>% 
-  mutate(Photoperiod = "Total") %>% 
-  ungroup()
-```
-
-... and within each photoperiod.
-
-```{r}
-#/ warning: false
-# Compute the overall average daily value for every requested variable across the whole experiment
-df.exp.summary <- df.daily %>%
+df.daily.avg <- df.daily %>%
   group_by(Animal, Photoperiod) %>%
   summarize(
-    across(all_of(cols2sum), mean),
-    across(all_of(cols2avg), mean),
-    across(all_of(cols4cum), sum)) %>% 
-  #filter(Photoperiod != "Total") %>%
-  ungroup() %>%
-  #bind_rows(., df.exp.totals) %>% 
+    across(all_of(c(cols2sum,cols2avg)),mean)) %>%
+  left_join(key, by = c("Animal" = "ID_Code")) %>%
+  select(-c(Animal.y, Diet1,Diet2,DietChangeDateTime))
+         
+# Compute each animal's average/total per variable for entire experiment
+df.total <- df.daily %>%
+  group_by(Animal, Photoperiod) %>%
+  summarize(
+    across(all_of(cols2sum),sum),
+    across(all_of(cols2avg),mean)) %>% 
+  ungroup()  %>%
   left_join(key, by = c("Animal" = "ID_Code")) %>% 
-  select(-Animal.y) %>%
-  arrange(Animal,Photoperiod)
-
-rm(df.exp.totals)
+  select(-c(Animal.y, Diet1,Diet2,DietChangeDateTime))
 ```
 
 ## Save data
@@ -367,6 +345,6 @@ rm(df.exp.totals)
 ```{r}
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
 savename <- paste(fpath,"/r_cleaned/",savename,sep="")
-save(df, df.hourly, df.daily, df.exp.summary, key, file = savename)
+save(df, df.hourly, df.daily, df.daily.avg, df.total,key, file = savename)
 rm(list = ls())
 ```

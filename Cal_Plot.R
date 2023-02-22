@@ -56,12 +56,15 @@ segment          <- T
 
 ## Defaults -------------------------------------------------------------------
 smooth           <- T
-norm             <- T
+norm             <- F
 tsvars           <- c('VO2','VCO2','VH2O','EE','EE.cum','EBalance','RER',
                       'AllMeters.cum','FoodIn.cum','WaterIn.cum',
                       'FoodIn.kcal','FoodIn.cum.kcal','EB.cum','BodyMass')
-boxvars          <- c('VO2','EE','EBalance','RER','AllMeters','WaterIn.g',
-                  'FoodIn.kcal')
+boxvars.avg      <- c('VO2','EE','EBalance','RER','AllMeters','WaterIn.g',
+                  'FoodIn.kcal','norm.EE','norm.FoodIn.kcal','norm.EBalance')
+
+boxvars.cum      <- c("AllMeters","FoodIn.g","FoodIn.kcal","norm.FoodIn.kcal","WaterIn.g","EBalance",
+                      "norm.EBalance","VO2","EE","RER","BodyMass","norm.EE")
 
 if (norm) {
   boxvars        <- c(boxvars,'norm.EB.cum','norm.EE.cum','norm.EE','norm.FoodIn.cum.kcal')
@@ -159,9 +162,9 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
 }
 
 # Create function to generate boxplots
-bxplot <- function(var,groupvar,facetvar,ylab) {
+bxplot <- function(data,var,groupvar,facetvar,ylab) {
   
-  ggplot(df.exp.summary,
+  ggplot(data,
          aes(x = Photoperiod,
              y = .data[[var]])) +
     {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +
@@ -173,7 +176,7 @@ bxplot <- function(var,groupvar,facetvar,ylab) {
                    group = .data[[groupvar]]), 
                color = "black", shape = 21, show.legend = FALSE) + 
     labs(x = NULL, y = ylab) +
-    scale_x_discrete(labels = c("Dark", "Light", "Total")) +
+    #scale_x_discrete(labels = c("Dark", "Light", "Total")) +
     theme_classic() + 
     ggtitle(title) +
     theme(text = element_text(size = 12))
@@ -228,11 +231,11 @@ for (i in 1:length(tsvars)) {
 ## Box plots ------------------------------------------------------------------
 
 # Loop through all variables for overall experiment plots
-box.plots <- vector(mode = "list",length = length(boxvars))
-for (i in 1:length(boxvars)) {
+boxplots.avg <- vector(mode = "list",length = length(boxvars.avg))
+for (i in 1:length(boxvars.avg)) {
   
-  var <- boxvars[i]
-  fname <- paste0(var,"_exp_boxplot")
+  var <- boxvars.avg[i]
+  fname <- paste0(var,"_boxplot_avg")
   
   ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
     select(Title,Unit) %>% 
@@ -245,8 +248,33 @@ for (i in 1:length(boxvars)) {
   
   if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
   
-  names(box.plots)[i] <- var
-  box.plots[[i]] <- bxplot(var,groupvar,facetvar,ylab)
+  names(boxplots.avg)[i] <- var
+  boxplots.avg[[i]] <- bxplot(df.daily.avg,var,groupvar,facetvar,ylab)
+  #print(plot)
+  if (export) {
+    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
+  }
+}
+
+boxplots.cum <- vector(mode = "list",length = length(boxvars.cum))
+for (i in 1:length(boxvars.cum)) {
+  
+  var <- boxvars.cum[i]
+  fname <- paste0(var,"_boxplot_cum")
+  
+  ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
+    select(Title,Unit) %>% 
+    summarize(ylab = paste(Title,Unit)) %>% 
+    pull()
+  
+  title <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
+    select(Title) %>%
+    pull()
+  
+  if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
+  
+  names(boxplots.cum)[i] <- var
+  boxplots.cum[[i]] <- bxplot(df.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
     ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
