@@ -25,6 +25,10 @@ editor: visual
 -   TimeSeries \<yyyy-mm-dd_cohort.csv\> saved in your default working directory (run `library(here)` to find out where this is!)
 -   Key \<yyyy-mm-dd_run_KEY.csv\> - must have same prefix as TimeSeries sheet, and be saved in the same directory
 
+TO DO:
+
+-   Fix boxplots for normalized cumulative variables - compute dark & light, then sum.
+
 ## Load required packages
 
 ```{r}
@@ -40,11 +44,13 @@ library(lubridate)
 
 If everything is working properly, these variables are the only ones a user should have to change to clean a given file's calorimetry data. Eventually, this entire script will be converted to a function, such that the user would type these in-line when calling that function (e.g., `Cal_Clean(cohort = 'mon001',rundate = '2021-10-18',remove_animals = 274)`).
 
+fpath \<- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "cal015"
-rundate         <- "2022-09-29"
-fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+cohort          <- "cal017"
+rundate         <- "2023-01-11"
+fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
 remove_animals  <- NA
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
@@ -67,6 +73,25 @@ A workaround, if you do not wish to load your data using the here() package, is 
 #| code-overflow: wrap
 fname           <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"KEY",sep = "_")
+savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
+savename <- paste(fpath,"/r_cleaned/",savename,sep="")
+
+if (file.exists(savename)) {
+  go <- menu(c("Re-run and overwrite existing Clean.Rda file","Re-run and save a new copy of Clean.Rda","Abort! Abort!"), title = "A .Rda file for this file already exists. How would you like to proceed?")
+}
+
+if (go == 1) {
+  print(paste0("Re-running Cal_Clean script and over-writing previous file at ", savename))
+  break
+}else if (go == 2) {
+  savename <- paste(rundate,cohort,"Clean_COPY.Rda",sep = "_")
+  savename <- paste0(fpath,"/r_cleaned/",savename)
+  print(paste0("A new Clean.Rda file will be generated at ", savename))
+  print("Be sure to revise filename inputs to subsequent scripts to reflect this new naming convention.")
+} else if (go == 3) {
+      print("Aborting script, Clean.Rda file for this run already exists.")
+      rm(list = ls())
+}
 
 # Load csv with run metadata
 key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/"),show_col_types=F) 
@@ -343,8 +368,6 @@ df.total <- df.daily %>%
 ## Save data
 
 ```{r}
-savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
-savename <- paste(fpath,"/r_cleaned/",savename,sep="")
 save(df, df.hourly, df.daily, df.daily.avg, df.total,key, file = savename)
 rm(list = ls())
 ```
