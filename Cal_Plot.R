@@ -42,33 +42,33 @@ library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
 
-cohort          <- "cal015"
-rundate         <- "2022-09-29"
-fpath            <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
+cohort          <- "cal017"
+rundate         <- "2023-01-11"
+fpath            <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
 
 # Specify grouping & list of variables for smoothing via moving mean
 groupvar         <- "Group"
-facetvar         <- "Sex" # set to NA (no quotes!) if no faceting desired
+facetvar         <- NA # set to NA (no quotes!) if no faceting desired
 plt              <- "Dark2"
 export           <- T
 ftype            <- ".pdf" # default to export pdfs
-segment          <- T
+segment          <- F
 
 ## Defaults -------------------------------------------------------------------
 smooth           <- T
-norm             <- F
-tsvars           <- c('VO2','VCO2','VH2O','EE','EE.cum','EBalance','RER',
-                      'AllMeters.cum','FoodIn.cum','WaterIn.cum',
-                      'FoodIn.kcal','FoodIn.cum.kcal','EB.cum','BodyMass')
-boxvars.avg      <- c('VO2','EE','EBalance','RER','AllMeters','WaterIn.g',
-                  'FoodIn.kcal','norm.EE','norm.FoodIn.kcal','norm.EBalance')
+tsvars           <- sort(c('AllMeters','AllMeters.cum','BodyMass','EBalance',
+                           'EB.cum','norm.EB.cum','EE','EE.cum','norm.EE.cum',
+                           'FoodIn.kcal','FoodIn.cum.kcal',
+                           'norm.FoodIn.cum.kcal','RER','VO2','VCO2','VH2O',
+                           'WaterIn.cum'))
+                          
+boxvars.avg      <- sort(c('AllMeters','EBalance','norm.EBalance','EE','norm.EE',
+                           'FoodIn.kcal','norm.FoodIn.kcal','RER',
+                           'VO2','WaterIn.g'))
 
-boxvars.cum      <- c("AllMeters","FoodIn.g","FoodIn.kcal","norm.FoodIn.kcal","WaterIn.g","EBalance",
-                      "norm.EBalance","VO2","EE","RER","BodyMass","norm.EE")
-
-if (norm) {
-  boxvars        <- c(boxvars,'norm.EB.cum','norm.EE.cum','norm.EE','norm.FoodIn.cum.kcal')
-}
+boxvars.cum      <- sort(c('AllMeters','EBalance','norm.EBalance','EE.cum',
+                           'norm.EE.cum','FoodIn.kcal','norm.FoodIn.kcal',
+                            'WaterIn.g'))
 
 if (smooth) {
   swin           <- suppressWarnings(as.integer(readline(prompt = "Enter window size (in integer hours) for smoothing via moving mean:")))
@@ -97,7 +97,22 @@ if (segment) {
 
 ## Load data ------------------------------------------------------------------
 
-load(paste(fpath,"/",paste(rundate,cohort,"Clean.Rda",sep = "_"),sep=""))
+fname           <- paste(rundate,cohort,sep = "_")
+
+# Prompt user which .Rda should be loaded if a Copy exists
+if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda")) 
+    & file.exists(paste0(fpath,"/",fname,"_Clean_COPY.Rda"))) {
+  
+  tmp <- menu(c("Original","Copy"), 
+              title = "Two .Rda files found for this run. Which would you like to plot?")
+  if (tmp == 1) {
+    f <- paste0(fpath,"/",fname,"_Clean.Rda")
+  } else if (tmp == 2) {
+    f <- paste0(fpath,"/",fname,"_Clean_COPY.Rda")
+  }
+}
+
+load(f)
 unitkeys         <- read_csv(paste(fpath,"Cal_Units.csv",sep="/"))
 
 # Statistics -----------------------------------------------------------------
@@ -249,7 +264,7 @@ for (i in 1:length(boxvars.avg)) {
   if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
   
   names(boxplots.avg)[i] <- var
-  boxplots.avg[[i]] <- bxplot(df.daily.avg,var,groupvar,facetvar,ylab)
+  boxplots.avg[[i]] <- bxplot(df.avg.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
     ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
@@ -271,10 +286,12 @@ for (i in 1:length(boxvars.cum)) {
     select(Title) %>%
     pull()
   
+  title <- paste0("Cumulative ", title)
+  
   if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
   
   names(boxplots.cum)[i] <- var
-  boxplots.cum[[i]] <- bxplot(df.total,var,groupvar,facetvar,ylab)
+  boxplots.cum[[i]] <- bxplot(df.cum.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
     ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
