@@ -22,24 +22,23 @@ fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirza
 ## Load data -------------
 
 fname           <- paste(rundate,cohort,sep = "_")
-code            <- paste(rundate,cohort,"KEY",sep = "_")
 
-# Load csv with run metadata
-key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/"),show_col_types=F)
-
-if (file.exists(savename)) {
-  go <- menu(c("Re-run and overwrite existing Clean.Rda file","Re-run and save a new copy of Clean.Rda","Abort! Abort!"), title = "A .Rda file for this file already exists. How would you like to proceed?")
+# Prompt user which .Rda should be loaded if a Copy exists
+if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda")) 
+    & file.exists(paste0(fpath,"/",fname,"_Clean_COPY.Rda"))) {
+  
+  tmp <- menu(c("Original","Copy"), 
+                title = "Two .Rda files found for this run. Which would you like to inspect?")
+  if (tmp == 1) {
+    f <- paste0(fpath,"/",fname,"_Clean.Rda")
+  } else if (tmp == 2) {
+    f <- paste0(fpath,"/",fname,"_Clean_COPY.Rda")
+  }
 }
 
-# Load cal.csv and merge metadata
-df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),show_col_types = F) %>%
-  left_join(key, by = "Animal") %>%                 #unblind by merging with decoding df 
-  rename(Cage = Animal,
-         Animal = ID_Code)%>%
-  select(!(starts_with("Enviro") 
-           | starts_with("Ped") 
-           | all_of(cols2excl))) %>%
-  mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment), factor))
+# Load Clean.Rda
+
+load(f)
 
 ## Summary --------------------------
 
