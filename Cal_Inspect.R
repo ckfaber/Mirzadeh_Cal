@@ -17,7 +17,7 @@ library(lubridate)
 
 cohort          <- "cal017"
 rundate         <- "2023-01-11"
-fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
+fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
 
 ## Load data -------------
 
@@ -42,7 +42,12 @@ load(f)
 
 ## Summary --------------------------
 
-
+# Desired metrics:
+# - count unique subjects
+# - number within each Treatment, Diet, Group, Sex
+# - whether any intervention, diet, or light schedule change occurred
+# - length of recording
+# - 
 
 ## Quick time-series plots
 
