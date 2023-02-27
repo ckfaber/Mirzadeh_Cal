@@ -48,9 +48,9 @@ fpath \<- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab D
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "cal017"
-rundate         <- "2023-01-11"
-fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+cohort          <- "cal018"
+rundate         <- "2023-02-15"
+fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
 remove_animals  <- NA
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
@@ -78,6 +78,8 @@ savename <- paste(fpath,"/r_cleaned/",savename,sep="")
 
 if (file.exists(savename)) {
   go <- menu(c("Re-run and overwrite existing Clean.Rda file","Re-run and save a new copy of Clean.Rda","Abort! Abort!"), title = "A .Rda file for this file already exists. How would you like to proceed?")
+} else {
+  go <- 0
 }
 
 if (go == 1) {
