@@ -21,13 +21,9 @@ editor: visual
 
 ###### Requirements:
 
--   TimeSeries sheet from Macro-processed .exp data files (MI \> v2.46) in 1 minute bins
--   TimeSeries \<yyyy-mm-dd_cohort.csv\> saved in your default working directory (run `library(here)` to find out where this is!)
+-   TimeSeries sheet from Macro-processed .exp data files (OneClickMacro \>= v2.52)
+-   TimeSeries \<yyyy-mm-dd_run_m\_timeseries.csv\>
 -   Key \<yyyy-mm-dd_run_KEY.csv\> - must have same prefix as TimeSeries sheet, and be saved in the same directory
-
-TO DO:
-
--   Fix boxplots for normalized cumulative variables - compute dark & light, then sum.
 
 ## Load required packages
 
