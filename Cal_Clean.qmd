@@ -71,7 +71,7 @@ A workaround, if you do not wish to load your data using the here() package, is 
 ```{r}
 #| warning: false
 #| code-overflow: wrap
-fname           <- paste(rundate,cohort,sep = "_")
+fname           <- paste(rundate,cohort,"m","timeseries",sep = "_")
 code            <- paste(rundate,cohort,"KEY",sep = "_")
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
 savename <- paste(fpath,"/r_cleaned/",savename,sep="")
