@@ -130,7 +130,8 @@ df <- df %>%
          day = as.numeric(day(DateTime)),
          hour = as.numeric(hour(DateTime)),
          minute = as.numeric(minute(DateTime))) %>%
-  mutate(DietChangeDateTime = round_date(mdy_hm(df$DietChangeDateTime)))
+  mutate(DietChangeDateTime = round_date(mdy_hm(df$DietChangeDateTime))) %>%
+  mutate(LightChangeDateTime = round_date(mdy_hm(df$LightChangeDateTime)))
 
 df <- df[order(df$DateTime),] %>%
   arrange(Animal)
@@ -231,21 +232,58 @@ df <- df %>%
 # Detect diet from key and establish conversion
 if (sum(is.na(key$Diet1))==length(key$Diet1) & sum(is.na(key$Diet2)) ==length(key$Diet2)) {
   
-  diet <- menu(c("NCD","HFD"), title = "No diet type specified in DECODED file. Which diet was provided?")
+  diet <- menu(c("NCD","HFD"), title = "No diet type specified in Key file. Which diet was provided?")
   
   df <- df %>%
     mutate(Diet = case_when(
       diet == 1 ~ "NCD",
       diet == 2 ~ "HFD"))
+} else if (sum(is.na(key$Diet2)) == length(key$Diet2)) {
+
+  df <- df %>%
+    group_by(Animal) %>%
+    rename(Diet = Diet1) %>%
+    ungroup()
+  
 } else {
-  df <- df %>% 
+  
+    df <- df %>% 
     group_by(Animal) %>%
     mutate(Diet = case_when(
       DateTime <= DietChangeDateTime ~ Diet1,
       DateTime > DietChangeDateTime ~ Diet2)) %>%
     ungroup()
+  
 }
   
+# Detect light schedule from key 
+if (sum(is.na(key$LightCycle1))==length(key$LightCycle1) & sum(is.na(key$LightCycle2)) ==length(key$LightCycle2)) {
+  
+  lt <- menu(c("LD","DD","LL"), title = "No light cycle  specified in Key file. Which light schedule was used?")
+  
+  df <- df %>%
+    mutate(LightCycle = case_when(
+      lt == 1 ~ "LD",
+      lt == 2 ~ "DD",
+      lt == 3 ~ "LL"))
+} else if (sum(is.na(key$LightCycle2)) == length(key$LightCycle2)) {
+
+  df <- df %>%
+    group_by(Animal) %>%
+    rename(LightCycle = LightCycle1) %>%
+    ungroup()
+  
+} else {
+  
+    df <- df %>% 
+    group_by(Animal) %>%
+    mutate(LightCycle = case_when(
+      DateTime <= LightChangeDateTime ~ LightCycle1,
+      DateTime > LightChangeDateTime ~ LightCycle2)) %>%
+    ungroup()
+  
+}
+
 # Compute new columns
 df <- df %>%
   group_by(Animal) %>%
