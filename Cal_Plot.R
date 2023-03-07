@@ -110,6 +110,8 @@ if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda"))
   } else if (tmp == 2) {
     f <- paste0(fpath,"/",fname,"_Clean_COPY.Rda")
   }
+} else if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda"))) {
+  f <- paste0(fpath,"/",fname,"_Clean.Rda")
 }
 
 load(f)
