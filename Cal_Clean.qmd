@@ -46,7 +46,7 @@ fpath \<- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab D
 # Run-specific user-defined parameters
 cohort          <- "cal018"
 rundate         <- "2023-02-15"
-fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
 remove_animals  <- NA
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
@@ -98,8 +98,7 @@ df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),sh
   left_join(key, by = "Animal") %>%                 #unblind by merging with decoding df 
   rename(Cage = Animal,
          Animal = ID_Code)%>%
-  select(!(starts_with("Enviro") 
-           | starts_with("Ped") 
+  select(!(starts_with("Ped") 
            | all_of(cols2excl))) %>%
   mutate(across(c(Animal,Sex,Cage,Group,Cohort,Treatment), factor))
 ```
@@ -307,8 +306,14 @@ df <- df %>%
          .names = "norm.{.col}")) %>% 
     ungroup()
 
+# Extract environmental sensor data to separate dataframe
+df.env <- df %>% 
+  select(DateTime,ExpDay,Time,Cage,starts_with("Enviro"),hour) %>%
+  filter(Cage == 1 | Cage == 9) %>% 
+  mutate(across(starts_with("Enviro"),as.numeric))
+
 # Trim last row with mostly NAs, created during some transformations above
-df <- head(df,-1)
+#df <- head(df,-1)
 ```
 
 ## Bin to hourly
@@ -327,6 +332,7 @@ cols2med <- c('DateTime','Time','minute')
 # Bin to hourly! 
 df.hourly <- df %>%
   group_by(Animal,ExpDay,hour) %>%
+  select(!starts_with("Enviro")) %>%
   mutate(
     across(all_of(cols2med),median)) %>% # assign middle of time bin to new bin
   mutate(across(
@@ -343,7 +349,28 @@ df.hourly <- df %>%
   #slice(2:(n()-1)) %>% # trim incomplete hours at start and end
   mutate(DateTime = round_date(DateTime, "30 minutes")) %>% 
   mutate(Time = as.numeric(
-    difftime(DateTime,DateTime[1]),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
+    difftime(DateTime,first(DateTime)),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
+  ungroup()
+
+# Removes duplicate row created at light transition when binning
+df.hourly <- df.hourly %>% 
+    group_by(Animal) %>%
+    mutate(LightCycle = case_when(
+      DateTime <= LightChangeDateTime ~ LightCycle1,
+      DateTime > LightChangeDateTime ~ LightCycle2)) %>%
+    ungroup() %>% 
+    distinct()
+
+df.env <- df.env %>%
+  group_by(Cage,ExpDay,hour) %>%
+  mutate(across(starts_with("Enviro"),mean)) %>%
+  mutate(across(all_of(c("DateTime","Time")),median)) %>%
+  ungroup() %>%
+  distinct() %>%
+  group_by(Cage) %>%
+  mutate(DateTime = round_date(DateTime, "30 minutes")) %>% 
+  mutate(Time = as.numeric(
+    difftime(DateTime,first(DateTime)),units = "hours"),.after = DateTime) %>% # starts clock from 0 at start of recording
   ungroup()
 ```
 
@@ -404,6 +431,6 @@ df.cum.total <- df.daily %>%
 ## Save data
 
 ```{r}
-save(df, df.hourly, df.daily, df.avg.total, df.cum.total,key, file = savename)
+save(df, df.hourly, df.env,df.daily, df.avg.total, df.cum.total,key, file = savename)
 rm(list = ls())
 ```
