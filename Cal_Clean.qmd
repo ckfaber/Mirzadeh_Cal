@@ -66,7 +66,7 @@ A workaround, if you do not wish to load your data using the here() package, is 
 ```{r}
 #| warning: false
 #| code-overflow: wrap
-fname           <- paste(rundate,cohort,"m","timeseries",sep = "_")
+fname           <- paste(rundate,cohort,sep = "_")
 code            <- paste(rundate,cohort,"KEY",sep = "_")
 savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
 savename <- paste(fpath,"/r_cleaned/",savename,sep="")
@@ -353,13 +353,15 @@ df.hourly <- df %>%
   ungroup()
 
 # Removes duplicate row created at light transition when binning
-df.hourly <- df.hourly %>% 
+if ("LightChangeDateTime" %in% colnames(df)) {
+ df.hourly <- df.hourly %>% 
     group_by(Animal) %>%
     mutate(LightCycle = case_when(
       DateTime <= LightChangeDateTime ~ LightCycle1,
       DateTime > LightChangeDateTime ~ LightCycle2)) %>%
     ungroup() %>% 
-    distinct()
+    distinct() 
+} 
 
 df.env <- df.env %>%
   group_by(Cage,ExpDay,hour) %>%
