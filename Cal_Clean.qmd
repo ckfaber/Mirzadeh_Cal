@@ -44,10 +44,10 @@ fpath \<- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab D
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "cal018"
-rundate         <- "2023-02-15"
-fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
-remove_animals  <- NA
+cohort          <- "Cal020"
+rundate         <- "2023-04-09"
+fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+remove_animals  <- c('H28','H29','N30','N34') # list of strings if animals to be removed. Set remove_animals <- NA if none to be removed.
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
 NCDgcal         <- 3.35 #default conversion 
@@ -111,9 +111,8 @@ Here, we remove any animals that we had previously specified, and perform some g
 #| warning: false
 
 # Remove dead/sick animals; if NA, don't run
-if (!is.na(remove_animals)) {
-   df <- df %>%
-    filter(Animal != remove_animals)
+if (!anyNA(remove_animals)) {
+   df <- df[!df$Animal %in% remove_animals,]
 }
 
 # Parse date-times and sort by animal ID (ID_Code) and date-time
