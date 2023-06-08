@@ -24,25 +24,33 @@ segment.run     <- FALSE # for conditional execution of Cal_Segment
 cols2excl       <- c('Still_pct_M','Sleep_pct_M',
                      'XBreak_R','YBreak_R','Mass_g','AllMeters_M') # default columns to exclude
 ```
-- Outputs:
-    * df
+- Outputs one .Rda file containing the following:
+    * df 
 : Cleaned data frame at original sampling interval as performed by the macro. 
     * df.hourly
 : Cleaned data frame re-sampled into hourly bins.
+    * df.env
+: Data frame containing ESA data
     * df.daily
 : Cleaned data frame re-sampled into daily photoperiod bins.
-    * df.daily.avg
-: WIP!!
-    * df.total
-: WIP!!!
+    * df.avg.total
+: Tidy data frame containing data averaged across the entire experiment (mean/total per day)
+    * df.cum.total
+: Somewhat redundant with df.avg.total, but frames the experimental averages as mean/total across experiment, instead of per day.
     * key
 : Data frame containing run metadata for unblinding investigator.
+
 #### 2) Cal_Inspect
-- Inputs:
-- Outputs:
+Work in progress: Will be built up as a way to interactively view and assess quality of data.
+
 #### 3) (Optional) Cal_Segment
+Work in progress: This was a script requested for splitting large recordings into distinct segments. 
+- 
 #### 4) (Optional) Cal_Merge
+Work in progress: This script was requested for merging separate recordings into one data frame. Please contact Chelsea before using.
+
 #### 5) Cal_Plot
+Takes the Clean.Rda file as input, and automatically generates time-series and photoperiod-averaged boxplots for the requested variables. 
 
 Please acknowledge use of this repo in any publications.
 
