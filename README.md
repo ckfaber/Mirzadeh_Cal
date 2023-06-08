@@ -48,7 +48,7 @@ Work in progress: Will be built up as a way to interactively view and assess qua
 
 #### 3) (Optional) Cal_Segment
 Work in progress: This was a script requested for splitting large recordings into distinct segments. 
-- 
+
 #### 4) (Optional) Cal_Merge
 Work in progress: This script was requested for merging separate recordings into one data frame. Please contact Chelsea before using.
 
