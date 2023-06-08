@@ -1,6 +1,8 @@
 # Mirzadeh_Cal
 R scripts and functions for tidying, visualizing, and analyzing indirect calorimetry data from Sable Promethion. 
 
+Please note that these scripts are a work-in-progress, and were written with the specific needs of the Mirzadeh Lab in mind. Therefore, they may require customization for your group's specific needs. I have detailed below the assumptions and requirements for this script to function properly, but don't hesitate to email me (or submit an 'Issue') with any questions, concerns, requests - or pull requests if you've solved or improved a problem! 
+
 ## Requirements: 
 - Expedata (.exp) data files processed with MI >v2.46 in 1-minute or 3-minute bins - all files must be processed with the SAME MACRO to ensure that the column names and binnings are consistent.
 - .csv containing the TimeSeries sheet from the macro-processed .xml. 
@@ -9,7 +11,8 @@ R scripts and functions for tidying, visualizing, and analyzing indirect calorim
 
 ## Workflow:
 #### 1) Cal_Clean
-Tidies and computes hourly bins (for time-series plots) and photoperiod-averaged data frames (for summary boxplots).
+Tidies and computes hourly bins (for time-series plots) and photoperiod-averaged data frames (for summary boxplots). Assumes a 12/12 light/dark cycle with lights off at 18:00. To ensure each day has a full 24-hours (for photo-period averaging and boxplots), this script also trims the data to always start and stop at 18:00.
+
 - Required Inputs: 
 ``` R
 # Assumes file-naming convention of: yyyy-mm-dd_runID.csv
@@ -50,7 +53,10 @@ Work in progress: This was a script requested for splitting large recordings int
 Work in progress: This script was requested for merging separate recordings into one data frame. Please contact Chelsea before using.
 
 #### 5) Cal_Plot
-Takes the Clean.Rda file as input, and automatically generates time-series and photoperiod-averaged boxplots for the requested variables. 
+Takes the Clean.Rda file as input, and automatically generates time-series and photoperiod-averaged boxplots for the requested variables. User may submit a grouping variable (that should be present within the 'KEY' file - see above), and a faceting variable, to further subset their data into panels. Requires the "Cal_Units.csv" file saved within the same folder as the Clean.Rda file to be loaded. 
+
+![Mirzadeh_Cal_example_ts](https://github.com/ckfaber/Mirzadeh_Cal/assets/53792364/48bab63d-f553-45a1-8b0a-15d4b64a79fc)
+![Mirzadeh_Cal_example_boxplot2](https://github.com/ckfaber/Mirzadeh_Cal/assets/53792364/8a932106-98c9-4963-8fdf-0ce98005a5e1)
 
 Please acknowledge use of this repo in any publications.
 
