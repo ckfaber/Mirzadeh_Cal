@@ -358,17 +358,6 @@ df <- df %>%
   mutate(AllMeters.cum = cumsum(AllMeters),.before = AllMeters) %>% # compute cumulative distance traveled
   ungroup()
 
-# Compute measures normalized to body weight
-cols2norm <- c('FoodIn.kcal','FoodIn.cum.kcal','EE','EE.cum','EBalance',
-               'EB.cum','EE.kcal.bin')
-
-df <- df %>% 
-  group_by(Animal) %>% 
-  mutate(across(all_of(cols2norm),
-                ~ . / meanBodyMass,
-         .names = "norm.{.col}")) %>% 
-    ungroup()
-
 # Extract environmental sensor data to separate dataframe
 df.env <- df %>% 
   select(DateTime,ExpDay,Time,Cage,starts_with("Enviro"),hour) %>%
@@ -387,9 +376,9 @@ Here, we compute hourly bins for each variable. Depending on variable, this is d
 #/ warning: false
 
 # DO NOT CHANGE WITHOUT EXPRESS PERMISSION FROM CHELSEA!!!!!!!!!!
-cols2sum <- sort(c('norm.FoodIn.kcal','FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','norm.EBalance','AllMeters','EE.kcal.bin','norm.EE.kcal.bin'))
-cols2avg <- sort(c('VO2','VCO2','VH2O','EE','RER','BodyMass','meanBodyMass','norm.EE','XBreak_R','YBreak_R'))
-cols4cum <- sort(c('AllMeters.cum','FoodIn.cum','WaterIn.cum','EE.cum','norm.EE.cum','EB.cum','norm.EB.cum','FoodIn.cum.kcal','norm.FoodIn.cum.kcal'))
+cols2sum <- sort(c('FoodIn.g','FoodIn.kcal','WaterIn.g','EBalance','AllMeters','EE.kcal.bin'))
+cols2avg <- sort(c('VO2','VCO2','VH2O','EE','RER','BodyMass','meanBodyMass','XBreak_R','YBreak_R'))
+cols4cum <- sort(c('AllMeters.cum','FoodIn.cum','WaterIn.cum','EE.cum','EB.cum','FoodIn.cum.kcal'))
 cols2med <- c('DateTime','Time','minute')
 
 # Bin to hourly! 
@@ -489,8 +478,7 @@ df.cum.total <- df.daily %>%
   ungroup()  %>%
   left_join(key, by = c("Animal" = "ID_Code")) %>% 
   select(-c(Animal.y, Diet1,Diet2,DietChangeDateTime)) %>%
-  rename(EE.cum = EE.kcal.bin,
-         norm.EE.cum = norm.EE.kcal.bin)
+  rename(EE.cum = EE.kcal.bin)
 ```
 
 ## Save data
