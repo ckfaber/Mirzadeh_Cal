@@ -8,6 +8,10 @@ format:
 editor: visual
 ---
 
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
 ## About
 
 ###### Inputs:
@@ -31,6 +35,7 @@ editor: visual
 #| label: load-packages
 #| warning: false
 #| echo: false
+#| include: false
 library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(lubridate)
@@ -44,10 +49,12 @@ fpath \<- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab D
 
 ```{r}
 # Run-specific user-defined parameters
-cohort          <- "Cal020"
-rundate         <- "2023-04-09"
-fpath           <- "C:/Users/cfaber/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
-remove_animals  <- c('H28','H29','N30','N34') # list of strings if animals to be removed. Set remove_animals <- NA if none to be removed.
+filename        <- "2023-09-07_cal023_m_timeseries.csv"
+fpath           <- "C:/Users/kaspe/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+
+
+# list of strings if animals to be removed. Set remove_animals <- NA if none to be removed.
+remove_animals  <- NA 
 
 # Default parameters. For diet, temperature, or other interventions, set the value of intervention equal to TRUE.
 NCDgcal         <- 3.35 #default conversion 
@@ -66,11 +73,41 @@ A workaround, if you do not wish to load your data using the here() package, is 
 ```{r}
 #| warning: false
 #| code-overflow: wrap
-fname           <- paste(rundate,cohort,sep = "_")
-code            <- paste(rundate,cohort,"KEY",sep = "_")
-savename <- paste(rundate,cohort,"Clean.Rda",sep = "_")
-savename <- paste(fpath,"/r_cleaned/",savename,sep="")
+#| include: false
 
+# Confirm file exists
+if (!file.exists(paste0(fpath,"/",filename))) {
+  stop("File not found! Please confirm file name and path are correct.")
+} else {
+  print(paste0("Found ", filename, ", extracting data."))
+}
+
+# This section assumes that files are named following yyyy-mm-dd_runID... .csv convention. If no underscores detected in filename, everything preceding .csv is taken as the name for all saved files.
+fileparts       <- unlist(strsplit(filename,'[_.]+'))
+
+if (length(fileparts) == 1) {
+  savename <- unlist(strsplit(filename,'.csv'))
+  code     <- paste(savename,"KEY.csv",sep = "_")
+  
+  if (!file.exists(paste0(fpath,"/",code))) {
+      stop("Key file not found! Please confirm file name and path are correct.")
+  }
+  savename <- paste(fpath,"/r_cleaned/",savename,sep="")
+} else {
+  rundate  <- fileparts[1]
+  runid    <- fileparts[2]
+  savename <- paste(rundate,runid,"Clean.Rda",sep = "_")
+  code     <- paste(rundate,runid,"KEY.csv",sep = "_")
+  
+  # Confirm key.csv file exists.
+  if (!file.exists(paste0(fpath,"/",code))) {
+      stop("Key file not found! Please confirm file name and path are correct.")
+  }
+  
+  savename <- paste(fpath,"/r_cleaned/",savename,sep="")
+}
+
+# Check whether macro-processed file has already been run through script.
 if (file.exists(savename)) {
   go <- menu(c("Re-run and overwrite existing Clean.Rda file","Re-run and save a new copy of Clean.Rda","Abort! Abort!"), title = "A .Rda file for this file already exists. How would you like to proceed?")
 } else {
@@ -91,10 +128,10 @@ if (go == 1) {
 }
 
 # Load csv with run metadata
-key             <- read_csv(paste(fpath,paste(code,".csv",sep = ""),sep="/"),show_col_types=F) 
+key             <- read_csv(paste(fpath,code,sep="/"),show_col_types=F) 
 
 # Load cal.csv and merge metadata
-df              <- read_csv(paste(fpath,paste(fname,".csv",sep = ""),sep="/"),show_col_types = F) %>%
+df              <- read_csv(paste(fpath,filename,sep="/"),show_col_types = F) %>%
   left_join(key, by = "Animal") %>%                 #unblind by merging with decoding df 
   rename(Cage = Animal,
          Animal = ID_Code)%>%
@@ -111,8 +148,35 @@ Here, we remove any animals that we had previously specified, and perform some g
 #| warning: false
 
 # Remove dead/sick animals; if NA, don't run
-if (!anyNA(remove_animals)) {
-   df <- df[!df$Animal %in% remove_animals,]
+# if (!anyNA(remove_animals)) {
+#    df <- df[!df$Animal %in% remove_animals,]
+# }
+
+# Remove animals marked for removal from dataset within the _KEY.csv
+if (any(key$Remove == "Y")) {
+  
+  print("Checking KEY for animals to remove from analysis")
+  ct <- key %>% 
+    count(Remove) %>% filter(Remove == "Y") %>% select(n) %>% pull()
+  
+  # Print how many and which animals are being removed
+  print(paste0("Removing n = ", as.character(ct), " animals"))
+
+  idx <- key %>%
+    filter(Remove == "Y") %>% select(ID_Code) %>% pull()
+  for (i in 1:length(idx)) {
+  print(paste0("Removing subject ", idx[[i]]))
+  }
+  
+  # Remove the specified animals
+  df <- df %>%
+  group_by(Animal) %>%
+  filter(Remove == "N") %>%
+  ungroup()
+  print('Subject(s) removed successfully.')
+  rm(list = c("ct","idx"))
+} else {
+  print("No animals marked for removal. Keeping all animals in df")
 }
 
 # Parse date-times and sort by animal ID (ID_Code) and date-time
@@ -192,14 +256,14 @@ df <- df %>%
          .after = DateTime) %>%
   ungroup()
 
-# Calculate rolling Age, from the starting Age entered in the "DECODED" metadata file.
+# Calculate rolling Age, from the starting Age entered in the "KEY" metadata file.
 if ("Age" %in% colnames(df)) {
   df <- df %>%
     group_by(ExpDay,Animal) %>% 
     mutate(Age = ExpDay-1 + first(Age)) %>% 
     ungroup()
 } else {
-  print("No Age values found in DECODED. If this is in error, please revised DECODED sheet accordingly, save, and rerun script, otherwise, continue.")
+  print("No Age values found in KEY If this is in error, please revised KEY sheet accordingly, save, and rerun script, otherwise, continue.")
 }
 
 # Recompute cumulative variables to begin at new start time
@@ -432,6 +496,6 @@ df.cum.total <- df.daily %>%
 ## Save data
 
 ```{r}
-save(df, df.hourly, df.env,df.daily, df.avg.total, df.cum.total,key, file = savename)
+save(df, df.hourly, df.env, df.daily, df.avg.total, df.cum.total, key, file = savename)
 rm(list = ls())
 ```
