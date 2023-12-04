@@ -29,6 +29,8 @@
 
 # To do: 
 # - Add shaded rectangle to dark period of box plots? 
+# - GET RID OF ALL BODY MASS NORMALIZATIONS
+# - Adjust x-axis numbering to go by 24-h intervals (unless really long recordings, then 48?)
 # - Add statistics!!!
 
 ## Load required packages ----------------------------------------------------
@@ -36,39 +38,42 @@
 library(tidyverse)
 library(ggnewscale)
 library(zoo, include.only = 'rollmean')
-library(broom)
-library(ggpubr)
-library(rstatix)
+library(scales)
+#library(broom)
+#library(ggpubr)
+#library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
-
-cohort          <- "cal017"
-rundate         <- "2023-01-11"
-fpath            <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
+fname           <- '2023-09-07_cal023_Clean.Rda'
+fpath           <- "C:/Users/kaspe/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
 
 # Specify grouping & list of variables for smoothing via moving mean
-groupvar         <- "Group"
-facetvar         <- NA # set to NA (no quotes!) if no faceting desired
+groupvar         <- "Treatment"
+facetvar         <- "Sex" # set to NA (no quotes!) if no faceting desired
 plt              <- "Dark2"
-export           <- T
+export           <- F
 ftype            <- ".pdf" # default to export pdfs
 segment          <- F
 
+## -----------------------------------------------
+
+fileparts       <- unlist(strsplit(fname,'[_.]+'))
+rundate  <- fileparts[1]
+runid    <- fileparts[2]
+rm(fileparts)
+  
 ## Defaults -------------------------------------------------------------------
 smooth           <- T
 tsvars           <- sort(c('AllMeters','AllMeters.cum','BodyMass','EBalance',
-                           'EB.cum','norm.EB.cum','EE','EE.cum','norm.EE.cum',
-                           'FoodIn.kcal','FoodIn.cum.kcal',
-                           'norm.FoodIn.cum.kcal','RER','VO2','VCO2','VH2O',
+                           'EB.cum','EE','EE.cum','FoodIn.kcal',
+                           'FoodIn.cum.kcal','RER','VO2','VCO2','VH2O',
                            'WaterIn.cum'))
                           
-boxvars.avg      <- sort(c('AllMeters','EBalance','norm.EBalance','EE','norm.EE',
-                           'FoodIn.kcal','norm.FoodIn.kcal','RER',
+boxvars.avg      <- sort(c('AllMeters','EBalance','EE','FoodIn.kcal','RER',
                            'VO2','WaterIn.g'))
 
-boxvars.cum      <- sort(c('AllMeters','EBalance','norm.EBalance','EE.cum',
-                           'norm.EE.cum','FoodIn.kcal','norm.FoodIn.kcal',
-                            'WaterIn.g'))
+boxvars.cum      <- sort(c('AllMeters','EBalance','EE.cum','FoodIn.kcal',
+                           'norm.FoodIn.kcal','WaterIn.g'))
 
 if (smooth) {
   swin           <- suppressWarnings(as.integer(readline(prompt = "Enter window size (in integer hours) for smoothing via moving mean:")))
@@ -79,7 +84,7 @@ if (smooth) {
 } 
 
 if (export) {
-  repo <- paste(rundate,cohort,"plots",sep="_")
+  repo <- paste(rundate,runid,"plots",sep="_")
   repo <- paste0(fpath,"/",repo)
   
   if (!dir.exists(repo)) {
@@ -97,11 +102,9 @@ if (segment) {
 
 ## Load data ------------------------------------------------------------------
 
-fname           <- paste(rundate,cohort,sep = "_")
-
 # Prompt user which .Rda should be loaded if a Copy exists
-if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda")) 
-    & file.exists(paste0(fpath,"/",fname,"_Clean_COPY.Rda"))) {
+if (file.exists(paste0(fpath,"/",fname)) 
+    & file.exists(paste0(fpath,"/",rundate,"_",runid,"_Clean_COPY.Rda"))) {
   
   tmp <- menu(c("Original","Copy"), 
               title = "Two .Rda files found for this run. Which would you like to plot?")
@@ -110,8 +113,8 @@ if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda"))
   } else if (tmp == 2) {
     f <- paste0(fpath,"/",fname,"_Clean_COPY.Rda")
   }
-} else if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda"))) {
-  f <- paste0(fpath,"/",fname,"_Clean.Rda")
+} else if (file.exists(paste0(fpath,"/",fname))) {
+  f <- paste0(fpath,"/",fname)
 }
 
 load(f)
@@ -241,7 +244,7 @@ for (i in 1:length(tsvars)) {
     } else {
       fname <- var
     }
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), width=5,height=3,units="in",path = repo)
+    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"), width=5,height=3,units="in",path = repo)
   }
 }
 
@@ -269,7 +272,7 @@ for (i in 1:length(boxvars.avg)) {
   boxplots.avg[[i]] <- bxplot(df.avg.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
+    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
   }
 }
 
@@ -296,6 +299,6 @@ for (i in 1:length(boxvars.cum)) {
   boxplots.cum[[i]] <- bxplot(df.cum.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
+    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
   }
 }
