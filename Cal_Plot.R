@@ -73,15 +73,11 @@ boxvars.avg      <- sort(c('AllMeters','EBalance','EE','FoodIn.kcal','RER',
                            'VO2','WaterIn.g'))
 
 boxvars.cum      <- sort(c('AllMeters','EBalance','EE.cum','FoodIn.kcal',
-                           'norm.FoodIn.kcal','WaterIn.g'))
+                           'WaterIn.g'))
 
 if (smooth) {
-  swin           <- suppressWarnings(as.integer(readline(prompt = "Enter window size (in integer hours) for smoothing via moving mean:")))
-  while (is.na(swin)) {
-    message("You entered a non-numeric value for smoothing window size. Try again.")
-    swin  <- suppressWarnings(as.integer(readline(prompt = "Enter window size (in integer hours) for smoothing via moving mean:")))
-    }
-} 
+  swin           <- 3
+}
 
 if (export) {
   repo <- paste(rundate,runid,"plots",sep="_")
@@ -96,7 +92,7 @@ if (segment) {
   trimtime           <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
   while (is.na(trimtime)) {
     message("You entered a non-numeric value for time to filter. Try again.")
-    swin  <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
+    trimtime  <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
   }
 }
 
