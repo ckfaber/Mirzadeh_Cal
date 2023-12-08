@@ -244,6 +244,9 @@ for (i in 1:length(tsvars)) {
     } else {
       fname <- var
     }
+    if (!is.na(facetvar)){
+      fname <- paste(fname,"~",facetvar,sep="")
+    }
     ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"), width=5,height=3,units="in",path = repo)
   }
 }
@@ -256,6 +259,9 @@ for (i in 1:length(boxvars.avg)) {
   
   var <- boxvars.avg[i]
   fname <- paste0(var,"_boxplot_avg")
+  if (!is.na(facetvar)){
+    fname <- paste(fname,"~",facetvar,sep="")
+  }
   
   ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
     select(Title,Unit) %>% 
@@ -281,6 +287,9 @@ for (i in 1:length(boxvars.cum)) {
   
   var <- boxvars.cum[i]
   fname <- paste0(var,"_boxplot_cum")
+  if (!is.na(facetvar)){
+    fname <- paste(fname,"~",facetvar,sep="")
+  }
   
   ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
     select(Title,Unit) %>% 
