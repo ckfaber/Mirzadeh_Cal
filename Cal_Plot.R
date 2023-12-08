@@ -162,17 +162,19 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
   theme_classic() + 
   
 # Shaded tiles for photoperiod
+# For color options see http://sape.inf.usi.ch/quick-reference/ggplot2/colour
   new_scale_fill() +
   geom_tile(data = photoperiods, 
             mapping = aes(x = Time, fill = Photoperiod,y=0),
             linewidth = 0,
-            alpha = 0.1,
+            alpha = 0.3,
             linetype = 0,
             height = Inf, # tiles will go all the way up and down
             show.legend = NA,
             inherit.aes = FALSE) + 
-  scale_fill_manual(values = c("Dark" = "gray45",
-                               "Light" = "white"),guide = "none") +
+  scale_fill_manual(values = c("Dark" = "gray65",
+                               "Light" = "white",
+                               "Subjective Light" = "gray75"),guide = "none") +
   
   # Plot annotations and formatting
   labs(x = "Time (hours)", y = ylab) + 
@@ -210,14 +212,16 @@ if (smooth) {
     group_by(Animal) %>%
     mutate(across(all_of(tsvars), ~ rollmean(.x,swin,fill = NA),.names = "{.col}")) %>%
     ungroup()
-  # Extract time-series and photoperiod as small df for plotting
-  pp_data <- df.hourly %>%
-    distinct(Time,Photoperiod)
-} else {
-  # Extract time-series and photoperiod as small df for plotting
-  pp_data <- df.hourly %>%
-    distinct(Time,Photoperiod)
 }
+
+# Extract time-series and photoperiod as small df for plotting
+pp_data <- df.hourly %>%
+    distinct(Time,Photoperiod,LightCycle) %>%
+    mutate(Photoperiod = case_when(
+      LightCycle == "LD" & Photoperiod == "Light" ~ "Light",
+      LightCycle == "LD" & Photoperiod == "Dark" ~ "Dark",
+      LightCycle == "DD" & Photoperiod == "Light" ~ "Subjective Light",
+      LightCycle == "DD" & Photoperiod == "Dark" ~ "Dark"))
 
 ts.plots <- vector(mode = "list",length = length(tsvars)) # Initialize empty list
 for (i in 1:length(tsvars)) {
