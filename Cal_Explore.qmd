@@ -11,6 +11,10 @@ editor: visual
 #| echo: false
 #| include: false
 
+library(tidyverse)
+library(lubridate)
+library(ggnewscale)
+
 # Load .Rda from file browser
 fpath <- file.choose()
 load(fpath)
@@ -36,23 +40,132 @@ unitkeys <- read_csv(paste0(repo,'Cal_Units.csv'))
 #| include: false
 
 # Specify grouping and faceting variables, color palette
-groupvar         <- "Treatment"
-facetvar         <- NA # set to NA (no quotes!) if no faceting desired
-plt              <- "Dark2"
+# For color options see http://sape.inf.usi.ch/quick-reference/ggplot2/colour
+
+df2plt      <- df.hourly # which binned data you want to vis
+var         <- "EE" # which variable to plot - use colnames(df2plt)
+groupvar    <- "Treatment"
+facetvar    <- NA # set to NA (no quotes!) if no faceting desired
+plt         <- "Dark2"
+by_group    <- F # T for mean + SEM, F for individual subjects
+
+# Defaults:
+#circadian   <- T # get LD shading information automatically
 ```
 
-#### Load required packages
+#### Create plotting functions
 
 ```{r}
-#| label: load-packages
-#| warning: false
-#| echo: false
-#| include: false
-library(tidyverse)
-library(lubridate)
+tsplot <- function(data,var,groupvar,facetvar,ylab) {
+  ts <- data
+  plot <- ggplot() +
+  # Conditionally facet if facetvar is not NA
+  {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +  
+   
+  # Shaded tiles for photoperiod
+  geom_tile(data = pp_data, 
+            mapping = aes(x = Time, fill = Photoperiod,y=0),
+            linewidth = 0,
+            alpha = 0.3,
+            linetype = 0,
+            height = Inf, # tiles will go all the way up and down
+            show.legend = NA,
+            inherit.aes = FALSE) + 
+  scale_fill_manual(values = c("Dark" = "gray65",
+                               "Light" = "white",
+                               "Subjective Light" = "gray75"),guide = "none") + new_scale_fill() +
+  stat_summary(data = ts,
+               aes(x = Time, 
+               y = .data[[var]],
+               color = .data[[groupvar]],
+               group = .data[[groupvar]]),
+               fun = "mean", geom = "line", 
+               linewidth = 1) + 
+  stat_summary(data = ts,
+               aes(x = Time, 
+               y = .data[[var]],
+               color = .data[[groupvar]],
+               group = .data[[groupvar]],
+               fill = .data[[groupvar]]),
+               fun.data = mean_se, 
+               geom = "ribbon", 
+               alpha = 0.5, linetype = 0) + 
+  scale_color_brewer(palette = plt) + 
+  scale_fill_brewer(palette = plt) + 
+  theme_classic() + 
+  
+  # Plot annotations and formatting
+  labs(x = "Time (hours)", y = ylab) + 
+  scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
+  theme_classic() + 
+  theme(text = element_text(size = 12))
+}
+
+tsploteach <- function(data,var,groupvar,facetvar,ylab) {
+  
+  ts <- data
+  plot <- ggplot() +
+    
+    geom_tile(data = pp_data, 
+              mapping = aes(x = Time, fill = Photoperiod,y=0),
+              linewidth = 0,
+              alpha = 0.3,
+              linetype = 0,
+              height = Inf, # tiles will go all the way up and down
+              show.legend = NA,
+              inherit.aes = FALSE) + 
+    scale_fill_manual(values = c("Dark" = "gray65",
+                               "Light" = "white",
+                               "Subjective Light" = "gray75"),guide = "none") +
+    
+    #ggplot(ts, aes(x = Time, 
+     #                      y = .data[[var]])) + 
+    # Conditionally facet if facetvar is not NA
+    {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +
+    geom_line(data = ts, aes(x = Time,
+                             y = .data[[var]],
+                             color = Animal),
+              alpha = 0.5,
+              linewidth = 1) +
+    theme_classic() + 
+    
+    # Plot annotations and formatting
+    labs(x = "Time (hours)", y = ylab) + 
+    scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
+    theme_classic() + 
+    theme(text = element_text(size = 12))
+  return(plot)
+}
+
+# Create photoperiod df
+pp_data <- df2plt %>%
+    distinct(Time,Photoperiod,LightCycle) %>%
+    mutate(Photoperiod = case_when(
+      LightCycle == "LD" & Photoperiod == "Light" ~ "Light",
+      LightCycle == "LD" & Photoperiod == "Dark" ~ "Dark",
+      LightCycle == "DD" & Photoperiod == "Light" ~ "Subjective Light",
+      LightCycle == "DD" & Photoperiod == "Dark" ~ "Dark"))
 ```
 
-```{r}
-#| echo: false
+Generate plots
 
+```{r}
+
+# Get annotations from unitkeys
+ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
+    select(Title,Unit) %>% 
+    summarize(ylab = paste(Title,Unit)) %>% 
+    pull()
+if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
+title <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
+    select(Title) %>%
+    pull()
+
+if (by_group == T) {
+  p <- tsplot(df2plt,var,groupvar,facetvar,ylab)
+  p
+} else {
+  p <- tsploteach(df2plt,var,groupvar,facetvar,ylab)
+  p
+}
 ```
