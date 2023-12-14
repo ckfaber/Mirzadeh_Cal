@@ -1,0 +1,52 @@
+---
+title: "Cal_Explore"
+format: html
+editor: visual
+---
+
+## Load Data
+
+```{r}
+#| warning: false
+#| echo: false
+#| include: false
+
+# Load .Rda from file browser
+fpath <- file.choose()
+load(fpath)
+
+# Get file name from path 
+tmp <- unlist(strsplit(fpath,"[\\]"))
+filename <- tmp[length(tmp)]
+print(paste('Data successfully loaded from',filename))
+
+# Get file directory from path
+repo <- paste0(tmp[1:length(tmp)-1],collapse="/")
+repo <- paste0(repo,"/")
+
+# Load Cal_Units.csv file
+unitkeys <- read_csv(paste0(repo,'Cal_Units.csv'))
+```
+
+## Set visualization parameters
+
+```{r}
+
+```
+
+#### Load required packages
+
+```{r}
+#| label: load-packages
+#| warning: false
+#| echo: false
+#| include: false
+library(plyr, include.only = 'mapvalues')
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+#| echo: false
+
+```
