@@ -116,7 +116,6 @@ if (file.exists(savename)) {
 
 if (go == 1) {
   print(paste0("Re-running Cal_Clean script and over-writing previous file at ", savename))
-  break
 }else if (go == 2) {
   savename <- paste(rundate,cohort,"Clean_COPY.Rda",sep = "_")
   savename <- paste0(fpath,"/r_cleaned/",savename)
