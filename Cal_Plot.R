@@ -28,8 +28,6 @@
 
 
 # To do: 
-# - Add shaded rectangle to dark period of box plots? 
-# - GET RID OF ALL BODY MASS NORMALIZATIONS
 # - Adjust x-axis numbering to go by 24-h intervals (unless really long recordings, then 48?)
 # - Add statistics!!!
 
