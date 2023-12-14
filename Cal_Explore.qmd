@@ -31,7 +31,14 @@ unitkeys <- read_csv(paste0(repo,'Cal_Units.csv'))
 ## Set visualization parameters
 
 ```{r}
+#| warning: false
+#| echo: false
+#| include: false
 
+# Specify grouping and faceting variables, color palette
+groupvar         <- "Treatment"
+facetvar         <- NA # set to NA (no quotes!) if no faceting desired
+plt              <- "Dark2"
 ```
 
 #### Load required packages
@@ -41,7 +48,6 @@ unitkeys <- read_csv(paste0(repo,'Cal_Units.csv'))
 #| warning: false
 #| echo: false
 #| include: false
-library(plyr, include.only = 'mapvalues')
 library(tidyverse)
 library(lubridate)
 ```
