@@ -28,7 +28,7 @@
 
 
 # To do: 
-# - Add shaded rectangle to dark period of box plots? 
+# - Adjust x-axis numbering to go by 24-h intervals (unless really long recordings, then 48?)
 # - Add statistics!!!
 
 ## Load required packages ----------------------------------------------------
@@ -36,50 +36,49 @@
 library(tidyverse)
 library(ggnewscale)
 library(zoo, include.only = 'rollmean')
-library(broom)
-library(ggpubr)
-library(rstatix)
+library(scales)
+#library(broom)
+#library(ggpubr)
+#library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
-
-cohort          <- "cal017"
-rundate         <- "2023-01-11"
-fpath            <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
+fname           <- '2023-09-07_cal023_Clean.Rda'
+fpath           <- "C:/Users/kaspe/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
 
 # Specify grouping & list of variables for smoothing via moving mean
-groupvar         <- "Group"
-facetvar         <- NA # set to NA (no quotes!) if no faceting desired
+groupvar         <- "Treatment"
+facetvar         <- "Sex" # set to NA (no quotes!) if no faceting desired
 plt              <- "Dark2"
-export           <- T
+export           <- F
 ftype            <- ".pdf" # default to export pdfs
 segment          <- F
 
+## -----------------------------------------------
+
+fileparts       <- unlist(strsplit(fname,'[_.]+'))
+rundate  <- fileparts[1]
+runid    <- fileparts[2]
+rm(fileparts)
+  
 ## Defaults -------------------------------------------------------------------
 smooth           <- T
 tsvars           <- sort(c('AllMeters','AllMeters.cum','BodyMass','EBalance',
-                           'EB.cum','norm.EB.cum','EE','EE.cum','norm.EE.cum',
-                           'FoodIn.kcal','FoodIn.cum.kcal',
-                           'norm.FoodIn.cum.kcal','RER','VO2','VCO2','VH2O',
+                           'EB.cum','EE','EE.cum','FoodIn.kcal',
+                           'FoodIn.cum.kcal','RER','VO2','VCO2','VH2O',
                            'WaterIn.cum'))
                           
-boxvars.avg      <- sort(c('AllMeters','EBalance','norm.EBalance','EE','norm.EE',
-                           'FoodIn.kcal','norm.FoodIn.kcal','RER',
+boxvars.avg      <- sort(c('AllMeters','EBalance','EE','FoodIn.kcal','RER',
                            'VO2','WaterIn.g'))
 
-boxvars.cum      <- sort(c('AllMeters','EBalance','norm.EBalance','EE.cum',
-                           'norm.EE.cum','FoodIn.kcal','norm.FoodIn.kcal',
-                            'WaterIn.g'))
+boxvars.cum      <- sort(c('AllMeters','EBalance','EE.cum','FoodIn.kcal',
+                           'WaterIn.g'))
 
 if (smooth) {
-  swin           <- suppressWarnings(as.integer(readline(prompt = "Enter window size (in integer hours) for smoothing via moving mean:")))
-  while (is.na(swin)) {
-    message("You entered a non-numeric value for smoothing window size. Try again.")
-    swin  <- suppressWarnings(as.integer(readline(prompt = "Enter window size (in integer hours) for smoothing via moving mean:")))
-    }
-} 
+  swin           <- 3
+}
 
 if (export) {
-  repo <- paste(rundate,cohort,"plots",sep="_")
+  repo <- paste(rundate,runid,"plots",sep="_")
   repo <- paste0(fpath,"/",repo)
   
   if (!dir.exists(repo)) {
@@ -91,17 +90,15 @@ if (segment) {
   trimtime           <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
   while (is.na(trimtime)) {
     message("You entered a non-numeric value for time to filter. Try again.")
-    swin  <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
+    trimtime  <- suppressWarnings(as.integer(readline(prompt = "Enter time (in hours) from recording start to segment plots:")))
   }
 }
 
 ## Load data ------------------------------------------------------------------
 
-fname           <- paste(rundate,cohort,sep = "_")
-
 # Prompt user which .Rda should be loaded if a Copy exists
-if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda")) 
-    & file.exists(paste0(fpath,"/",fname,"_Clean_COPY.Rda"))) {
+if (file.exists(paste0(fpath,"/",fname)) 
+    & file.exists(paste0(fpath,"/",rundate,"_",runid,"_Clean_COPY.Rda"))) {
   
   tmp <- menu(c("Original","Copy"), 
               title = "Two .Rda files found for this run. Which would you like to plot?")
@@ -110,8 +107,8 @@ if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda"))
   } else if (tmp == 2) {
     f <- paste0(fpath,"/",fname,"_Clean_COPY.Rda")
   }
-} else if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda"))) {
-  f <- paste0(fpath,"/",fname,"_Clean.Rda")
+} else if (file.exists(paste0(fpath,"/",fname))) {
+  f <- paste0(fpath,"/",fname)
 }
 
 load(f)
@@ -138,44 +135,48 @@ unitkeys         <- read_csv(paste(fpath,"Cal_Units.csv",sep="/"))
 ## Plot functions -------------------------------------------------------------
 # Create ggplot function for time-series plots with SEM ribbon
 tsplot <- function(data,var,groupvar,facetvar,ylab) {
-  
-  if(segment){
-    data <- data %>% filter(Time < trimtime)
-    photoperiods <- pp_data %>% filter(Time < trimtime)
-  } else {
-    photoperiods <- pp_data
-  }
-  plot <- ggplot(data, aes(x = Time, 
-               y = .data[[var]],
-               color = .data[[groupvar]],
-               group = .data[[groupvar]],
-               fill = .data[[groupvar]])) + 
-  # Conditionally facet if facetvar is not NA
-  {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +
-  stat_summary(fun = "mean", geom = "line", linewidth = 1) + 
-  stat_summary(fun.data = mean_se, geom = "ribbon", alpha = 0.5, linetype = 0) + 
-  scale_color_brewer(palette = plt) + 
-  scale_fill_brewer(palette = plt) + 
-  theme_classic() + 
-  
-# Shaded tiles for photoperiod
-  new_scale_fill() +
-  geom_tile(data = photoperiods, 
-            mapping = aes(x = Time, fill = Photoperiod,y=0),
-            linewidth = 0,
-            alpha = 0.1,
-            linetype = 0,
-            height = Inf, # tiles will go all the way up and down
-            show.legend = NA,
-            inherit.aes = FALSE) + 
-  scale_fill_manual(values = c("Dark" = "gray45",
-                               "Light" = "white"),guide = "none") +
-  
-  # Plot annotations and formatting
-  labs(x = "Time (hours)", y = ylab) + 
-  scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
-  theme_classic() + 
-  theme(text = element_text(size = 12))
+  ts <- data
+  plot <- ggplot() +
+    # Conditionally facet if facetvar is not NA
+    {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +  
+    
+    # Shaded tiles for photoperiod
+    geom_tile(data = pp_data, 
+              mapping = aes(x = Time, fill = Photoperiod,y=0),
+              linewidth = 0,
+              alpha = 0.3,
+              linetype = 0,
+              height = Inf, # tiles will go all the way up and down
+              show.legend = NA,
+              inherit.aes = FALSE) + 
+    scale_fill_manual(values = c("Dark" = "gray65",
+                                 "Light" = "white",
+                                 "Subjective Light" = "gray75"),guide = "none") + new_scale_fill() +
+    stat_summary(data = ts,
+                 aes(x = Time, 
+                     y = .data[[var]],
+                     color = .data[[groupvar]],
+                     group = .data[[groupvar]]),
+                 fun = "mean", geom = "line", 
+                 linewidth = 1) + 
+    stat_summary(data = ts,
+                 aes(x = Time, 
+                     y = .data[[var]],
+                     color = .data[[groupvar]],
+                     group = .data[[groupvar]],
+                     fill = .data[[groupvar]]),
+                 fun.data = mean_se, 
+                 geom = "ribbon", 
+                 alpha = 0.5, linetype = 0) + 
+    scale_color_brewer(palette = plt) + 
+    scale_fill_brewer(palette = plt) + 
+    theme_classic() + 
+    
+    # Plot annotations and formatting
+    labs(x = "Time (hours)", y = ylab) + 
+    scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
+    theme_classic() + 
+    theme(text = element_text(size = 12))
 }
 
 # Create function to generate boxplots
@@ -207,14 +208,16 @@ if (smooth) {
     group_by(Animal) %>%
     mutate(across(all_of(tsvars), ~ rollmean(.x,swin,fill = NA),.names = "{.col}")) %>%
     ungroup()
-  # Extract time-series and photoperiod as small df for plotting
-  pp_data <- df.hourly %>%
-    distinct(Time,Photoperiod)
-} else {
-  # Extract time-series and photoperiod as small df for plotting
-  pp_data <- df.hourly %>%
-    distinct(Time,Photoperiod)
 }
+
+# Extract time-series and photoperiod as small df for plotting
+pp_data <- df.hourly %>%
+    distinct(Time,Photoperiod,LightCycle) %>%
+    mutate(Photoperiod = case_when(
+      LightCycle == "LD" & Photoperiod == "Light" ~ "Light",
+      LightCycle == "LD" & Photoperiod == "Dark" ~ "Dark",
+      LightCycle == "DD" & Photoperiod == "Light" ~ "Subjective Light",
+      LightCycle == "DD" & Photoperiod == "Dark" ~ "Dark"))
 
 ts.plots <- vector(mode = "list",length = length(tsvars)) # Initialize empty list
 for (i in 1:length(tsvars)) {
@@ -241,7 +244,10 @@ for (i in 1:length(tsvars)) {
     } else {
       fname <- var
     }
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"), width=5,height=3,units="in",path = repo)
+    if (!is.na(facetvar)){
+      fname <- paste(fname,"~",facetvar,sep="")
+    }
+    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"), width=5,height=3,units="in",path = repo)
   }
 }
 
@@ -253,6 +259,9 @@ for (i in 1:length(boxvars.avg)) {
   
   var <- boxvars.avg[i]
   fname <- paste0(var,"_boxplot_avg")
+  if (!is.na(facetvar)){
+    fname <- paste(fname,"~",facetvar,sep="")
+  }
   
   ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
     select(Title,Unit) %>% 
@@ -269,7 +278,7 @@ for (i in 1:length(boxvars.avg)) {
   boxplots.avg[[i]] <- bxplot(df.avg.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
+    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
   }
 }
 
@@ -278,6 +287,9 @@ for (i in 1:length(boxvars.cum)) {
   
   var <- boxvars.cum[i]
   fname <- paste0(var,"_boxplot_cum")
+  if (!is.na(facetvar)){
+    fname <- paste(fname,"~",facetvar,sep="")
+  }
   
   ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
     select(Title,Unit) %>% 
@@ -296,6 +308,6 @@ for (i in 1:length(boxvars.cum)) {
   boxplots.cum[[i]] <- bxplot(df.cum.total,var,groupvar,facetvar,ylab)
   #print(plot)
   if (export) {
-    ggsave(paste(rundate,cohort,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
+    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
   }
 }

@@ -1,0 +1,80 @@
+---
+title: "Cal_Merge_Long"
+format: html
+editor: visual
+---
+
+## About
+
+Inputs:
+
+-   List of files to be merged longitudinally (Clean.Rda files)
+
+### Load Required Packages
+
+```{r}
+#| label: load-packages
+#| warning: false
+#| echo: false
+#| include: false
+library(plyr, include.only = 'mapvalues')
+library(tidyverse)
+library(lubridate)
+```
+
+#### Get file paths and load hourly-binned data frames
+
+```{r}
+filepaths <- choose.files()
+savename <- "2023-09-07_cal023_full-run.Rda"
+```
+
+```{r}
+# Get individual file names
+filenames <- vector(mode = "list",length = length(filepaths)) 
+
+for (i in 1:length(filenames)) {
+  tmp <- unlist(strsplit(filepaths[i],"[\\]"))
+  filenames[[i]] <- tmp[length(tmp)]
+}
+```
+
+#### Load `df.hourly` from each .Rda into `dfs`, a list of data frames
+
+```{r}
+# Not quite working as expected
+dfs <- vector(mode = "list",length = length(filepaths)) # Initialize empty list
+for (i in 1:length(dfs)) {
+  load(filepaths[i])
+  dfs[[i]] <- df.hourly
+  names(dfs)[i] <- filenames[[i]]
+  rm(list=setdiff(ls(), c("dfs","filepaths","filenames","i")))
+}
+```
+
+#### Combine and recalculate elapsed time
+
+```{r}
+df.long <- bind_rows(dfs)
+
+t1 <- first(df.long$DateTime)-5 # -5 because inelegant solution to the problem of the first timepoint appearing as Day 0 instead of Day 1
+
+df.long <- df.long %>% 
+  group_by(Animal) %>%
+  mutate(
+    Time = as.numeric(
+      difftime(DateTime,t1),units = "hours"),.after = DateTime,
+    ExpDay = as.integer(ceiling(difftime(DateTime,t1, units = "days"))))
+```
+
+Export merged `df.long`
+
+```{r}
+tmp <- unlist(strsplit(filepaths[1],"[\\]"))
+repo <- paste0(tmp[1:length(tmp)-1],collapse="/")
+repo <- paste0(repo,"/")
+
+savename <- paste0(repo,savename)
+save(df.long,filenames,file = savename)
+rm(list=ls())
+```

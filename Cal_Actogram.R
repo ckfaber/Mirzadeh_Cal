@@ -1,37 +1,27 @@
 ## Cal_Actogram: Double-plotted actogram -------------------------------------
 
+# TO DO:
+# - fix naming convention issue
+# - figure out why df.long from merged file doesn't work
+# - 
+
 library(tidyverse)
 library(ggnewscale)
 
 ## Define filename/path ------------
 
-cohort          <- "cal018"
-rundate         <- "2023-02-15"
-fpath           <- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
-groupvar         <- "Group"
-activity        <- "YBreak_R" # default to YBreak_R
+filename        <- "2023-10-31_cal023_Clean.Rda"
+fpath           <- "C:/Users/kaspe/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned/"
+
+groupvar        <- "Treatment"
+activity        <- "AllMeters" # default to AllMeters
 plt             <- "Dark2"
-export          <- T
+export          <- F
 ftype           <- ".pdf" # default
 
 ## Load data and extract activity into separate df --------------
 
-fname           <- paste(rundate,cohort,sep = "_")
-
-# Prompt user which .Rda should be loaded if a Copy exists
-if (file.exists(paste0(fpath,"/",fname,"_Clean.Rda")) 
-    & file.exists(paste0(fpath,"/",fname,"_Clean_COPY.Rda"))) {
-  
-  tmp <- menu(c("Original","Copy"), 
-              title = "Two .Rda files found for this run. Which would you like to plot?")
-  if (tmp == 1) {
-    f <- paste0(fpath,"/",fname,"_Clean.Rda")
-  } else if (tmp == 2) {
-    f <- paste0(fpath,"/",fname,"_Clean_COPY.Rda")
-  }
-}
-
-load(f)
+load(paste0(fpath,filename))
 unitkeys         <- read_csv(paste(fpath,"Cal_Units.csv",sep="/"))
 
 if (export) {
@@ -46,7 +36,7 @@ if (export) {
 ## Extract activity df -----------------------------------------------------
 
 acto <- df %>% 
-  select(DateTime:Cage,XBreak_R,YBreak_R,AllMeters,LightCycle) %>%
+  select(DateTime:Cage,XBreak_R,YBreak_R,AllMeters,EE,LightCycle) %>%
   group_by(ExpDay) %>%
   mutate(Time_daily = as.numeric(
     difftime(DateTime,first(DateTime)), units = "hours"),.after = DateTime) %>%
@@ -72,23 +62,23 @@ pp   <- acto %>% distinct(Time_daily,ZT,Photoperiod,Photoperiod_actual)
 
 ## Heat map style actogram -------------
 
-ggplot(filter(acto,Animal == "dtx011"), 
+ggplot(filter(acto,Animal == "dtx024"), 
        aes(x = Time_daily, 
            y = ExpDay, 
-           fill = YBreak_R)) + 
+           fill = .data[[activity]])) + 
   geom_raster(hjust = 0, vjust = 0.5) + 
   scale_fill_continuous(low = "white", high = "red4") +
-  new_scale_fill() +
-  geom_tile(data = pp, 
-          mapping = aes(x = Time_daily, fill = Photoperiod,y=1),
-          linewidth = 0,
-          alpha = 0.3,
-          linetype = 0,
-          height = Inf, # tiles will go all the way up and down
-          show.legend = NA,
-          inherit.aes = FALSE) + 
-  scale_fill_manual(values = c("Dark" = "gray45",
-                               "Light" = "white"),guide = "none") + 
+  #new_scale_fill() +
+  #geom_tile(data = pp, 
+          # mapping = aes(x = Time_daily, fill = Photoperiod,y=1),
+          # linewidth = 0,
+          # alpha = 0.3,
+          # linetype = 0,
+          # height = Inf, # tiles will go all the way up and down
+          # show.legend = NA,
+          # inherit.aes = FALSE) + 
+  #scale_fill_manual(values = c("Dark" = "gray45",
+  #                             "Light" = "white"),guide = "none") + 
   theme_classic() + 
   scale_x_continuous(limits = c(0,24),
                      name = "Zeitgeber Time",
@@ -106,10 +96,6 @@ for (ani in 1:n_distinct(acto$Animal)) {
     
     animal <- as.character(unique(acto$Animal)[ani])
     names(actograms)[ani] <- animal
-    
-    if (activity == "YBreak_R") {
-      subtitle = "Beam Breaks (Y)"
-    }
     
     actograms[[ani]] <- acto %>% filter(Animal == animal) %>%
       ggplot() +
@@ -173,7 +159,7 @@ for (ani in 1:n_distinct(acto$Animal)) {
         strip.text.x = element_blank(),
         plot.background = element_rect(fill = "white"),
         panel.spacing.x = unit(0,"lines")) +
-      ggtitle(animal, subtitle = "Beam Breaks (y)") 
+      ggtitle(animal, subtitle = "Distance Traveled (m)") 
       
       if(export){
           fname <- animal
