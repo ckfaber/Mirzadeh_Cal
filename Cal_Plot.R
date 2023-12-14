@@ -135,46 +135,48 @@ unitkeys         <- read_csv(paste(fpath,"Cal_Units.csv",sep="/"))
 ## Plot functions -------------------------------------------------------------
 # Create ggplot function for time-series plots with SEM ribbon
 tsplot <- function(data,var,groupvar,facetvar,ylab) {
-  
-  if(segment){
-    data <- data %>% filter(Time < trimtime)
-    photoperiods <- pp_data %>% filter(Time < trimtime)
-  } else {
-    photoperiods <- pp_data
-  }
-  plot <- ggplot(data, aes(x = Time, 
-               y = .data[[var]],
-               color = .data[[groupvar]],
-               group = .data[[groupvar]],
-               fill = .data[[groupvar]])) + 
-  # Conditionally facet if facetvar is not NA
-  {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +
-  stat_summary(fun = "mean", geom = "line", linewidth = 1) + 
-  stat_summary(fun.data = mean_se, geom = "ribbon", alpha = 0.5, linetype = 0) + 
-  scale_color_brewer(palette = plt) + 
-  scale_fill_brewer(palette = plt) + 
-  theme_classic() + 
-  
-# Shaded tiles for photoperiod
-# For color options see http://sape.inf.usi.ch/quick-reference/ggplot2/colour
-  new_scale_fill() +
-  geom_tile(data = photoperiods, 
-            mapping = aes(x = Time, fill = Photoperiod,y=0),
-            linewidth = 0,
-            alpha = 0.3,
-            linetype = 0,
-            height = Inf, # tiles will go all the way up and down
-            show.legend = NA,
-            inherit.aes = FALSE) + 
-  scale_fill_manual(values = c("Dark" = "gray65",
-                               "Light" = "white",
-                               "Subjective Light" = "gray75"),guide = "none") +
-  
-  # Plot annotations and formatting
-  labs(x = "Time (hours)", y = ylab) + 
-  scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
-  theme_classic() + 
-  theme(text = element_text(size = 12))
+  ts <- data
+  plot <- ggplot() +
+    # Conditionally facet if facetvar is not NA
+    {if(!is.na(facetvar) & facetvar %in% colnames(data))facet_grid(~ .data[[facetvar]])} +  
+    
+    # Shaded tiles for photoperiod
+    geom_tile(data = pp_data, 
+              mapping = aes(x = Time, fill = Photoperiod,y=0),
+              linewidth = 0,
+              alpha = 0.3,
+              linetype = 0,
+              height = Inf, # tiles will go all the way up and down
+              show.legend = NA,
+              inherit.aes = FALSE) + 
+    scale_fill_manual(values = c("Dark" = "gray65",
+                                 "Light" = "white",
+                                 "Subjective Light" = "gray75"),guide = "none") + new_scale_fill() +
+    stat_summary(data = ts,
+                 aes(x = Time, 
+                     y = .data[[var]],
+                     color = .data[[groupvar]],
+                     group = .data[[groupvar]]),
+                 fun = "mean", geom = "line", 
+                 linewidth = 1) + 
+    stat_summary(data = ts,
+                 aes(x = Time, 
+                     y = .data[[var]],
+                     color = .data[[groupvar]],
+                     group = .data[[groupvar]],
+                     fill = .data[[groupvar]]),
+                 fun.data = mean_se, 
+                 geom = "ribbon", 
+                 alpha = 0.5, linetype = 0) + 
+    scale_color_brewer(palette = plt) + 
+    scale_fill_brewer(palette = plt) + 
+    theme_classic() + 
+    
+    # Plot annotations and formatting
+    labs(x = "Time (hours)", y = ylab) + 
+    scale_x_continuous(expand = expansion(0, 0)) +   # no padding on the x-axis
+    theme_classic() + 
+    theme(text = element_text(size = 12))
 }
 
 # Create function to generate boxplots
