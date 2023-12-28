@@ -26,7 +26,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ###### Requirements:
 
 -   TimeSeries sheet from Macro-processed .exp data files (OneClickMacro \>= v2.52)
--   TimeSeries \<yyyy-mm-dd_run_m\_timeseries.csv\>
+-   TimeSeries \<yyyy-mm-dd_run_m_timeseries.csv\>
 -   Key \<yyyy-mm-dd_run_KEY.csv\> - must have same prefix as TimeSeries sheet, and be saved in the same directory
 
 ## Load required packages
@@ -49,8 +49,8 @@ fpath \<- "C:/Users/kaspe/Dropbox (Barrow Neurological Institute)/Mirzadeh Lab D
 
 ```{r}
 # Run-specific user-defined parameters
-filename        <- "2023-09-07_cal023_m_timeseries.csv"
-fpath           <- "C:/Users/kaspe/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
+filename        <- "2023-12-11_cal023_m_timeseries.csv"
+fpath           <- "C:/Users/cfaber/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed"
 
 
 # list of strings if animals to be removed. Set remove_animals <- NA if none to be removed.
@@ -152,7 +152,9 @@ Here, we remove any animals that we had previously specified, and perform some g
 # }
 
 # Remove animals marked for removal from dataset within the _KEY.csv
-if (any(key$Remove == "Y")) {
+if (all(key$Remove == "N") | all(is.na(key$Remove))) {
+  print("No animals marked for removal. Keeping all animals in df")
+} else if (any(key$Remove == "Y")) {
   
   print("Checking KEY for animals to remove from analysis")
   ct <- key %>% 
@@ -174,8 +176,6 @@ if (any(key$Remove == "Y")) {
   ungroup()
   print('Subject(s) removed successfully.')
   rm(list = c("ct","idx"))
-} else {
-  print("No animals marked for removal. Keeping all animals in df")
 }
 
 # Parse date-times and sort by animal ID (ID_Code) and date-time
