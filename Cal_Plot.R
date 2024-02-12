@@ -29,7 +29,13 @@
 
 # To do: 
 # - Adjust x-axis numbering to go by 24-h intervals (unless really long recordings, then 48?)
+# - add custom plot dimensions, e.g.: 
+#      - ggh4x::force_panelsizes(rows = unit(4,'cm'), cols = unit(4,'cm))
 # - Add statistics!!!
+# - add ability to customize colors: 
+#      - custom_scale <- c('grey','red','darkred')
+#      - plot1 + scale_color_manual(values = custom_scale) 
+#      - needs to add conditional checks for proper length depending on n groups, whether or not palette has been specified, etc
 
 ## Load required packages ----------------------------------------------------
 
@@ -42,14 +48,14 @@ library(scales)
 #library(rstatix)
 
 ## Define inputs to script for analysis ---------------------------------------
-fname           <- '2023-09-07_cal023_Clean.Rda'
+fname           <- '2023-12-11_cal023_full-run.Rda'
 fpath           <- "C:/Users/kaspe/Barrow Neurological Institute Dropbox/Chelsea Faber/Mirzadeh Lab Dropbox MAIN/Data/Calorimetry/macro_processed/r_cleaned"
 
 # Specify grouping & list of variables for smoothing via moving mean
 groupvar         <- "Treatment"
-facetvar         <- "Sex" # set to NA (no quotes!) if no faceting desired
+facetvar         <- NA # set to NA (no quotes!) if no faceting desired
 plt              <- "Dark2"
-export           <- F
+export           <- T
 ftype            <- ".pdf" # default to export pdfs
 segment          <- F
 
@@ -70,8 +76,6 @@ tsvars           <- sort(c('AllMeters','AllMeters.cum','BodyMass','EBalance',
 boxvars.avg      <- sort(c('AllMeters','EBalance','EE','FoodIn.kcal','RER',
                            'VO2','WaterIn.g'))
 
-boxvars.cum      <- sort(c('AllMeters','EBalance','EE.cum','FoodIn.kcal',
-                           'WaterIn.g'))
 
 if (smooth) {
   swin           <- 3
@@ -151,13 +155,15 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
               inherit.aes = FALSE) + 
     scale_fill_manual(values = c("Dark" = "gray65",
                                  "Light" = "white",
-                                 "Subjective Light" = "gray75"),guide = "none") + new_scale_fill() +
+                                 "Subjective Light" = "gray75",
+                                 "Subjective Dark" = "lightgoldenrod3"),guide = "none") + 
+    new_scale_fill() +
     stat_summary(data = ts,
                  aes(x = Time, 
                      y = .data[[var]],
                      color = .data[[groupvar]],
                      group = .data[[groupvar]]),
-                 fun = "mean", geom = "line", 
+                 fun = "mean", geom = "line", # use fun to return single value
                  linewidth = 1) + 
     stat_summary(data = ts,
                  aes(x = Time, 
@@ -165,7 +171,7 @@ tsplot <- function(data,var,groupvar,facetvar,ylab) {
                      color = .data[[groupvar]],
                      group = .data[[groupvar]],
                      fill = .data[[groupvar]]),
-                 fun.data = mean_se, 
+                 fun.data = mean_se, # use fun.data to return multiple values per data point (+/- sem)
                  geom = "ribbon", 
                  alpha = 0.5, linetype = 0) + 
     scale_color_brewer(palette = plt) + 
@@ -212,12 +218,14 @@ if (smooth) {
 
 # Extract time-series and photoperiod as small df for plotting
 pp_data <- df.hourly %>%
-    distinct(Time,Photoperiod,LightCycle) %>%
-    mutate(Photoperiod = case_when(
-      LightCycle == "LD" & Photoperiod == "Light" ~ "Light",
-      LightCycle == "LD" & Photoperiod == "Dark" ~ "Dark",
-      LightCycle == "DD" & Photoperiod == "Light" ~ "Subjective Light",
-      LightCycle == "DD" & Photoperiod == "Dark" ~ "Dark"))
+  distinct(Time,Photoperiod,LightCycle) %>%
+  mutate(Photoperiod = case_when(
+    LightCycle == "LD" & Photoperiod == "Light" ~ "Light",
+    LightCycle == "LD" & Photoperiod == "Dark" ~ "Dark",
+    LightCycle == "DD" & Photoperiod == "Light" ~ "Subjective Light",
+    LightCycle == "DD" & Photoperiod == "Dark" ~ "Dark",
+    LightCycle == "LL" & Photoperiod == "Light" ~ "Light",
+    LightCycle == "LL" & Photoperiod == "Dark" ~ "Subjective Dark"))
 
 ts.plots <- vector(mode = "list",length = length(tsvars)) # Initialize empty list
 for (i in 1:length(tsvars)) {
@@ -234,8 +242,14 @@ for (i in 1:length(tsvars)) {
     pull()
 
   if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
-
-  ts.plots[[i]] <- tsplot(df.hourly,var,groupvar,facetvar,ylab)
+  
+  tmplt <- tsplot(df.hourly,var,groupvar,facetvar,ylab)
+  
+  if (var == "RER") {
+    tmplt <- tmplt + coord_cartesian(ylim = c(0.7,1.0))
+  }
+  
+  ts.plots[[i]] <- tmplt
   names(ts.plots)[i] <- var
   #print(ts.plots[[i]]) # commented out - tends to crash R
   if(export){
@@ -275,37 +289,13 @@ for (i in 1:length(boxvars.avg)) {
   if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
   
   names(boxplots.avg)[i] <- var
-  boxplots.avg[[i]] <- bxplot(df.avg.total,var,groupvar,facetvar,ylab)
-  #print(plot)
-  if (export) {
-    ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
-  }
-}
 
-boxplots.cum <- vector(mode = "list",length = length(boxvars.cum))
-for (i in 1:length(boxvars.cum)) {
-  
-  var <- boxvars.cum[i]
-  fname <- paste0(var,"_boxplot_cum")
-  if (!is.na(facetvar)){
-    fname <- paste(fname,"~",facetvar,sep="")
+  tmplt <- bxplot(df.avg.total,var,groupvar,facetvar,ylab)
+  if (var == "RER") {
+    tmplt <- tmplt + coord_cartesian(ylim = c(0.7,1.0))
   }
   
-  ylab <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
-    select(Title,Unit) %>% 
-    summarize(ylab = paste(Title,Unit)) %>% 
-    pull()
-  
-  title <- filter(unitkeys,Renamed_Var == {{var}}) %>% 
-    select(Title) %>%
-    pull()
-  
-  title <- paste0("Cumulative ", title)
-  
-  if (grepl("NA",ylab)) ylab <- title else ylab <- ylab
-  
-  names(boxplots.cum)[i] <- var
-  boxplots.cum[[i]] <- bxplot(df.cum.total,var,groupvar,facetvar,ylab)
+  boxplots.avg[[i]] <- tmplt
   #print(plot)
   if (export) {
     ggsave(paste(rundate,runid,paste(fname,ftype,sep=""),sep= "_"),width=5,height=3,units="in",path = repo)
