@@ -249,6 +249,17 @@ for (i in 1:length(tsvars)) {
     tmplt <- tmplt + coord_cartesian(ylim = c(0.7,1.0))
   }
   
+  if (nrow(pp_data) > 100) {
+    xbreaks <- seq(from = 0, to = nrow(pp_data), by = 24)
+    xlabels <- seq(from = 0, to = length(xbreaks)-1, by = 1)
+    xlabel <- "Time (Days)"
+    
+    tmplt <- tmplt + scale_x_continuous(breaks = xbreaks,
+                                        labels = xlabels,
+                                        expand = expansion(0,0)) +
+      xlab(xlabel)
+  }
+  
   ts.plots[[i]] <- tmplt
   names(ts.plots)[i] <- var
   #print(ts.plots[[i]]) # commented out - tends to crash R
